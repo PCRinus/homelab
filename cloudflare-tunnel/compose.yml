@@ -1,0 +1,9 @@
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    network_mode: "host"
+    volumes:
+      - /home/mircea/docker/cloudflared:/etc/cloudflared:ro
+    command: tunnel --config /etc/cloudflared/config.yml run
