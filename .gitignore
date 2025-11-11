@@ -1,2 +1,7 @@
 .env
 *.env
+
+# Terraform files
+*.tfstate
+*.tfstate.backup
+.terraform/
