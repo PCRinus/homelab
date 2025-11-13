@@ -2,7 +2,7 @@
 *.env
 
 # Terraform files
-*.tfstate
+*.tfstate.*
 *.tfstate.backup
 .terraform/
 terraform.tfvars
