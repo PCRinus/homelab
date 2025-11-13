@@ -5,5 +5,5 @@ services:
     restart: unless-stopped
     network_mode: "host"
     volumes:
-      - /home/mircea/docker/cloudflared:/etc/cloudflared:ro
+      - ./config.yml:/etc/cloudflared/config.yml:ro
     command: tunnel --config /etc/cloudflared/config.yml run
