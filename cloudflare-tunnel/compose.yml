@@ -6,4 +6,5 @@ services:
     network_mode: "host"
     volumes:
       - ./config.yml:/etc/cloudflared/config.yml:ro
+      - ./2a32c37d-447c-4d24-9256-9deb86bc686f.json:/etc/cloudflared/2a32c37d-447c-4d24-9256-9deb86bc686f.json:ro
     command: tunnel --config /etc/cloudflared/config.yml run
