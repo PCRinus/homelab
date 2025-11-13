@@ -21,6 +21,10 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "terraform_managed_re
       originRequest = {}
       service       = "http://localhost:8123"
       }, {
+      hostname      = "dozzle.home-server.me"
+      originRequest = {}
+      service       = "http://localhost:8081"
+      }, {
       originRequest = {}
       service       = "http_status:404"
     }]

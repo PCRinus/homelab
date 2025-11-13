@@ -6,4 +6,6 @@ ingress:
     service: http://localhost:32400
   - hostname: ha.home-server.me
     service: http://localhost:8123
+  - hostname: dozzle.home-server.me
+    service: http://localhost:8081
   - service: http_status:404
