@@ -1,0 +1,70 @@
+version: 2
+updates:
+  # Terraform provider updates
+  - package-ecosystem: "terraform"
+    directory: "/cloudflare-tunnel"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "PCRinus"
+    labels:
+      - "dependencies"
+      - "terraform"
+    commit-message:
+      prefix: "terraform"
+      include: "scope"
+
+  # Docker Compose updates
+  - package-ecosystem: "docker"
+    directory: "/cloudflare-tunnel"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "PCRinus"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/dozzle"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/home-assistant"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/media-server"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/portainer"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
