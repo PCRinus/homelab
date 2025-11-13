@@ -49,3 +49,13 @@ resource "cloudflare_dns_record" "terraform_managed_resource_2ed691eb805ce7bcc49
   }
 }
 
+resource "cloudflare_dns_record" "dozzle" {
+  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  name    = "dozzle"
+  proxied = true
+  ttl     = 1
+  type    = "CNAME"
+  zone_id = var.zone_id
+  comment = "Dozzle Docker logs viewer"
+}
+
