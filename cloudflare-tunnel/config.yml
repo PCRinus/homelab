@@ -1,0 +1,9 @@
+tunnel: 2a32c37d-447c-4d24-9256-9deb86bc686f
+credentials-file: /etc/cloudflared/2a32c37d-447c-4d24-9256-9deb86bc686f.json
+
+ingress:
+  - hostname: plex.home-server.me
+    service: http://localhost:32400
+  - hostname: ha.home-server.me
+    service: http://localhost:8123
+  - service: http_status:404
