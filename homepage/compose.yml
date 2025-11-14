@@ -6,7 +6,9 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - /home/mircea/docker/homepage:/app/config
+      - /home/mircea/compose-files/homepage:/app/config
       - /var/run/docker.sock:/var/run/docker.sock # (optional) For docker integrations
+    env_file:
+      - .env
     environment:
       HOMEPAGE_ALLOWED_HOSTS: homelab:3000 # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
