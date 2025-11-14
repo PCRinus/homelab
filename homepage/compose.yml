@@ -3,12 +3,13 @@ services:
     image: ghcr.io/gethomepage/homepage:v1.7
     container_name: homepage
     restart: unless-stopped
-    ports:
-      - 3000:3000
+    network_mode: host
     volumes:
       - /home/mircea/compose-files/homepage:/app/config
-      - /var/run/docker.sock:/var/run/docker.sock # (optional) For docker integrations
+      - /var/run/docker.sock:/var/run/docker.sock:ro # (optional) For docker integrations
     env_file:
       - .env
     environment:
-      HOMEPAGE_ALLOWED_HOSTS: homelab:3000 # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - HOMEPAGE_ALLOWED_HOSTS=homelab:3000
