@@ -9,3 +9,6 @@ terraform.tfvars
 
 # Cloudflare Tunnel files
 2a32c37d-447c-4d24-9256-9deb86bc686f.json
+
+# Log files
+*.log
