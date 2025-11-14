@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest
+    image: lscr.io/linuxserver/qbittorrent:5.0.2
     container_name: qbittorrent
     environment:
       - PUID=${PUID}
@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
 
   sonarr:
-    image: ghcr.io/hotio/sonarr:latest
+    image: ghcr.io/hotio/sonarr:release-4.0.11.2680
     container_name: sonarr
     environment:
       - PUID=${PUID}
@@ -34,7 +34,7 @@ services:
     restart: unless-stopped
 
   radarr:
-    image: ghcr.io/hotio/radarr:latest
+    image: ghcr.io/hotio/radarr:release-5.14.0.9383
     container_name: radarr
     environment:
       - PUID=${PUID}
@@ -50,7 +50,7 @@ services:
 
 
   prowlarr:
-    image: ghcr.io/hotio/prowlarr:latest
+    image: ghcr.io/hotio/prowlarr:release-1.27.0.4852
     container_name: prowlarr
     environment:
       - PUID=${PUID}
@@ -66,7 +66,7 @@ services:
 
   flaresolverr:
     # DockerHub mirror flaresolverr/flaresolverr:latest
-    image: ghcr.io/flaresolverr/flaresolverr:latest
+    image: ghcr.io/flaresolverr/flaresolverr:v3.3.21
     container_name: flaresolverr
     environment:
       - LOG_LEVEL=${LOG_LEVEL:-info}
@@ -90,7 +90,7 @@ services:
     restart: unless-stopped
 
   plex:
-    image: lscr.io/linuxserver/plex:latest
+    image: lscr.io/linuxserver/plex:1.41.2
     container_name: plex
     network_mode: host
     environment:
