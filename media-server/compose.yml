@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:5.0.2
+    image: lscr.io/linuxserver/qbittorrent:5.1.2
     container_name: qbittorrent
     environment:
       - PUID=${PUID}
@@ -66,7 +66,7 @@ services:
 
   flaresolverr:
     # DockerHub mirror flaresolverr/flaresolverr:latest
-    image: ghcr.io/flaresolverr/flaresolverr:v3.3.21
+    image: ghcr.io/flaresolverr/flaresolverr:v3.4.5
     container_name: flaresolverr
     environment:
       - LOG_LEVEL=${LOG_LEVEL:-info}
@@ -90,7 +90,7 @@ services:
     restart: unless-stopped
 
   plex:
-    image: lscr.io/linuxserver/plex:1.41.2
+    image: lscr.io/linuxserver/plex:1.42.2
     container_name: plex
     network_mode: host
     environment:
