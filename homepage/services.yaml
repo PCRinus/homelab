@@ -9,10 +9,7 @@
         description: Media Server
         server: my-docker
         container: plex
-        widget:
-          type: plex
-          url: http://homelab:32400
-          key: ${PLEX_TOKEN}
+        showStats: true
 
     - Overseerr:
         icon: overseerr.png
@@ -20,10 +17,7 @@
         description: Media Requests
         server: my-docker
         container: overseerr
-        widget:
-          type: overseerr
-          url: http://homelab:5055
-          key: ${OVERSEERR_API_KEY}
+        showStats: true
 
     - Sonarr:
         icon: sonarr.png
@@ -31,10 +25,7 @@
         description: TV Series Management
         server: my-docker
         container: sonarr
-        widget:
-          type: sonarr
-          url: http://homelab:8989
-          key: ${SONARR_API_KEY}
+        showStats: true
 
     - Radarr:
         icon: radarr.png
@@ -42,10 +33,7 @@
         description: Movies Management
         server: my-docker
         container: radarr
-        widget:
-          type: radarr
-          url: http://homelab:7878
-          key: ${RADARR_API_KEY}
+        showStats: true
 
     - Prowlarr:
         icon: prowlarr.png
@@ -53,10 +41,7 @@
         description: Indexer Manager
         server: my-docker
         container: prowlarr
-        widget:
-          type: prowlarr
-          url: http://homelab:9696
-          key: ${PROWLARR_API_KEY}
+        showStats: true
 
     - qBittorrent:
         icon: qbittorrent.png
@@ -64,11 +49,7 @@
         description: Torrent Client
         server: my-docker
         container: qbittorrent
-        widget:
-          type: qbittorrent
-          url: http://homelab:8080
-          username: ${QBITTORRENT_USERNAME}
-          password: ${QBITTORRENT_PASSWORD}
+        showStats: true
 
     - FlareSolverr:
         icon: flaresolverr.png
@@ -76,6 +57,7 @@
         description: Cloudflare Solver
         server: my-docker
         container: flaresolverr
+        showStats: true
 
 - Infrastructure:
     - Portainer:
@@ -84,11 +66,7 @@
         description: Docker Management
         server: my-docker
         container: portainer
-        widget:
-          type: portainer
-          url: https://homelab:9443
-          env: 1
-          key: ${PORTAINER_API_KEY}
+        showStats: true
 
     - Dozzle:
         icon: dozzle.png
@@ -96,6 +74,7 @@
         description: Docker Logs Viewer
         server: my-docker
         container: dozzle
+        showStats: true
 
     - Homepage:
         icon: homepage.png
@@ -103,6 +82,7 @@
         description: This Dashboard
         server: my-docker
         container: homepage
+        showStats: true
 
 - Home Automation:
     - Home Assistant:
@@ -111,7 +91,4 @@
         description: Home Automation Platform
         server: my-docker
         container: homeassistant
-        widget:
-          type: homeassistant
-          url: http://homelab:8123
-          key: ${HOME_ASSISTANT_TOKEN}
+        showStats: true
