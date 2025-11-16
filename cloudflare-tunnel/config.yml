@@ -8,4 +8,6 @@ ingress:
     service: http://localhost:8123
   - hostname: dozzle.home-server.me
     service: http://localhost:8081
+  - hostname: uptime.home-server.me
+    service: http://localhost:3001
   - service: http_status:404
