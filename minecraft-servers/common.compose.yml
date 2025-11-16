@@ -1,0 +1,57 @@
+# Common configuration for Minecraft servers
+# Include this file in your server-specific compose files
+
+x-minecraft-base: &minecraft-base
+  image: itzg/minecraft-server
+  tty: true
+  stdin_open: true
+  environment:
+    EULA: "TRUE"
+    TYPE: "FABRIC"
+    VERSION: "1.21.8"
+    MAX_PLAYERS: "10"
+    ICON: "https://img.icons8.com/?size=100&id=36055&format=png&color=000000"
+    USE_AIKAR_FLAGS: "true"
+    TZ: ${TZ}
+    DIFFICULTY: "2"
+    SIMULATION_DISTANCE: "14"
+    CF_API_KEY: ${CF_API_KEY}
+    OPS: |-
+      PCRinus1
+      Covaliu
+
+x-minecraft-common-mods: &common-mods
+  fabric-api
+  krypton
+  c2me-fabric
+  lithium
+  scalablelux
+  ferrite-core
+  distanthorizons:2.3.6-b - 1.21.8 neo/fabric
+  balm
+  waystones
+  crops-love-rain
+  forge-config-api-port
+  appleskin
+  leaf-me-alone
+  rightclickharvest
+  architectury-api
+  jamlib
+  collective
+  anvil-restoration
+  farmers-delight-refabricated
+  crate-delight
+  macaws-windows
+  macaws-doors
+  macaws-fences-and-walls
+  macaws-lights-and-lamps
+  macaws-roofs
+  macaws-stairs
+  tax-free-levels
+  puzzles-lib
+  tiny-skeletons
+  cristel-lib
+  lmd
+  almanac
+  convenient-effects
+  towns-and-towers

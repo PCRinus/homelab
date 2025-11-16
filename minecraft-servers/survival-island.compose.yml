@@ -1,0 +1,17 @@
+include:
+  - ./common.compose.yml
+
+services:
+  mc:
+    <<: *minecraft-base
+    container_name: minecraft-server-survival-island
+    ports:
+      - "25566:25565"
+    environment:
+      SEED: "14897853841"
+      MEMORY: "2048M"
+      VIEW_DISTANCE: "18"
+      MODRINTH_PROJECTS: |-
+        *common-mods
+    volumes:
+      - /home/mircea/docker/minecraft-server-survival-island:/data
