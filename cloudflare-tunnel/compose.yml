@@ -8,3 +8,9 @@ services:
       - ./config.yml:/etc/cloudflared/config.yml:ro
       - ./2a32c37d-447c-4d24-9256-9deb86bc686f.json:/etc/cloudflared/2a32c37d-447c-4d24-9256-9deb86bc686f.json:ro
     command: tunnel --config /etc/cloudflared/config.yml run
+    healthcheck:
+      test: ["CMD-SHELL", "cloudflared tunnel info 2>&1 | grep -q 'Connected' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
