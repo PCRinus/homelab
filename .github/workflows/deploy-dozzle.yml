@@ -1,0 +1,17 @@
+name: Deploy Dozzle
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'dozzle/compose.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: Dozzle
+      service_path: dozzle
+    secrets: inherit

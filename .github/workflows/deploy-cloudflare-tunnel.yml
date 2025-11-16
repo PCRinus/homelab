@@ -1,0 +1,21 @@
+name: Deploy Cloudflare Tunnel
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'cloudflare-tunnel/compose.yml'
+      - 'cloudflare-tunnel/config.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: Cloudflare Tunnel
+      service_path: cloudflare-tunnel
+      deploy_script: |
+        chmod +x start.sh
+        ./start.sh
+    secrets: inherit
