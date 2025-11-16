@@ -150,9 +150,13 @@ Then check the **Actions** tab in your GitHub repository to see the workflow run
 - Verify SSH service is running on your server: `sudo systemctl status ssh`
 
 ### Docker commands fail
-- Ensure your SSH user has permission to run docker commands (member of `docker` group):
+- **For rootless Docker**: Ensure Docker environment variables are set in `~/.zshenv` (not just `~/.zshrc`) for non-interactive SSH sessions:
   ```bash
-  sudo usermod -aG docker $USER
+  cat > ~/.zshenv << 'EOF'
+  # Docker rootless configuration
+  export PATH=/home/mircea/bin:$PATH
+  export DOCKER_HOST=unix:///run/user/1000/docker.sock
+  EOF
   ```
 - Verify the paths in workflows match your actual directory structure
 - Check that Docker Compose is installed on your server
