@@ -1,0 +1,35 @@
+include:
+  - ./common.compose.yml
+
+services:
+  minecraft:
+    <<: *minecraft-base
+    container_name: minecraft-server-world-generation
+    ports:
+      - "25565:25565"
+    environment:
+      MEMORY: "6144M"
+      MODRINTH_PROJECTS: |-
+        *common-mods
+        ksyxis
+        xaeros-minimap
+        terralith
+        lithostitched
+        tectonic
+        incendium:v5.4.9 ~ Mod 1.21.5-10
+        chunky
+        bobby
+        philips-ruins
+        moogs-voyager-structures
+        mns-moogs-nether-structures
+        moogs-structure-lib
+        more-delight
+        easy-magic
+        easy-magic
+        better-tridents
+        jade
+        glitchcore:21.8.0.0
+        trek:B0.5.1+mod
+        dungeons-and-taverns
+    volumes:
+      - /home/mircea/docker/minecraft-server-world-generation:/data
