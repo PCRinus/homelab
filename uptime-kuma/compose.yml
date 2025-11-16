@@ -1,0 +1,8 @@
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:2
+    container_name: uptime-kuma
+    network_mode: host
+    volumes:
+      - /home/mircea/docker/uptime-kuma:/app/data
+    restart: unless-stopped
