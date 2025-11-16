@@ -1,0 +1,17 @@
+name: Deploy Uptime Kuma
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'uptime-kuma/compose.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: Uptime Kuma
+      service_path: uptime-kuma
+    secrets: inherit

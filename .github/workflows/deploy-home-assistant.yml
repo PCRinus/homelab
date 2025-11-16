@@ -1,0 +1,17 @@
+name: Deploy Home Assistant
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'home-assistant/compose.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: Home Assistant
+      service_path: home-assistant
+    secrets: inherit

@@ -1,0 +1,20 @@
+name: Deploy Minecraft Servers
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'minecraft-servers/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-service.yml
+    with:
+      service_name: Minecraft Servers
+      service_path: minecraft-servers
+      deploy_script: |
+        docker compose -f common.compose.yml -f survival-island.compose.yml -f world-gen-server.compose.yml pull
+        docker compose -f common.compose.yml -f survival-island.compose.yml -f world-gen-server.compose.yml up -d
+    secrets: inherit
