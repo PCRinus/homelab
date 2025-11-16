@@ -6,7 +6,7 @@ services:
     network_mode: host
     volumes:
       - /home/mircea/compose-files/homepage:/app/config
-      - /var/run/docker.sock:/var/run/docker.sock:ro # (optional) For docker integrations
+      - /run/user/1000/docker.sock:/var/run/docker.sock:ro # (optional) For docker integrations
     env_file:
       - .env
     environment:

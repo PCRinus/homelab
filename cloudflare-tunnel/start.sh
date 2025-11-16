@@ -32,15 +32,15 @@ echo "✓ All required files found and readable"
 
 # Stop any existing container
 echo "Stopping existing container (if any)..."
-sudo docker compose down 2>/dev/null || true
+docker compose down 2>/dev/null || true
 
 # Remove any orphaned volumes/directories that Docker might have created
 echo "Cleaning up..."
-sudo docker volume prune -f 2>/dev/null || true
+docker volume prune -f 2>/dev/null || true
 
 # Start the container
 echo "Starting cloudflared container..."
-sudo docker compose up -d
+docker compose up -d
 
 # Wait a moment for the container to start
 sleep 3
@@ -48,12 +48,12 @@ sleep 3
 # Check container status
 echo ""
 echo "Container status:"
-sudo docker ps --filter "name=cloudflared" --format "table {{.Names}}\t{{.Status}}\t{{.State}}"
+docker ps --filter "name=cloudflared" --format "table {{.Names}}\t{{.Status}}\t{{.State}}"
 
 # Show recent logs
 echo ""
 echo "Recent logs:"
-sudo docker logs cloudflared --tail 10
+docker logs cloudflared --tail 10
 
 echo ""
 echo "✓ Cloudflared started successfully!"
