@@ -25,6 +25,13 @@
       ],
       "groupName": "Terraform providers",
       "automerge": false
+    },
+    {
+      "matchDatasources": [
+        "github-actions"
+      ],
+      "groupName": "GitHub Actions",
+      "automerge": false
     }
   ],
   "docker-compose": {
@@ -36,6 +43,11 @@
   "terraform": {
     "managerFilePatterns": [
       "/\\.tf$/"
+    ]
+  },
+  "github-actions": {
+    "fileMatch": [
+      "^\\.github/workflows/[^/]+\\.ya?ml$"
     ]
   }
 }
