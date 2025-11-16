@@ -59,3 +59,12 @@ resource "cloudflare_dns_record" "dozzle" {
   comment = "Dozzle Docker logs viewer"
 }
 
+resource "cloudflare_dns_record" "uptime" {
+  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  name    = "uptime"
+  proxied = true
+  ttl     = 1
+  type    = "CNAME"
+  zone_id = var.zone_id
+  comment = "Uptime Kuma monitoring"
+}

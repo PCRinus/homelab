@@ -25,6 +25,10 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "terraform_managed_re
       originRequest = {}
       service       = "http://localhost:8081"
       }, {
+      hostname      = "uptime.home-server.me"
+      originRequest = {}
+      service       = "http://localhost:3001"
+      }, {
       originRequest = {}
       service       = "http_status:404"
     }]
