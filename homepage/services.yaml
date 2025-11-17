@@ -60,14 +60,6 @@
         showStats: true
 
 - Infrastructure:
-    - Portainer:
-        icon: portainer.png
-        href: https://homelab:9443
-        description: Docker Management
-        server: my-docker
-        container: portainer
-        showStats: true
-
     - Dozzle:
         icon: dozzle.png
         href: http://homelab:8081
