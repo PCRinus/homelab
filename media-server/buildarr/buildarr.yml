@@ -1,0 +1,205 @@
+---
+# Buildarr configuration for managing *arr stack
+# Version controlled in git repository
+
+# Include secrets file (not version controlled)
+includes:
+  - buildarr-secrets.yml
+
+buildarr:
+  # Watch the configuration file for changes and apply them automatically
+  watch_config: true
+  
+  # Update schedule - daily at 3 AM
+  update_days:
+    - "monday"
+    - "tuesday"
+    - "wednesday"
+    - "thursday"
+    - "friday"
+    - "saturday"
+    - "sunday"
+  update_times:
+    - "03:00"
+
+# Sonarr configuration
+sonarr:
+  instances:
+    sonarr:
+      host: "sonarr"
+      port: 8989
+      protocol: "http"
+      # API key defined in buildarr-secrets.yml
+      # Add instance-specific settings here as needed
+      # settings:
+      #   ...
+
+# Radarr configuration
+# NOTE: Temporarily commented out due to compatibility issue between
+# Radarr v6.0.4 and Buildarr Radarr plugin v0.2.6
+# See: https://github.com/buildarr/buildarr-radarr/issues
+# Uncomment when plugin is updated or if you want to manage manually
+# radarr:
+#   instances:
+#     radarr:
+#       host: "radarr"
+#       port: 7878
+#       protocol: "http"
+#       # API key defined in buildarr-secrets.yml
+#       # Add instance-specific settings here as needed
+#       # settings:
+#       #   ...
+
+# Prowlarr configuration
+prowlarr:
+  instances:
+    prowlarr:
+      host: "prowlarr"
+      port: 9696
+      protocol: "http"
+      # API key defined in buildarr-secrets.yml
+      settings:
+        # === INDEXERS ===
+        indexers:
+          # Don't delete indexers not defined here (allows manual additions)
+          indexers:
+            delete_unmanaged: false
+            definitions:
+              1337x:
+                type: 1337x
+                enable: true
+                sync_profile: Standard
+                priority: 25
+                tags:
+                  - flaresolverr
+                fields:
+                  downloadlink: iTorrents.org
+                  downloadlink2: magnet
+                  sort: created
+                  type: desc
+              
+              BitSearch:
+                type: bitsearch
+                enable: true
+                sync_profile: Standard
+                priority: 25
+              
+              "FileList.io":
+                type: filelist.io
+                enable: true
+                sync_profile: Standard
+                priority: 25
+                query_limit: 150  # Private tracker - respect rate limits
+                fields:
+                  baseUrl: https://filelist.io/
+                  username: NarcisCasian
+                  # passkey is in secret_fields, managed via UI
+                  freeleechOnly: false
+              
+              Isohunt2:
+                type: isohunt2
+                enable: true
+                sync_profile: Standard
+                priority: 25
+                fields:
+                  category: All
+                  sort: created
+              
+              "kickasstorrents.to":
+                type: kickasstorrents-to
+                enable: true
+                sync_profile: Standard
+                priority: 25
+                tags:
+                  - flaresolverr
+          
+          # FlareSolverr proxy for cloudflare-protected sites
+          proxies:
+            delete_unmanaged: false
+            definitions:
+              FlareSolverr:
+                type: flaresolverr
+                host_url: http://flaresolverr:8191
+                request_timeout: 60
+                tags:
+                  - flaresolverr
+        
+        # === APPLICATIONS (Sonarr/Radarr sync) ===
+        apps:
+          applications:
+            delete_unmanaged: false
+            definitions:
+              Sonarr:
+                type: sonarr
+                prowlarr_url: http://prowlarr:9696
+                base_url: http://sonarr:8989
+                sync_level: full-sync
+                sync_categories:
+                  - tv/uhd
+                  - tv/hd
+                  - tv
+                  - tv/web-dl
+                  - tv/other
+                  - tv/x265
+                  - tv/foreign
+                  - tv/sd
+                anime_sync_categories:
+                  - tv/anime
+                sync_anime_standard_format_search: true
+                tags: []
+              
+              Radarr:
+                type: radarr
+                prowlarr_url: http://prowlarr:9696
+                base_url: http://radarr:7878
+                sync_level: full-sync
+                sync_categories:
+                  - movies/foreign
+                  - movies/x265
+                  - movies/web-dl
+                  - movies/sd
+                  - movies/hd
+                  - movies/other
+                  - movies/3d
+                  - movies/dvd
+                  - movies/bluray
+                  - movies/uhd
+                  - movies
+                tags: []
+          
+          # Sync profile used by indexers
+          sync_profiles:
+            delete_unmanaged: false
+            definitions:
+              Standard:
+                enable_rss: true
+                enable_interactive_search: true
+                enable_automatic_search: true
+                minimum_seeders: 1
+        
+        # === TAGS ===
+        tags:
+          definitions:
+            - flaresolverr
+        
+        # === SETTINGS YOU PROBABLY DON'T NEED TO MANAGE ===
+        # These are typically set once and rarely changed:
+        
+        # general:
+        #   host:
+        #     instance_name: Prowlarr
+        #     # port, bind_address - managed via Docker
+        #   security:
+        #     authentication: form
+        #     authentication_required: enabled
+        #     # username/password - better managed via UI for security
+        #   logging:
+        #     log_level: DEBUG
+        #   backup:
+        #     interval: 7
+        #     retention: 28
+        
+        # ui:
+        #   first_day_of_week: sunday
+        #   time_format: twelve-hour
+        #   theme: auto
