@@ -1,0 +1,25 @@
+*.yml linguist-language=YAML
+*.yaml linguist-language=YAML
+compose.yml linguist-language=YAML
+compose.yaml linguist-language=YAML
+
+*.tf linguist-language=Terraform
+*.tfvars linguist-language=Terraform
+*.hcl linguist-language=HCL
+
+*.sh linguist-language=Shell
+
+*.js linguist-language=JavaScript
+*.css linguist-language=CSS
+
+*.json linguist-language=JSON
+
+*.md linguist-documentation=true
+
+*.backup linguist-generated=true
+terraform.tfstate linguist-generated=true
+terraform.tfstate.* linguist-generated=true
+*.log linguist-generated=true
+
+*.sample linguist-vendored=true
+*.example linguist-vendored=true
