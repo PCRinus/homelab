@@ -5,12 +5,11 @@
     // Map of local URLs to Cloudflare tunnel URLs
     const urlMappings = {
       'homelab:32400': 'plex.home-server.me',
-      'homelab:5055': 'overseerr.home-server.me', // Add if you create this
-      'homelab:8989': 'sonarr.home-server.me',    // Add if you create this
-      'homelab:7878': 'radarr.home-server.me',    // Add if you create this
-      'homelab:9696': 'prowlarr.home-server.me',  // Add if you create this
-      'homelab:8080': 'qbittorrent.home-server.me', // Add if you create this
-      'homelab:8191': 'flaresolverr.home-server.me', // Add if you create this
+      'homelab:5055': 'overseerr.home-server.me',
+      'homelab:8989': 'sonarr.home-server.me',
+      'homelab:7878': 'radarr.home-server.me',
+      'homelab:9696': 'prowlarr.home-server.me',
+      'homelab:8080': 'qbittorrent.home-server.me',
       'homelab:8081': 'dozzle.home-server.me',
       'homelab:3001': 'uptime.home-server.me',
       'homelab:3000': 'home-server.me',
