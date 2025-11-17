@@ -1,3 +1,6 @@
+# Unmark .github directory as vendored (Linguist excludes it by default)
+.github/** -linguist-vendored
+
 *.yml linguist-language=YAML
 *.yaml linguist-language=YAML
 compose.yml linguist-language=YAML
