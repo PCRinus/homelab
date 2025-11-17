@@ -17,3 +17,6 @@ tfplan
 
 # Log files
 *.log
+
+# Dump files
+*dump*
