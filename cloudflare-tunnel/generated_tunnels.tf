@@ -13,6 +13,10 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "terraform_managed_re
       no-autoupdate = "true"
     }
     ingress = [{
+      hostname      = "home-server.me"
+      originRequest = {}
+      service       = "http://localhost:3000"
+      }, {
       hostname      = "plex.home-server.me"
       originRequest = {}
       service       = "http://localhost:32400"
