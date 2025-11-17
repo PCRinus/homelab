@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:20.04.1
@@ -102,6 +100,20 @@ services:
     volumes:
       - /home/mircea/docker/plex/config:/config
       - external_drive:/data
+    restart: unless-stopped
+
+  buildarr:
+    image: callum027/buildarr:latest
+    container_name: buildarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - type: bind
+        source: ./buildarr
+        target: /config
+        read_only: true
     restart: unless-stopped
 
 volumes:
