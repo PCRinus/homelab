@@ -18,31 +18,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "~> 1.0"
-
-      - name: Terraform Plan and Apply
+      - name: Deploy Cloudflare Tunnel
         uses: ./.github/actions/deploy-service
         with:
-          service_name: Cloudflare Tunnel (Terraform)
+          service_name: Cloudflare Tunnel
           service_path: cloudflare-tunnel
           deploy_script: |
             export CLOUDFLARE_API_TOKEN="${{ secrets.CLOUDFLARE_API_TOKEN }}"
             terraform init
             terraform plan -out=tfplan
             terraform apply -auto-approve tfplan
-          ts_authkey: ${{ secrets.TS_AUTHKEY }}
-          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh_user: ${{ secrets.SSH_USER }}
-
-      - name: Deploy Cloudflare Tunnel
-        uses: ./.github/actions/deploy-service
-        with:
-          service_name: Cloudflare Tunnel (Docker)
-          service_path: cloudflare-tunnel
-          deploy_script: |
             chmod +x start.sh
             ./start.sh
           ts_authkey: ${{ secrets.TS_AUTHKEY }}
