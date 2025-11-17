@@ -1,0 +1,45 @@
+name: Deploy Service
+description: 'Deploy a Docker Compose service via SSH over Tailscale'
+
+inputs:
+  service_name:
+    description: 'Name of the service to deploy'
+    required: true
+  service_path:
+    description: 'Path to the service directory'
+    required: true
+  deploy_script:
+    description: 'Custom deployment script'
+    required: false
+    default: |
+      docker compose pull
+      docker compose up -d
+  ts_authkey:
+    description: 'Tailscale auth key'
+    required: true
+  ssh_private_key:
+    description: 'SSH private key'
+    required: true
+  ssh_user:
+    description: 'SSH username'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Connect to Tailscale
+      uses: tailscale/github-action@v4
+      with:
+        authkey: ${{ inputs.ts_authkey }}
+        tags: tag:ci
+        version: latest
+
+    - name: Deploy ${{ inputs.service_name }}
+      uses: appleboy/ssh-action@v1
+      with:
+        host: homelab
+        username: ${{ inputs.ssh_user }}
+        key: ${{ inputs.ssh_private_key }}
+        script: |
+          cd compose-files/${{ inputs.service_path }}
+          ${{ inputs.deploy_script }}

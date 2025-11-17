@@ -10,8 +10,16 @@ on:
 
 jobs:
   deploy:
-    uses: ./.github/workflows/deploy-service.yml
-    with:
-      service_name: Home Assistant
-      service_path: home-assistant
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy Home Assistant
+        uses: ./.github/actions/deploy-service
+        with:
+          service_name: Home Assistant
+          service_path: home-assistant
+          ts_authkey: ${{ secrets.TS_AUTHKEY }}
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_user: ${{ secrets.SSH_USER }}
