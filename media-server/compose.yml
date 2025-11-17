@@ -50,7 +50,7 @@ services:
 
 
   prowlarr:
-    image: ghcr.io/hotio/prowlarr:release-1.27.0.4852
+    image: ghcr.io/hotio/prowlarr:release-2.3.0.5236
     container_name: prowlarr
     environment:
       - PUID=${PUID}
