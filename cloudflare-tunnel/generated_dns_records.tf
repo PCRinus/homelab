@@ -23,17 +23,14 @@ resource "cloudflare_dns_record" "terraform_managed_resource_8f22cd35e6f3cc9e39c
   }
 }
 
-resource "cloudflare_dns_record" "terraform_managed_resource_6b1094bfea3ccf9296fbd38eab9a6265_2" {
-  content = "fc1846ca-b4fa-43ba-bb54-13469ad1f9f1.cfargotunnel.com"
+resource "cloudflare_dns_record" "homepage" {
+  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
   name    = "home-server.me"
   proxied = true
-  tags    = []
   ttl     = 1
   type    = "CNAME"
-  zone_id = "97c1a5749e2e19a69ae4132f95f633cd"
-  settings = {
-    flatten_cname = false
-  }
+  zone_id = var.zone_id
+  comment = "Homepage dashboard on root domain"
 }
 
 resource "cloudflare_dns_record" "terraform_managed_resource_2ed691eb805ce7bcc49600fd0424f935_3" {
