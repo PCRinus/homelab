@@ -65,3 +65,53 @@ resource "cloudflare_dns_record" "uptime" {
   zone_id = var.zone_id
   comment = "Uptime Kuma monitoring"
 }
+
+resource "cloudflare_dns_record" "overseerr" {
+  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  name    = "overseerr"
+  proxied = true
+  ttl     = 1
+  type    = "CNAME"
+  zone_id = var.zone_id
+  comment = "Overseerr media request service"
+}
+
+resource "cloudflare_dns_record" "sonarr" {
+  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  name    = "sonarr"
+  proxied = true
+  ttl     = 1
+  type    = "CNAME"
+  zone_id = var.zone_id
+  comment = "Sonarr TV series management"
+}
+
+resource "cloudflare_dns_record" "radarr" {
+  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  name    = "radarr"
+  proxied = true
+  ttl     = 1
+  type    = "CNAME"
+  zone_id = var.zone_id
+  comment = "Radarr movie management"
+}
+
+resource "cloudflare_dns_record" "prowlarr" {
+  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  name    = "prowlarr"
+  proxied = true
+  ttl     = 1
+  type    = "CNAME"
+  zone_id = var.zone_id
+  comment = "Prowlarr indexer manager"
+}
+
+resource "cloudflare_dns_record" "qbittorrent" {
+  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  name    = "qbittorrent"
+  proxied = true
+  ttl     = 1
+  type    = "CNAME"
+  zone_id = var.zone_id
+  comment = "qBittorrent torrent client"
+}

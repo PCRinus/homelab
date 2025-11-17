@@ -21,6 +21,26 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "terraform_managed_re
       originRequest = {}
       service       = "http://localhost:32400"
       }, {
+      hostname      = "overseerr.home-server.me"
+      originRequest = {}
+      service       = "http://localhost:5055"
+      }, {
+      hostname      = "sonarr.home-server.me"
+      originRequest = {}
+      service       = "http://localhost:8989"
+      }, {
+      hostname      = "radarr.home-server.me"
+      originRequest = {}
+      service       = "http://localhost:7878"
+      }, {
+      hostname      = "prowlarr.home-server.me"
+      originRequest = {}
+      service       = "http://localhost:9696"
+      }, {
+      hostname      = "qbittorrent.home-server.me"
+      originRequest = {}
+      service       = "http://localhost:8080"
+      }, {
       hostname      = "ha.home-server.me"
       originRequest = {}
       service       = "http://localhost:8123"
