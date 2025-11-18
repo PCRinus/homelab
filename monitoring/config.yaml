@@ -1,0 +1,92 @@
+# Gatus configuration file
+# Documentation: https://github.com/TwiN/gatus
+
+storage:
+  type: sqlite
+  path: /data/data.db
+
+web:
+  port: 8080
+
+endpoints:
+  # Media Server Stack
+  - name: qBittorrent
+    group: Media Server
+    url: "http://qbittorrent:8080"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 1000"
+
+  - name: Sonarr
+    group: Media Server
+    url: "http://sonarr:8989"
+    interval: 60s
+    conditions:
+      - "[STATUS] == any(200, 401)"
+      - "[RESPONSE_TIME] < 1000"
+
+  - name: Radarr
+    group: Media Server
+    url: "http://radarr:7878"
+    interval: 60s
+    conditions:
+      - "[STATUS] == any(200, 401)"
+      - "[RESPONSE_TIME] < 1000"
+
+  - name: Prowlarr
+    group: Media Server
+    url: "http://prowlarr:9696"
+    interval: 60s
+    conditions:
+      - "[STATUS] == any(200, 401)"
+      - "[RESPONSE_TIME] < 1000"
+
+  - name: FlareSolverr
+    group: Media Server
+    url: "http://flaresolverr:8191"
+    interval: 60s
+    conditions:
+      - "[STATUS] == any(200, 401)"
+      - "[RESPONSE_TIME] < 1000"
+
+  - name: Overseerr
+    group: Media Server
+    url: "http://overseerr:5055"
+    interval: 60s
+    conditions:
+      - "[STATUS] == any(200, 401)"
+      - "[RESPONSE_TIME] < 1000"
+
+  - name: Plex
+    group: Media Server
+    url: "http://host.docker.internal:32400/web"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 1000"
+
+  - name: Home Assistant
+    group: Home Automation
+    url: "http://host.docker.internal:8123"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 1000"
+
+  # Infrastructure
+  - name: Cloudflare Tunnel
+    group: Infrastructure
+    url: "http://host.docker.internal:20241/metrics"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 500"
+
+  - name: Dozzle
+    group: Infrastructure
+    url: "http://dozzle:8080"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 500"
