@@ -15,6 +15,8 @@ services:
       - "8080:8080"      # WebUI
       - "6881:6881"      # BitTorrent TCP
       - "6881:6881/udp"  # BitTorrent UDP (DHT/PeX)
+    networks:
+      - media-net
     restart: unless-stopped
 
   sonarr:
@@ -29,6 +31,8 @@ services:
       - external_drive:/data
     ports:
       - "8989:8989"
+    networks:
+      - media-net
     restart: unless-stopped
 
   radarr:
@@ -43,6 +47,8 @@ services:
       - external_drive:/data
     ports:
       - "7878:7878"
+    networks:
+      - media-net
     restart: unless-stopped
 
 
@@ -60,6 +66,8 @@ services:
       - /home/mircea/docker/prowlarr:/config
     ports:
       - "9696:9696"
+    networks:
+      - media-net
     restart: unless-stopped
 
   flaresolverr:
@@ -73,6 +81,8 @@ services:
       - TZ=${TZ}
     ports:
       - "${PORT:-8191}:8191"
+    networks:
+      - media-net
     restart: unless-stopped
 
   overseerr:
@@ -85,6 +95,8 @@ services:
       - 5055:5055
     volumes:
       - /home/mircea/docker/overseerr:/app/config
+    networks:
+      - media-net
     restart: unless-stopped
 
   plex:
@@ -114,7 +126,13 @@ services:
         source: ./buildarr
         target: /config
         read_only: true
+    networks:
+      - media-net
     restart: unless-stopped
+
+networks:
+  media-net:
+    name: media-server_default
 
 volumes:
   external_drive:
