@@ -6,7 +6,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=Europe/Bucharest
     volumes:
       - /home/mircea/docker/home-assistant:/config
     restart: unless-stopped
