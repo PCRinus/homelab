@@ -9,6 +9,4 @@ services:
       - TZ=Etc/UTC
     volumes:
       - /home/mircea/docker/home-assistant:/config
-    ports:
-      - 8123:8123 #optional
     restart: unless-stopped
