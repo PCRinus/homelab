@@ -68,12 +68,12 @@
         container: dozzle
         showStats: true
 
-    - Uptime Kuma:
-        icon: uptime-kuma.png
-        href: http://homelab:3001
-        description: Uptime Monitoring
+    - Gatus:
+        icon: gatus.png
+        href: http://homelab:8082
+        description: Health Dashboard
         server: my-docker
-        container: uptime-kuma
+        container: gatus
         showStats: true
 
     - Homepage:
