@@ -1,8 +1,0 @@
-services:
-  dozzle:
-    container_name: dozzle
-    image: amir20/dozzle:v8.14.8
-    volumes:
-      - /run/user/1000/docker.sock:/var/run/docker.sock
-    ports:
-      - 8081:8080
