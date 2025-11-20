@@ -132,7 +132,6 @@ services:
 
 networks:
   media-net:
-    name: media-server_default
 
 volumes:
   external_drive:
