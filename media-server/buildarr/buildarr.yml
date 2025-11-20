@@ -92,7 +92,7 @@ prowlarr:
                 query_limit: 150  # Private tracker - respect rate limits
                 fields:
                   baseUrl: https://filelist.io/
-                  username: NarcisCasian
+                  username: PCRinus
                   # passkey is in secret_fields, managed via UI
                   freeleechOnly: false
               
