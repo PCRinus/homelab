@@ -20,8 +20,8 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - default
-      - media-server_default
+      - media-server_media-net
 
 networks:
-  media-server_default:
+  media-server_media-net:
     external: true
