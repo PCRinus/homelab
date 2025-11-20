@@ -86,7 +86,7 @@ services:
     restart: unless-stopped
 
   overseerr:
-    image: sctx/overseerr:develop
+    image: ghcr.io/sct/overseerr:develop
     container_name: overseerr
     environment:
       - LOG_LEVEL=debug
