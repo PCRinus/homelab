@@ -1,11 +1,12 @@
-name: Deploy Dozzle
+name: Deploy Monitoring Stack
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'dozzle/compose.yml'
+      - 'monitoring/compose.yml'
+      - 'monitoring/config.yaml'
   workflow_dispatch:
 
 jobs:
@@ -15,11 +16,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Deploy Dozzle
+      - name: Deploy Monitoring Stack
         uses: ./.github/actions/deploy-service
         with:
-          service_name: Dozzle
-          service_path: dozzle
+          service_name: Monitoring Stack
+          service_path: monitoring
           ts_authkey: ${{ secrets.TS_AUTHKEY }}
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh_user: ${{ secrets.SSH_USER }}
