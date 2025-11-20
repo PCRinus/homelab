@@ -10,7 +10,7 @@ services:
       - TORRENTING_PORT=6881
     volumes:
       - /home/mircea/docker/qbittorrent:/config
-      - external_drive:/data
+      - /mnt/unas/media:/data
     ports:
       - "8080:8080"      # WebUI
       - "6881:6881"      # BitTorrent TCP
@@ -28,7 +28,7 @@ services:
       - TZ=${TZ}
     volumes:
       - /home/mircea/docker/sonarr:/config
-      - external_drive:/data
+      - /mnt/unas/media:/data
     ports:
       - "8989:8989"
     networks:
@@ -44,7 +44,7 @@ services:
       - TZ=${TZ}
     volumes:
       - /home/mircea/docker/radarr:/config
-      - external_drive:/data
+      - /mnt/unas/media:/data
     ports:
       - "7878:7878"
     networks:
@@ -111,7 +111,7 @@ services:
       - PLEX_CLAIM=${PLEX_CLAIM}
     volumes:
       - /home/mircea/docker/plex/config:/config
-      - external_drive:/data
+      - /mnt/unas/media:/data
     restart: unless-stopped
 
   buildarr:
@@ -132,11 +132,3 @@ services:
 
 networks:
   media-net:
-
-volumes:
-  external_drive:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /mnt/corsair
