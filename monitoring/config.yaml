@@ -8,6 +8,14 @@ storage:
 web:
   port: 8080
 
+debug: false
+
+# Log endpoint evaluation results
+# This will log every check result which is useful for monitoring
+alerting:
+  console:
+    enabled: true
+
 endpoints:
   # Media Server Stack
   - name: qBittorrent
@@ -20,47 +28,55 @@ endpoints:
 
   - name: Sonarr
     group: Media Server
-    url: "http://sonarr:8989"
+    url: "http://sonarr:8989/api/v3/system/status"
     interval: 60s
+    headers:
+      X-Api-Key: "${SONARR_API_KEY}"
     conditions:
-      - "[STATUS] == any(200, 401)"
+      - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 1000"
 
   - name: Radarr
     group: Media Server
-    url: "http://radarr:7878"
+    url: "http://radarr:7878/api/v3/system/status"
     interval: 60s
+    headers:
+      X-Api-Key: "${RADARR_API_KEY}"
     conditions:
-      - "[STATUS] == any(200, 401)"
+      - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 1000"
 
   - name: Prowlarr
     group: Media Server
-    url: "http://prowlarr:9696"
+    url: "http://prowlarr:9696/api/v1/system/status"
     interval: 60s
+    headers:
+      X-Api-Key: "${PROWLARR_API_KEY}"
     conditions:
-      - "[STATUS] == any(200, 401)"
+      - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 1000"
 
   - name: FlareSolverr
     group: Media Server
-    url: "http://flaresolverr:8191"
+    url: "http://flaresolverr:8191/health"
     interval: 60s
     conditions:
-      - "[STATUS] == any(200, 401)"
+      - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 1000"
 
   - name: Overseerr
     group: Media Server
-    url: "http://overseerr:5055"
+    url: "http://overseerr:5055/api/v1/status"
     interval: 60s
+    headers:
+      X-Api-Key: "${OVERSEERR_API_KEY}"
     conditions:
-      - "[STATUS] == any(200, 401)"
+      - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 1000"
 
   - name: Plex
     group: Media Server
-    url: "http://host.docker.internal:32400/web"
+    url: "http://plex:32400/web"
     interval: 60s
     conditions:
       - "[STATUS] == 200"
@@ -77,7 +93,7 @@ endpoints:
   # Infrastructure
   - name: Cloudflare Tunnel
     group: Infrastructure
-    url: "http://host.docker.internal:20241/metrics"
+    url: "http://cloudflared:20241/metrics"
     interval: 60s
     conditions:
       - "[STATUS] == 200"
