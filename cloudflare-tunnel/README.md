@@ -7,7 +7,7 @@ This directory contains the infrastructure-as-code setup for managing Cloudflare
 ```
 cloudflare-tunnel/
 ├── compose.yml              # Docker Compose for running cloudflared
-├── config.yml              # Cloudflared tunnel configuration (local)
+├── tunnel-token            # Tunnel authentication token (gitignored)
 ├── main.tf                 # Main Terraform configuration (provider, variables, zone settings)
 ├── generated_dns_records.tf # Imported DNS records
 ├── generated_tunnels.tf    # Imported tunnel resources
@@ -84,9 +84,9 @@ bash import.sh
 
 ### Active Tunnel
 
-- **Tunnel ID**: `2a32c37d-447c-4d24-9256-9deb86bc686f`
+- **Tunnel ID**: `0ba69785-f553-4e75-ae68-1f3f990e573d`
 - **Name**: `homeserver`
-- **Config Source**: `local` (managed via `config.yml`)
+- **Config Source**: `cloudflare` (managed via Terraform)
 
 ### Ingress Rules
 
@@ -134,7 +134,7 @@ ingress:
 resource "cloudflare_dns_record" "new_service" {
   zone_id = var.zone_id
   name    = "new-service"
-  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
   type    = "CNAME"
   proxied = true
 }
@@ -169,8 +169,8 @@ domain     = "home-server.me"
 - `ha.home-server.me` - CNAME to tunnel
 
 ### Cloudflare Tunnel (1)
-- Tunnel: `homeserver` (`2a32c37d-447c-4d24-9256-9deb86bc686f`)
-- Tunnel Config: Ingress rules for Plex and Home Assistant
+- Tunnel: `homeserver` (`0ba69785-f553-4e75-ae68-1f3f990e573d`)
+- Tunnel Config: Remotely managed via Terraform (10 services)
 
 ### Zone Settings (3)
 - TLS 1.3: Enabled
@@ -182,9 +182,16 @@ domain     = "home-server.me"
 ### Sensitive Files (Do NOT commit)
 - `terraform.tfstate*` - Contains resource IDs and metadata
 - `terraform.tfvars` - Contains zone/account IDs
-- `config.yml` - Contains tunnel ID and credentials path
-- `*.json` - Tunnel credentials files
+- `tunnel-token` - Tunnel authentication token
 - `.terraform/` - Provider binaries
+
+### GitHub Secrets Required
+For CI/CD deployment via GitHub Actions:
+- `CLOUDFLARE_API_TOKEN` - Terraform API token
+- `CLOUDFLARE_TUNNEL_TOKEN` - Base64 encoded tunnel token (contents of `tunnel-token` file)
+- `TS_AUTHKEY` - Tailscale auth key
+- `SSH_PRIVATE_KEY` - SSH key for deployment
+- `SSH_USER` - SSH username for deployment
 
 ### Zone Settings Warning
 Zone settings (TLS 1.3, SSL, HTTPS rewrites) cannot be destroyed via Terraform. They must be manually disabled in the Cloudflare dashboard if needed.

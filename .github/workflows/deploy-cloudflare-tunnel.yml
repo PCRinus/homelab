@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'cloudflare-tunnel/compose.yml'
-      - 'cloudflare-tunnel/config.yml'
       - 'cloudflare-tunnel/*.tf'
       - 'cloudflare-tunnel/terraform.tfvars'
   workflow_dispatch:
@@ -28,8 +27,12 @@ jobs:
             terraform init
             terraform plan -out=tfplan
             terraform apply -auto-approve tfplan
-            chmod +x start.sh
-            ./start.sh
+            
+            echo "${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}" > tunnel-token
+            chmod 600 tunnel-token
+            
+            # Deploy with docker compose
+            docker compose up -d
           ts_authkey: ${{ secrets.TS_AUTHKEY }}
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh_user: ${{ secrets.SSH_USER }}
