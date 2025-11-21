@@ -15,12 +15,21 @@ services:
     volumes:
       - ./config.yaml:/config/config.yaml:ro
       - /home/mircea/docker/gatus/data:/data
+    env_file:
+      - .env
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
       - default
       - media-server_media-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "dozzle.enable=true"
 
 networks:
   media-server_media-net:
