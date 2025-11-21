@@ -31,6 +31,10 @@ services:
       - /mnt/unas/media:/data
     ports:
       - "8989:8989"
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
     networks:
       - media-net
     restart: unless-stopped
@@ -47,6 +51,10 @@ services:
       - /mnt/unas/media:/data
     ports:
       - "7878:7878"
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
     networks:
       - media-net
     restart: unless-stopped
@@ -99,6 +107,10 @@ services:
       - 5055:5055
     volumes:
       - /home/mircea/docker/overseerr:/app/config
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
     networks:
       - media-net
     restart: unless-stopped
@@ -106,7 +118,6 @@ services:
   plex:
     image: lscr.io/linuxserver/plex:1.42.2
     container_name: plex
-    network_mode: host
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -116,6 +127,18 @@ services:
     volumes:
       - /home/mircea/docker/plex/config:/config
       - /mnt/unas/media:/data
+    ports:
+      - "32400:32400"     # Plex Web UI (required)
+      - "32410:32410/udp" # GDM network discovery
+      - "32412:32412/udp" # GDM network discovery
+      - "32413:32413/udp" # GDM network discovery
+      - "32414:32414/udp" # GDM network discovery
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
+    networks:
+      - media-net
     restart: unless-stopped
 
   buildarr:
