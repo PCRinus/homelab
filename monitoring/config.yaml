@@ -15,6 +15,13 @@ debug: false
 alerting:
   console:
     enabled: true
+  discord:
+    webhook-url: "${DISCORD_WEBHOOK_URL}"
+    default-alert:
+      description: "Service health check failed"
+      send-on-resolved: true
+      failure-threshold: 3
+      success-threshold: 2
 
 endpoints:
   # Media Server Stack
@@ -25,6 +32,9 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 1000"
+    alerts:
+      - type: discord
+        description: "qBittorrent is down or not responding"
 
   - name: Sonarr
     group: Media Server
@@ -35,6 +45,9 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 1000"
+    alerts:
+      - type: discord
+        description: "Sonarr is down or not responding"
 
   - name: Radarr
     group: Media Server
@@ -45,6 +58,9 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 1000"
+    alerts:
+      - type: discord
+        description: "Radarr is down or not responding"
 
   - name: Prowlarr
     group: Media Server
@@ -55,6 +71,9 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 1000"
+    alerts:
+      - type: discord
+        description: "Prowlarr is down or not responding"
 
   - name: FlareSolverr
     group: Media Server
@@ -63,6 +82,9 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 1000"
+    alerts:
+      - type: discord
+        description: "FlareSolverr is down or not responding"
 
   - name: Overseerr
     group: Media Server
@@ -73,6 +95,9 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 1000"
+    alerts:
+      - type: discord
+        description: "Overseerr is down or not responding"
 
   - name: Plex
     group: Media Server
@@ -81,6 +106,9 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 1000"
+    alerts:
+      - type: discord
+        description: "Plex Media Server is down or not responding"
 
   - name: Home Assistant
     group: Home Automation
@@ -89,6 +117,9 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 1000"
+    alerts:
+      - type: discord
+        description: "Home Assistant is down or not responding"
 
   # Infrastructure
   - name: Cloudflare Tunnel
@@ -98,6 +129,10 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 500"
+    alerts:
+      - type: discord
+        description: "Cloudflare Tunnel is down - external access may be unavailable"
+        failure-threshold: 5
 
   - name: Dozzle
     group: Infrastructure
@@ -106,3 +141,6 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 500"
+    alerts:
+      - type: discord
+        description: "Dozzle (log viewer) is down or not responding"
