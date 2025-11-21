@@ -3,13 +3,17 @@ services:
     image: cloudflare/cloudflared:2025.11.1
     container_name: cloudflared
     restart: unless-stopped
-    network_mode: "host"
+    networks:
+      - media-server_media-net
+      - homepage_default
+      - monitoring_default
+    ports:
+      - "20241:20241"
     environment:
       - TUNNEL_METRICS=0.0.0.0:20241
     volumes:
-      - ./config.yml:/etc/cloudflared/config.yml:ro
-      - ./2a32c37d-447c-4d24-9256-9deb86bc686f.json:/etc/cloudflared/2a32c37d-447c-4d24-9256-9deb86bc686f.json:ro
-    command: tunnel --config /etc/cloudflared/config.yml run
+      - ./tunnel-token:/etc/cloudflared/token:ro
+    command: ["tunnel", "run", "--token-file", "/etc/cloudflared/token"]
     healthcheck:
       # Check if the Cloudflare Tunnel is healthy by querying the metrics endpoint
       # https://github.com/cloudflare/cloudflared/pull/1135#issuecomment-2495472654
@@ -19,3 +23,11 @@ services:
       timeout: 30s
       retries: 3
       start_period: 10s
+
+networks:
+  media-server_media-net:
+    external: true
+  homepage_default:
+    external: true
+  monitoring_default:
+    external: true

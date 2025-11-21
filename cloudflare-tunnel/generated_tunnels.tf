@@ -1,13 +1,12 @@
-resource "cloudflare_zero_trust_tunnel_cloudflared" "terraform_managed_resource_2a32c37d-447c-4d24-9256-9deb86bc686f_0" {
+resource "cloudflare_zero_trust_tunnel_cloudflared" "homeserver" {
   account_id = "ed6d4bb3828b44b941ccbbd0dc250af7"
-  config_src = "local"
+  config_src = "cloudflare"
   name       = "homeserver"
 }
 
-resource "cloudflare_zero_trust_tunnel_cloudflared_config" "terraform_managed_resource_ed6d4bb3828b44b941ccbbd0dc250af7_0" {
+resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
   account_id = "ed6d4bb3828b44b941ccbbd0dc250af7"
-  source     = "local"
-  tunnel_id  = "2a32c37d-447c-4d24-9256-9deb86bc686f"
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.homeserver.id
   config = {
     __configuration_flags = {
       no-autoupdate = "true"
@@ -15,43 +14,43 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "terraform_managed_re
     ingress = [{
       hostname      = "home-server.me"
       originRequest = {}
-      service       = "http://localhost:3000"
+      service       = "http://homepage:3000"
       }, {
       hostname      = "plex.home-server.me"
       originRequest = {}
-      service       = "http://localhost:32400"
+      service       = "http://plex:32400"
       }, {
       hostname      = "overseerr.home-server.me"
       originRequest = {}
-      service       = "http://localhost:5055"
+      service       = "http://overseerr:5055"
       }, {
       hostname      = "sonarr.home-server.me"
       originRequest = {}
-      service       = "http://localhost:8989"
+      service       = "http://sonarr:8989"
       }, {
       hostname      = "radarr.home-server.me"
       originRequest = {}
-      service       = "http://localhost:7878"
+      service       = "http://radarr:7878"
       }, {
       hostname      = "prowlarr.home-server.me"
       originRequest = {}
-      service       = "http://localhost:9696"
+      service       = "http://prowlarr:9696"
       }, {
       hostname      = "qbittorrent.home-server.me"
       originRequest = {}
-      service       = "http://localhost:8080"
+      service       = "http://qbittorrent:8080"
       }, {
       hostname      = "ha.home-server.me"
       originRequest = {}
-      service       = "http://localhost:8123"
+      service       = "http://homeassistant:8123"
       }, {
       hostname      = "dozzle.home-server.me"
       originRequest = {}
-      service       = "http://localhost:8081"
+      service       = "http://dozzle:8080"
       }, {
       hostname      = "uptime.home-server.me"
       originRequest = {}
-      service       = "http://localhost:3001"
+      service       = "http://gatus:8080"
       }, {
       originRequest = {}
       service       = "http_status:404"

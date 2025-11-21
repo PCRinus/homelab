@@ -11,7 +11,7 @@ resource "cloudflare_dns_record" "terraform_managed_resource_27b84829b17fbafb6c9
 }
 
 resource "cloudflare_dns_record" "terraform_managed_resource_8f22cd35e6f3cc9e39ccd94b2a949363_1" {
-  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
   name    = "ha.home-server.me"
   proxied = true
   tags    = []
@@ -24,7 +24,7 @@ resource "cloudflare_dns_record" "terraform_managed_resource_8f22cd35e6f3cc9e39c
 }
 
 resource "cloudflare_dns_record" "homepage" {
-  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
   name    = "home-server.me"
   proxied = true
   ttl     = 1
@@ -34,7 +34,7 @@ resource "cloudflare_dns_record" "homepage" {
 }
 
 resource "cloudflare_dns_record" "terraform_managed_resource_2ed691eb805ce7bcc49600fd0424f935_3" {
-  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
   name    = "plex.home-server.me"
   proxied = true
   tags    = []
@@ -47,7 +47,7 @@ resource "cloudflare_dns_record" "terraform_managed_resource_2ed691eb805ce7bcc49
 }
 
 resource "cloudflare_dns_record" "dozzle" {
-  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
   name    = "dozzle"
   proxied = true
   ttl     = 1
@@ -57,7 +57,7 @@ resource "cloudflare_dns_record" "dozzle" {
 }
 
 resource "cloudflare_dns_record" "uptime" {
-  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
   name    = "uptime"
   proxied = true
   ttl     = 1
@@ -67,7 +67,7 @@ resource "cloudflare_dns_record" "uptime" {
 }
 
 resource "cloudflare_dns_record" "overseerr" {
-  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
   name    = "overseerr"
   proxied = true
   ttl     = 1
@@ -77,7 +77,7 @@ resource "cloudflare_dns_record" "overseerr" {
 }
 
 resource "cloudflare_dns_record" "sonarr" {
-  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
   name    = "sonarr"
   proxied = true
   ttl     = 1
@@ -87,7 +87,7 @@ resource "cloudflare_dns_record" "sonarr" {
 }
 
 resource "cloudflare_dns_record" "radarr" {
-  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
   name    = "radarr"
   proxied = true
   ttl     = 1
@@ -97,7 +97,7 @@ resource "cloudflare_dns_record" "radarr" {
 }
 
 resource "cloudflare_dns_record" "prowlarr" {
-  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
   name    = "prowlarr"
   proxied = true
   ttl     = 1
@@ -107,7 +107,7 @@ resource "cloudflare_dns_record" "prowlarr" {
 }
 
 resource "cloudflare_dns_record" "qbittorrent" {
-  content = "2a32c37d-447c-4d24-9256-9deb86bc686f.cfargotunnel.com"
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
   name    = "qbittorrent"
   proxied = true
   ttl     = 1

@@ -13,7 +13,7 @@ tfplan
 *.tfplan
 
 # Cloudflare Tunnel files
-2a32c37d-447c-4d24-9256-9deb86bc686f.json
+tunnel-token
 
 # Log files
 *.log

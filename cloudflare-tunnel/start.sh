@@ -1,5 +1,5 @@
 #!/bin/bash
-# Cloudflared startup script to prevent directory mount issues
+# Cloudflared deployment script for tunnel management
 
 set -e
 
@@ -7,34 +7,25 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # Check if required files exist
-if [ ! -f "config.yml" ]; then
-    echo "Error: config.yml not found!"
+if [ ! -f "tunnel-token" ]; then
+    echo "Error: tunnel-token file not found!"
+    echo "Create it with: echo 'YOUR_TUNNEL_TOKEN' > tunnel-token"
     exit 1
 fi
 
-if [ ! -f "2a32c37d-447c-4d24-9256-9deb86bc686f.json" ]; then
-    echo "Error: Tunnel credentials JSON file not found!"
+# Verify file is readable
+if [ ! -r "tunnel-token" ]; then
+    echo "Error: tunnel-token is not readable!"
     exit 1
 fi
 
-# Verify files are readable
-if [ ! -r "config.yml" ]; then
-    echo "Error: config.yml is not readable!"
-    exit 1
-fi
-
-if [ ! -r "2a32c37d-447c-4d24-9256-9deb86bc686f.json" ]; then
-    echo "Error: Tunnel credentials JSON file is not readable!"
-    exit 1
-fi
-
-echo "✓ All required files found and readable"
+echo "✓ Tunnel token file found and readable"
 
 # Stop any existing container
 echo "Stopping existing container (if any)..."
 docker compose down 2>/dev/null || true
 
-# Remove any orphaned volumes/directories that Docker might have created
+# Remove any orphaned volumes
 echo "Cleaning up..."
 docker volume prune -f 2>/dev/null || true
 
