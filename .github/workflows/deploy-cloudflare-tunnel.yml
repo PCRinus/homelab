@@ -33,6 +33,7 @@ jobs:
             
             # Deploy with docker compose
             docker compose up -d
-          ts_authkey: ${{ secrets.TS_AUTHKEY }}
+          ts_oauth_client_id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          ts_oauth_secret: ${{ secrets.TS_OAUTH_SECRET }}
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh_user: ${{ secrets.SSH_USER }}

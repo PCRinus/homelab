@@ -6,8 +6,11 @@ inputs:
     description: 'Cleanup mode: dangling (just dangling images), images (all unused images), full (images + containers + volumes)'
     required: false
     default: 'images'
-  ts_authkey:
-    description: 'Tailscale auth key'
+  ts_oauth_client_id:
+    description: 'Tailscale OAuth client ID'
+    required: true
+  ts_oauth_secret:
+    description: 'Tailscale OAuth client secret'
     required: true
   ssh_private_key:
     description: 'SSH private key'
@@ -22,7 +25,8 @@ runs:
     - name: Connect to Tailscale
       uses: tailscale/github-action@v4
       with:
-        authkey: ${{ inputs.ts_authkey }}
+        oauth-client-id: ${{ inputs.ts_oauth_client_id }}
+        oauth-secret: ${{ inputs.ts_oauth_secret }}
         tags: tag:ci
         version: latest
 
