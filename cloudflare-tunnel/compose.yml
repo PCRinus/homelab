@@ -9,6 +9,12 @@ services:
       - monitoring_default
     ports:
       - "20241:20241"
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
+    extra_hosts:
+      - "homeassistant:host-gateway"
     environment:
       - TUNNEL_METRICS=0.0.0.0:20241
     volumes:
