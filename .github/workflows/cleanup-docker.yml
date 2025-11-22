@@ -1,0 +1,32 @@
+name: Cleanup Docker Resources
+
+on:
+  schedule:
+    # Run every Wednesday and Sunday at 2 AM UTC
+    - cron: '0 2 * * 0,3'
+  workflow_dispatch:
+    inputs:
+      cleanup_mode:
+        description: 'Cleanup mode'
+        required: false
+        type: choice
+        options:
+          - dangling
+          - images
+          - full
+        default: 'images'
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Cleanup Docker Resources
+        uses: ./.github/actions/cleanup-docker
+        with:
+          cleanup_mode: ${{ inputs.cleanup_mode || 'images' }}
+          ts_authkey: ${{ secrets.TS_AUTHKEY }}
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_user: ${{ secrets.SSH_USER }}
