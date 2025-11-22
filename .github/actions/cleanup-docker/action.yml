@@ -1,0 +1,60 @@
+name: Cleanup Docker
+description: 'Clean up unused Docker images and resources via SSH'
+
+inputs:
+  cleanup_mode:
+    description: 'Cleanup mode: dangling (just dangling images), images (all unused images), full (images + containers + volumes)'
+    required: false
+    default: 'images'
+  ts_authkey:
+    description: 'Tailscale auth key'
+    required: true
+  ssh_private_key:
+    description: 'SSH private key'
+    required: true
+  ssh_user:
+    description: 'SSH username'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Connect to Tailscale
+      uses: tailscale/github-action@v4
+      with:
+        authkey: ${{ inputs.ts_authkey }}
+        tags: tag:ci
+        version: latest
+
+    - name: Cleanup Docker Resources
+      uses: appleboy/ssh-action@v1
+      with:
+        host: homelab
+        username: ${{ inputs.ssh_user }}
+        key: ${{ inputs.ssh_private_key }}
+        script: |
+          echo "🧹 Starting Docker cleanup (mode: ${{ inputs.cleanup_mode }})"
+          
+          case "${{ inputs.cleanup_mode }}" in
+            dangling)
+              echo "Removing dangling images only..."
+              docker image prune -f
+              ;;
+            images)
+              echo "Removing all unused images..."
+              docker image prune -a -f
+              ;;
+            full)
+              echo "Removing unused images, containers, and volumes..."
+              docker system prune -a -f --volumes
+              ;;
+            *)
+              echo "Unknown cleanup mode: ${{ inputs.cleanup_mode }}"
+              exit 1
+              ;;
+          esac
+          
+          echo "✅ Cleanup complete"
+          echo ""
+          echo "📊 Current disk usage:"
+          docker system df
