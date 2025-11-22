@@ -10,3 +10,6 @@ services:
       - /run/user/1000/docker.sock:/var/run/docker.sock:ro # (optional) For docker integrations
     environment:
       - HOMEPAGE_ALLOWED_HOSTS=homelab:3000,home-server.me
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
