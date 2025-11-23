@@ -6,6 +6,10 @@ on:
       - main
     paths:
       - 'home-assistant/compose.yml'
+      - 'home-assistant/configuration.yaml'
+      - 'home-assistant/automations.yaml'
+      - 'home-assistant/scripts.yaml'
+      - 'home-assistant/scenes.yaml'
   workflow_dispatch:
 
 jobs:
