@@ -8,5 +8,12 @@ services:
       - PGID=1000
       - TZ=Europe/Bucharest
     volumes:
+      # Persistent data (databases, cache, storage) stays in ~/docker
       - /home/mircea/docker/home-assistant:/config
+      # Configuration files are mounted from this repo
+      - ./configuration.yaml:/config/configuration.yaml
+      - ./automations.yaml:/config/automations.yaml
+      - ./scripts.yaml:/config/scripts.yaml
+      - ./scenes.yaml:/config/scenes.yaml
+      - ./secrets.yaml:/config/secrets.yaml
     restart: unless-stopped
