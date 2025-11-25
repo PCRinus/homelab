@@ -140,6 +140,26 @@ services:
       - media-net
     restart: unless-stopped
 
+  bazarr:
+    image: ghcr.io/hotio/bazarr:release-1.5.3
+    container_name: bazarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /home/mircea/docker/bazarr:/config
+      - /mnt/unas/media:/data
+    ports:
+      - "6767:6767"
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
+    networks:
+      - media-net
+    restart: unless-stopped
+
   buildarr:
     image: callum027/buildarr:0.7.8
     container_name: buildarr

@@ -51,6 +51,14 @@
         container: qbittorrent
         showStats: true
 
+    - Bazarr:
+        icon: bazarr.png
+        href: http://homelab:6767
+        description: Subtitle Management
+        server: my-docker
+        container: bazarr
+        showStats: true
+
     - FlareSolverr:
         icon: flaresolverr.png
         href: http://homelab:8191

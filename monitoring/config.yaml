@@ -99,6 +99,19 @@ endpoints:
       - type: discord
         description: "Overseerr is down or not responding"
 
+  - name: Bazarr
+    group: Media Server
+    url: "http://bazarr:6767/api/system/status"
+    interval: 60s
+    headers:
+      X-Api-Key: "${BAZARR_API_KEY}"
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 1000"
+    alerts:
+      - type: discord
+        description: "Bazarr is down or not responding"
+
   - name: Plex
     group: Media Server
     url: "http://plex:32400/web"
