@@ -42,6 +42,11 @@
         server: my-docker
         container: prowlarr
         showStats: true
+        widget:
+          type: prowlarr
+          url: http://prowlarr:9696
+          key: {{HOMEPAGE_VAR_PROWLARR_API_KEY}}
+          fields: ["numberOfGrabs", "numberOfQueries"]
 
     - qBittorrent:
         icon: qbittorrent.png

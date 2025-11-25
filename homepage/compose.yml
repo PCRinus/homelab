@@ -7,9 +7,19 @@ services:
       - 3000:3000
     volumes:
       - /home/mircea/compose-files/homepage:/app/config
-      - /run/user/1000/docker.sock:/var/run/docker.sock:ro # (optional) For docker integrations
+      - /run/user/1000/docker.sock:/var/run/docker.sock:ro # For docker integrations
+      - /mnt/unas/media:/mnt/unas/media:ro # For storage stats widget
     environment:
       - HOMEPAGE_ALLOWED_HOSTS=homelab:3000,home-server.me
+      - HOMEPAGE_VAR_PROWLARR_API_KEY=${PROWLARR_API_KEY}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     dns:
       - 1.1.1.1
       - 8.8.8.8
+    networks:
+      - media-net # Required for widget API calls to reach services by container name (rootless Docker can't route via host ports)
+
+networks:
+  media-net:
+    external: true # Defined in media-server/compose.yml

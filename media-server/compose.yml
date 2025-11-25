@@ -178,3 +178,4 @@ services:
 
 networks:
   media-net:
+    name: media-net # Named network allows other compose stacks (e.g., homepage) to join for inter-container communication
