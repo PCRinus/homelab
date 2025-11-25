@@ -115,7 +115,7 @@ prowlarr:
                 type: filelist.io
                 enable: true
                 sync_profile: Standard
-                priority: 25
+                priority: 10  # Lower = higher priority (prefer private tracker)
                 query_limit: 150  # Private tracker - respect rate limits
                 fields:
                   baseUrl: https://filelist.io/
@@ -202,7 +202,7 @@ prowlarr:
                 enable_rss: true
                 enable_interactive_search: true
                 enable_automatic_search: true
-                minimum_seeders: 1
+                minimum_seeders: 5
         
         # === TAGS ===
         tags:
