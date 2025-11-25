@@ -30,15 +30,33 @@ sonarr:
       port: 8989
       protocol: "http"
       # API key defined in buildarr-secrets.yml
-      # Add instance-specific settings here as needed
-      # settings:
-      #   ...
+      settings:
+        # === MEDIA MANAGEMENT ===
+        media_management:
+          # Root folder for TV shows - TRaSH recommended path
+          root_folders:
+            - /data/media/tv
+          # Enable hardlinks for instant moves (requires same filesystem)
+          use_hardlinks: true
+          # TRaSH recommended naming scheme
+          rename_episodes: true
+          replace_illegal_characters: true
+          standard_episode_format: '{Series TitleYear} - S{season:00}E{episode:00} - {Episode CleanTitle} [{Quality Full}]{[MediaInfo VideoDynamicRangeType]}{[Mediainfo AudioCodec}{ Mediainfo AudioChannels]}{[MediaInfo VideoCodec]}{-Release Group}'
+          daily_episode_format: '{Series TitleYear} - {Air-Date} - {Episode CleanTitle} [{Quality Full}]{[MediaInfo VideoDynamicRangeType]}{[Mediainfo AudioCodec}{ Mediainfo AudioChannels]}{[MediaInfo VideoCodec]}{-Release Group}'
+          anime_episode_format: '{Series TitleYear} - S{season:00}E{episode:00} - {absolute:000} - {Episode CleanTitle} [{Quality Full}]{[MediaInfo VideoDynamicRangeType]}[{MediaInfo VideoBitDepth}bit]{[MediaInfo VideoCodec]}[{Mediainfo AudioCodec} { Mediainfo AudioChannels}]{MediaInfo AudioLanguages}{-Release Group}'
+          series_folder_format: '{Series TitleYear} [tvdbid-{TvdbId}]'
+          season_folder_format: 'Season {season:00}'
+          specials_folder_format: 'Specials'
+          multiepisode_style: prefixed-range
+        
+        # NOTE: Download clients managed manually in Sonarr UI
+        # Buildarr has a SecretStr serialization bug when updating passwords
 
 # Radarr configuration
-# NOTE: Temporarily commented out due to compatibility issue between
-# Radarr v6.0.4 and Buildarr Radarr plugin v0.2.6
+# NOTE: Disabled due to Buildarr Radarr plugin v0.2.6 incompatibility with Radarr v6
+# The plugin fails to deserialize Radarr v6 API responses (colonReplacementFormat enum changed)
 # See: https://github.com/buildarr/buildarr-radarr/issues
-# Uncomment when plugin is updated or if you want to manage manually
+# Uncomment when plugin is updated to support Radarr v6
 # radarr:
 #   instances:
 #     radarr:
@@ -46,9 +64,18 @@ sonarr:
 #       port: 7878
 #       protocol: "http"
 #       # API key defined in buildarr-secrets.yml
-#       # Add instance-specific settings here as needed
-#       # settings:
-#       #   ...
+#       settings:
+#         download_clients:
+#           enable_completed_download_handling: true
+#           redownload_failed: true
+#           definitions:
+#             qBittorrent:
+#               type: qbittorrent
+#               enable: true
+#               hostname: qbittorrent
+#               port: 8080
+#               username: admin
+#               category: radarr
 
 # Prowlarr configuration
 prowlarr:
