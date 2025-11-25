@@ -3,11 +3,13 @@
 # https://gethomepage.dev/configs/info-widgets/
 
 - resources:
+    label: System Resources
     cpu: true
     cputemp: true
     memory: true
-    disk: /
 
-- search:
-    provider: duckduckgo
-    target: _blank
+- resources:
+    label: Storage devices
+    disk:
+      - /
+      - /mnt/unas/media
