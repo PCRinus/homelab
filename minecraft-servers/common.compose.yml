@@ -1,6 +1,9 @@
 # Common configuration for Minecraft servers
 # Include this file in your server-specific compose files
 
+env_file:
+  - ../.env
+
 x-minecraft-base: &minecraft-base
   image: itzg/minecraft-server
   tty: true

@@ -1,3 +1,6 @@
+env_file:
+  - ../.env
+
 services:
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:20.04.1

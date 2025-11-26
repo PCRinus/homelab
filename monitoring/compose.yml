@@ -16,7 +16,7 @@ services:
       - ./config.yaml:/config/config.yaml:ro
       - /home/mircea/docker/gatus/data:/data
     env_file:
-      - .env
+      - ../.env
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
