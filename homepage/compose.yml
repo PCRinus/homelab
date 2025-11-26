@@ -1,11 +1,10 @@
-env_file:
-  - ../.env
-
 services:
   homepage:
     image: ghcr.io/gethomepage/homepage:v1.7
     container_name: homepage
     restart: unless-stopped
+    env_file:
+      - ../.env
     ports:
       - 3000:3000
     volumes:

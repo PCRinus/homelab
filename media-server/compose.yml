@@ -1,10 +1,9 @@
-env_file:
-  - ../.env
-
 services:
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:20.04.1
     container_name: qbittorrent
+    env_file:
+      - ../.env
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -25,6 +24,8 @@ services:
   sonarr:
     image: ghcr.io/hotio/sonarr:release-4.0.16.2944
     container_name: sonarr
+    env_file:
+      - ../.env
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -45,6 +46,8 @@ services:
   radarr:
     image: ghcr.io/hotio/radarr:release-6.0.4.10291
     container_name: radarr
+    env_file:
+      - ../.env
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -62,11 +65,11 @@ services:
       - media-net
     restart: unless-stopped
 
-
-
   prowlarr:
     image: ghcr.io/hotio/prowlarr:release-2.3.0.5236
     container_name: prowlarr
+    env_file:
+      - ../.env
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -88,6 +91,8 @@ services:
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:v3.4.5
     container_name: flaresolverr
+    env_file:
+      - ../.env
     environment:
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - LOG_HTML=${LOG_HTML:-false}
@@ -102,6 +107,8 @@ services:
   overseerr:
     image: ghcr.io/sct/overseerr:develop
     container_name: overseerr
+    env_file:
+      - ../.env
     environment:
       - LOG_LEVEL=debug
       - TZ=${TZ}
@@ -120,6 +127,8 @@ services:
   plex:
     image: lscr.io/linuxserver/plex:1.42.2
     container_name: plex
+    env_file:
+      - ../.env
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -146,6 +155,8 @@ services:
   bazarr:
     image: ghcr.io/hotio/bazarr:release-1.5.3
     container_name: bazarr
+    env_file:
+      - ../.env
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -166,6 +177,8 @@ services:
   buildarr:
     image: callum027/buildarr:0.7.8
     container_name: buildarr
+    env_file:
+      - ../.env
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
