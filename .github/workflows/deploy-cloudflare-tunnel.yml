@@ -25,8 +25,19 @@ jobs:
           deploy_script: |
             export CLOUDFLARE_API_TOKEN="${{ secrets.CLOUDFLARE_API_TOKEN }}"
             terraform init
-            terraform plan -out=tfplan
-            terraform apply -auto-approve tfplan
+            
+            # Check if terraform would modify state
+            terraform plan -detailed-exitcode -out=tfplan
+            EXIT_CODE=$?
+            if [ $EXIT_CODE -eq 1 ]; then
+              echo "❌ Terraform plan failed"
+              exit 1
+            elif [ $EXIT_CODE -eq 2 ]; then
+              echo "❌ Terraform state would be modified. Please run 'terraform apply' locally and commit the updated tfstate before deploying."
+              exit 1
+            fi
+            
+            echo "✅ No infrastructure changes detected, proceeding with deployment..."
             
             echo "${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}" > tunnel-token
             chmod 600 tunnel-token
