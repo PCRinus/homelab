@@ -8,12 +8,23 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - /home/mircea/compose-files/homepage:/app/config
-      - /run/user/1000/docker.sock:/var/run/docker.sock:ro # For docker integrations
-      - /mnt/unas/media:/mnt/unas/media:ro # For storage stats widget
+      # Versioned configs - read-only
+      - ./services.yaml:/app/config/services.yaml:ro
+      - ./settings.yaml:/app/config/settings.yaml:ro
+      - ./bookmarks.yaml:/app/config/bookmarks.yaml:ro
+      - ./docker.yaml:/app/config/docker.yaml:ro
+      - ./widgets.yaml:/app/config/widgets.yaml:ro
+      - ./custom.css:/app/config/custom.css:ro
+      - ./custom.js:/app/config/custom.js:ro
+      - ./kubernetes.yaml:/app/config/kubernetes.yaml:ro
+      - ./proxmox.yaml:/app/config/proxmox.yaml:ro
+      # Container-writable data - not versioned
+      - /home/mircea/docker/homepage/logs:/app/config/logs
+      # Other mounts
+      - /run/user/1000/docker.sock:/var/run/docker.sock:ro
+      - /mnt/unas/media:/mnt/unas/media:ro
     environment:
       - HOMEPAGE_ALLOWED_HOSTS=homelab:3000,home-server.me
-      - HOMEPAGE_VAR_PROWLARR_API_KEY=${PROWLARR_API_KEY}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     dns:
