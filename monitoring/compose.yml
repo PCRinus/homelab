@@ -22,7 +22,11 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - default
-      - media-server_media-net
+      - media-net
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
     logging:
       driver: "json-file"
       options:
@@ -32,5 +36,5 @@ services:
       - "dozzle.enable=true"
 
 networks:
-  media-server_media-net:
+  media-net:
     external: true
