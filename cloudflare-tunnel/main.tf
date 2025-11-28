@@ -1,4 +1,18 @@
 terraform {
+  backend "s3" {
+    bucket                      = "homelab-terraform-state"
+    key                         = "cloudflare-tunnel/terraform.tfstate"
+    region                      = "auto"
+    skip_credentials_validation = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+    skip_requesting_account_id  = true
+    skip_s3_checksum            = true
+    endpoints = {
+      s3 = "https://ed6d4bb3828b44b941ccbbd0dc250af7.eu.r2.cloudflarestorage.com"
+    }
+  }
+
   required_providers {
     cloudflare = {
       source  = "cloudflare/cloudflare"

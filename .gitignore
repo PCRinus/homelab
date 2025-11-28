@@ -8,6 +8,7 @@ buildarr-secrets.yml
 home-assistant/secrets.yaml
 
 # Terraform files
+*.tfstate
 *.tfstate.*
 *.tfstate.backup
 .terraform/
