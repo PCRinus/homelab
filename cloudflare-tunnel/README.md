@@ -27,6 +27,10 @@ Set these before running Terraform commands:
 
 ```bash
 export CLOUDFLARE_API_TOKEN="your-api-token-here"
+
+# Required for R2 state backend
+export AWS_ACCESS_KEY_ID="your-r2-access-key"
+export AWS_SECRET_ACCESS_KEY="your-r2-secret-key"
 ```
 
 ### API Token Permissions
@@ -180,10 +184,11 @@ domain     = "home-server.me"
 ## ⚠️ Important Notes
 
 ### Sensitive Files (Do NOT commit)
-- `terraform.tfstate*` - Contains resource IDs and metadata
 - `terraform.tfvars` - Contains zone/account IDs
 - `tunnel-token` - Tunnel authentication token
 - `.terraform/` - Provider binaries
+
+> **Note**: `terraform.tfstate` is stored remotely in R2, not locally.
 
 ### GitHub Secrets Required
 For CI/CD deployment via GitHub Actions:
@@ -197,9 +202,11 @@ For CI/CD deployment via GitHub Actions:
 Zone settings (TLS 1.3, SSL, HTTPS rewrites) cannot be destroyed via Terraform. They must be manually disabled in the Cloudflare dashboard if needed.
 
 ### State Management
-- State is stored locally in `terraform.tfstate`
-- Consider using remote state (S3, Terraform Cloud) for team collaboration
-- Always backup state files before major changes
+- State is stored remotely in **Cloudflare R2** bucket: `homelab-terraform-state`
+- State path: `cloudflare-tunnel/terraform.tfstate`
+- R2 provides S3-compatible storage with automatic encryption
+- No local state files needed — Terraform reads/writes directly from R2
+- Requires `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables (R2 API credentials)
 
 ## 🐛 Troubleshooting
 
