@@ -8,6 +8,7 @@ terraform {
     skip_region_validation      = true
     skip_requesting_account_id  = true
     skip_s3_checksum            = true
+    use_path_style              = true
     endpoints = {
       s3 = "https://ed6d4bb3828b44b941ccbbd0dc250af7.eu.r2.cloudflarestorage.com"
     }
