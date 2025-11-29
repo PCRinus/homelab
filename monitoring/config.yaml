@@ -25,16 +25,16 @@ alerting:
 
 endpoints:
   # Media Server Stack
-  - name: qBittorrent
+  - name: Transmission
     group: Media Server
-    url: "http://qbittorrent:8080"
+    url: "http://transmission:9091"
     interval: 60s
     conditions:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 1000"
     alerts:
       - type: discord
-        description: "qBittorrent is down or not responding"
+        description: "Transmission is down or not responding"
 
   - name: Sonarr
     group: Media Server

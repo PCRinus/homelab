@@ -48,12 +48,12 @@
           key: {{HOMEPAGE_VAR_PROWLARR_API_KEY}}
           fields: ["numberOfGrabs", "numberOfQueries"]
 
-    - qBittorrent:
-        icon: qbittorrent.png
-        href: http://homelab:8080
+    - Transmission:
+        icon: transmission.png
+        href: http://homelab:9091
         description: Torrent Client
         server: my-docker
-        container: qbittorrent
+        container: transmission
         showStats: true
 
     - Bazarr:

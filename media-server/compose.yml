@@ -1,22 +1,23 @@
 services:
-  qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:20.04.1
-    container_name: qbittorrent
+  transmission:
+    image: lscr.io/linuxserver/transmission:4.0.6
+    container_name: transmission
     env_file:
       - ../.env
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - WEBUI_PORT=8080
-      - TORRENTING_PORT=6881
+      - USER=${TRANSMISSION_USER}
+      - PASS=${TRANSMISSION_PASS}
     volumes:
-      - /home/mircea/docker/qbittorrent:/config
+      - /home/mircea/docker/transmission:/config
+      - ./transmission/settings.json:/config/settings.json:ro
       - /mnt/unas/media:/data
     ports:
-      - "8080:8080"      # WebUI
-      - "6881:6881"      # BitTorrent TCP
-      - "6881:6881/udp"  # BitTorrent UDP (DHT/PeX)
+      - "9091:9091"      # WebUI
+      - "51413:51413"    # BitTorrent TCP
+      - "51413:51413/udp" # BitTorrent UDP
     networks:
       - media-net
     restart: unless-stopped
