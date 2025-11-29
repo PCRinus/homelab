@@ -20,7 +20,7 @@ This directory contains the Docker Compose configuration for the media server st
 
 ### Configuration
 
-Transmission is configured via `transmission/settings.json`, which is version-controlled and mounted read-only into the container.
+Transmission is configured via `transmission/settings.json`, which is version-controlled.
 
 **Key settings:**
 - Download directory: `/data/torrents`
@@ -33,6 +33,21 @@ Transmission is configured via `transmission/settings.json`, which is version-co
 - Upload: 10 MB/s (80 Mbps)
 - Active downloads: 8 concurrent
 - Seed queue: 10 torrents
+
+### Starting the Stack
+
+Use the startup script to apply settings and start all services:
+```bash
+cd /home/mircea/compose-files/media-server
+sudo ./start.sh
+```
+
+This script:
+1. Copies `transmission/settings.json` to the config directory
+2. Pulls latest images
+3. Starts all containers
+
+This approach keeps the git repo clean — the container modifies the copy in `/home/mircea/docker/transmission/`, not the versioned file.
 
 ### Authentication
 
