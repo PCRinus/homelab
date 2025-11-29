@@ -13,7 +13,6 @@ echo "🎬 Starting Media Server Stack..."
 echo "📋 Copying Transmission settings..."
 TRANSMISSION_CONFIG="${CONFIG_BASE}/transmission"
 cp "${SCRIPT_DIR}/transmission/settings.json" "${TRANSMISSION_CONFIG}/settings.json"
-chown 1000:1000 "${TRANSMISSION_CONFIG}/settings.json"
 
 # --- Pull and Start Containers ---
 echo "📦 Pulling latest images..."
