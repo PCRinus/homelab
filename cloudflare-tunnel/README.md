@@ -9,8 +9,9 @@ cloudflare-tunnel/
 ├── compose.yml              # Docker Compose for running cloudflared
 ├── tunnel-token            # Tunnel authentication token (gitignored)
 ├── main.tf                 # Main Terraform configuration (provider, variables, zone settings)
-├── generated_dns_records.tf # Imported DNS records
-├── generated_tunnels.tf    # Imported tunnel resources
+├── dns.tf                  # DNS records
+├── tunnel.tf               # Zero Trust tunnel configuration
+├── r2.tf                   # R2 bucket for Terraform state
 ├── terraform.tfvars        # Variable values (gitignored - contains sensitive data)
 └── README.md              # This file
 ```
