@@ -10,6 +10,11 @@
         server: my-docker
         container: plex
         showStats: true
+        widget:
+          type: plex
+          url: http://plex:32400
+          key: {{HOMEPAGE_VAR_PLEX_TOKEN}}
+          fields: ["streams", "movies", "tv"]
 
     - Overseerr:
         icon: overseerr.png
@@ -18,6 +23,11 @@
         server: my-docker
         container: overseerr
         showStats: true
+        widget:
+          type: overseerr
+          url: http://overseerr:5055
+          key: {{HOMEPAGE_VAR_OVERSEERR_API_KEY}}
+          fields: ["pending", "approved", "available"]
 
     - Sonarr:
         icon: sonarr.png
@@ -26,6 +36,11 @@
         server: my-docker
         container: sonarr
         showStats: true
+        widget:
+          type: sonarr
+          url: http://sonarr:8989
+          key: {{HOMEPAGE_VAR_SONARR_API_KEY}}
+          fields: ["wanted", "queued", "series"]
 
     - Radarr:
         icon: radarr.png
@@ -34,6 +49,11 @@
         server: my-docker
         container: radarr
         showStats: true
+        widget:
+          type: radarr
+          url: http://radarr:7878
+          key: {{HOMEPAGE_VAR_RADARR_API_KEY}}
+          fields: ["wanted", "queued", "movies"]
 
     - Prowlarr:
         icon: prowlarr.png
@@ -55,6 +75,12 @@
         server: my-docker
         container: transmission
         showStats: true
+        widget:
+          type: transmission
+          url: http://transmission:9091
+          username: {{HOMEPAGE_VAR_TRANSMISSION_USER}}
+          password: {{HOMEPAGE_VAR_TRANSMISSION_PASS}}
+          fields: ["leech", "download", "seed", "upload"]
 
     - Bazarr:
         icon: bazarr.png
@@ -63,6 +89,11 @@
         server: my-docker
         container: bazarr
         showStats: true
+        widget:
+          type: bazarr
+          url: http://bazarr:6767
+          key: {{HOMEPAGE_VAR_BAZARR_API_KEY}}
+          fields: ["missingEpisodes", "missingMovies"]
 
     - FlareSolverr:
         icon: flaresolverr.png

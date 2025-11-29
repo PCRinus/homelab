@@ -1,7 +1,12 @@
 ---
 # For configuration options and examples, please see:
 # https://gethomepage.dev/configs/settings/
-title: My Awesome Homepage
+title: Homelab Dashboard
+
+layout:
+  Media Management:
+    style: row
+    columns: 4
 
 providers:
   openweathermap: openweathermapapikey
