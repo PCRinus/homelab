@@ -7,11 +7,45 @@ on:
     paths:
       - 'cloudflare-tunnel/compose.yml'
       - 'cloudflare-tunnel/*.tf'
-      - 'cloudflare-tunnel/terraform.tfvars'
   workflow_dispatch:
 
 jobs:
+  terraform:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloudflare-tunnel
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init -reconfigure
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+
   deploy:
+    name: Deploy Docker Compose
+    needs: terraform
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -23,24 +57,6 @@ jobs:
           service_name: Cloudflare Tunnel
           service_path: cloudflare-tunnel
           deploy_script: |
-            export CLOUDFLARE_API_TOKEN="${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            export AWS_ACCESS_KEY_ID="${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}"
-            export AWS_SECRET_ACCESS_KEY="${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}"
-            terraform init -reconfigure
-            
-            # Check if terraform would modify state
-            terraform plan -detailed-exitcode -out=tfplan
-            EXIT_CODE=$?
-            if [ $EXIT_CODE -eq 1 ]; then
-              echo "❌ Terraform plan failed"
-              exit 1
-            elif [ $EXIT_CODE -eq 2 ]; then
-              echo "❌ Terraform state would be modified. Please run 'terraform apply' locally and commit the updated tfstate before deploying."
-              exit 1
-            fi
-            
-            echo "✅ No infrastructure changes detected, proceeding with deployment..."
-            
             echo "${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}" > tunnel-token
             chmod 600 tunnel-token
             
