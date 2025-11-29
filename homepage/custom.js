@@ -2,17 +2,21 @@
 (function() {
   // Only run if accessed via home-server.me (Cloudflare tunnel)
   if (window.location.hostname === 'home-server.me') {
-    // Map of local URLs to Cloudflare tunnel URLs
     const urlMappings = {
+      // Media Management
       'homelab:32400': 'plex.home-server.me',
       'homelab:5055': 'overseerr.home-server.me',
       'homelab:8989': 'sonarr.home-server.me',
       'homelab:7878': 'radarr.home-server.me',
       'homelab:9696': 'prowlarr.home-server.me',
-      'homelab:8080': 'qbittorrent.home-server.me',
+      'homelab:9091': 'transmission.home-server.me',
+      'homelab:6767': 'bazarr.home-server.me',
+      'homelab:8191': 'flaresolverr.home-server.me',
+      // Infrastructure
       'homelab:8081': 'dozzle.home-server.me',
-      'homelab:3001': 'uptime.home-server.me',
+      'homelab:8082': 'gatus.home-server.me',
       'homelab:3000': 'home-server.me',
+      // Home Automation
       'homelab:8123': 'ha.home-server.me'
     };
 
