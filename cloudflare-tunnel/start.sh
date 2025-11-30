@@ -13,13 +13,11 @@ if [ ! -f "tunnel-token" ]; then
     exit 1
 fi
 
-# Verify file is readable
-if [ ! -r "tunnel-token" ]; then
-    echo "Error: tunnel-token is not readable!"
-    exit 1
-fi
+# Fix permissions - cloudflared container runs as non-root and needs to read the token
+# This often gets reset by editors, git, or terraform operations
+chmod 644 tunnel-token
 
-echo "✓ Tunnel token file found and readable"
+echo "✓ Tunnel token file found and permissions set"
 
 # Stop any existing container
 echo "Stopping existing container (if any)..."

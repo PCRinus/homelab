@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'cloudflare-tunnel/compose.yml'
-      - 'cloudflare-tunnel/*.tf'
+      - 'cloudflare-tunnel/**'
+      - '!cloudflare-tunnel/README.md'
   workflow_dispatch:
 
 jobs:
@@ -60,12 +60,7 @@ jobs:
         with:
           service_name: Cloudflare Tunnel
           service_path: cloudflare-tunnel
-          deploy_script: |
-            echo "${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}" > tunnel-token
-            chmod 600 tunnel-token
-            
-            # Deploy with docker compose
-            docker compose up -d
+          deploy_script: ./start.sh
           ts_oauth_client_id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           ts_oauth_secret: ${{ secrets.TS_OAUTH_SECRET }}
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
