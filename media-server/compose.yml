@@ -1,7 +1,37 @@
 services:
+  gluetun:
+    image: qmcgaw/gluetun:v3.40.0
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    env_file:
+      - ../.env
+    environment:
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_TYPE=wireguard
+      - VPN_PORT_FORWARDING=on
+      - VPN_PORT_FORWARDING_PROVIDER=protonvpn
+      - PORT_FORWARD_ONLY=on
+    volumes:
+      - /home/mircea/docker/gluetun:/gluetun
+    ports:
+      - "8080:8080"      # qBittorrent WebUI (exposed through gluetun)
+      - "8000:8000"      # Gluetun control server (health checks)
+      - "6881:6881"      # BitTorrent TCP (exposed through gluetun)
+      - "6881:6881/udp"  # BitTorrent UDP (exposed through gluetun)
+    networks:
+      - media-net
+    restart: unless-stopped
+
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:5.0.4
     container_name: qbittorrent
+    network_mode: service:gluetun  # Route all traffic through VPN
+    depends_on:
+      gluetun:
+        condition: service_healthy
     env_file:
       - ../.env
     environment:
@@ -9,12 +39,6 @@ services:
     volumes:
       - /home/mircea/docker/qbittorrent:/config
       - /mnt/unas/media:/data
-    ports:
-      - "8080:8080"      # WebUI
-      - "6881:6881"      # BitTorrent TCP
-      - "6881:6881/udp"  # BitTorrent UDP
-    networks:
-      - media-net
     restart: unless-stopped
 
   sonarr:

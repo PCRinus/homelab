@@ -6,7 +6,8 @@ This directory contains the Docker Compose configuration for the media server st
 
 | Service | Port | Description |
 |---------|------|-------------|
-| qBittorrent | 8080 | Torrent client |
+| Gluetun | 8000 (control) | VPN client (ProtonVPN) - routes qBittorrent traffic |
+| qBittorrent | 8080 | Torrent client (via Gluetun VPN) |
 | Sonarr | 8989 | TV series management |
 | Radarr | 7878 | Movie management |
 | Prowlarr | 9696 | Indexer manager |
@@ -15,6 +16,45 @@ This directory contains the Docker Compose configuration for the media server st
 | Plex | 32400 | Media server |
 | FlareSolverr | 8191 | Cloudflare bypass for indexers |
 | Buildarr | - | Configuration management for *arr stack |
+
+## VPN Setup (Gluetun + ProtonVPN)
+
+All torrent traffic is routed through ProtonVPN via Gluetun. This protects your IP and enables seeding via ProtonVPN's port forwarding.
+
+### How It Works
+
+- **Gluetun** creates a VPN tunnel to ProtonVPN using WireGuard
+- **qBittorrent** uses `network_mode: service:gluetun` to route all traffic through the VPN
+- **Port forwarding** is automatic - Gluetun obtains a forwarded port from ProtonVPN
+
+### Configuration
+
+VPN credentials are in `.env`:
+- `WIREGUARD_PRIVATE_KEY` - Get from https://account.protonvpn.com/downloads (WireGuard config)
+- `SERVER_COUNTRIES` - Server location (default: Netherlands, must support P2P + port forwarding)
+
+### Checking VPN Status
+
+```bash
+# Check if VPN is connected
+docker exec gluetun wget -qO- ifconfig.me
+
+# Check forwarded port
+cat /home/mircea/docker/gluetun/forwarded_port
+
+# View Gluetun logs
+docker logs gluetun
+```
+
+### Port Forwarding for Seeding
+
+Gluetun automatically obtains a forwarded port from ProtonVPN and writes it to `/home/mircea/docker/gluetun/forwarded_port`. Configure qBittorrent to use this port:
+
+1. Check the port: `cat /home/mircea/docker/gluetun/forwarded_port`
+2. In qBittorrent: **Settings → Connection → Listening Port**
+3. Set the port to match the forwarded port
+
+**Note:** The forwarded port may change when Gluetun reconnects. For automation, consider using Gluetun's control server API.
 
 ## Torrent Client Setup (qBittorrent)
 
@@ -26,7 +66,7 @@ qBittorrent stores its configuration in `/home/mircea/docker/qbittorrent/`. Sett
 - Download directory: `/data/torrents`
 - Incomplete directory: `/data/torrents/incomplete`
 - WebUI port: 8080
-- Peer port: 6881
+- Peer port: (use forwarded port from Gluetun)
 
 ### Starting the Stack
 

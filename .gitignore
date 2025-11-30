@@ -24,3 +24,6 @@ tunnel-token
 
 # Dump files
 *dump*
+
+# ProtonVPN WireGuard config
+homelab-gluetun.txt
