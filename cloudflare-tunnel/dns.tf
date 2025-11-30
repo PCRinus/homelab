@@ -113,5 +113,25 @@ resource "cloudflare_dns_record" "qbittorrent" {
   ttl     = 1
   type    = "CNAME"
   zone_id = var.zone_id
-  comment = "qBittorrent torrent client"
+  comment = "qBittorrent torrent client (via Gluetun VPN)"
+}
+
+resource "cloudflare_dns_record" "bazarr" {
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
+  name    = "bazarr"
+  proxied = true
+  ttl     = 1
+  type    = "CNAME"
+  zone_id = var.zone_id
+  comment = "Bazarr subtitle management"
+}
+
+resource "cloudflare_dns_record" "flaresolverr" {
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
+  name    = "flaresolverr"
+  proxied = true
+  ttl     = 1
+  type    = "CNAME"
+  zone_id = var.zone_id
+  comment = "FlareSolverr Cloudflare bypass"
 }
