@@ -27,7 +27,7 @@ endpoints:
   # Media Server Stack
   - name: Gluetun VPN
     group: Media Server
-    url: "http://gluetun:8000"
+    url: "http://gluetun:8000/v1/publicip/ip"
     interval: 60s
     conditions:
       - "[STATUS] == 200"
