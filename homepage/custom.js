@@ -9,7 +9,7 @@
       'homelab:8989': 'sonarr.home-server.me',
       'homelab:7878': 'radarr.home-server.me',
       'homelab:9696': 'prowlarr.home-server.me',
-      'homelab:9091': 'transmission.home-server.me',
+      'homelab:8080': 'qbittorrent.home-server.me',
       'homelab:6767': 'bazarr.home-server.me',
       'homelab:8191': 'flaresolverr.home-server.me',
       // Infrastructure
