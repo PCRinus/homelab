@@ -9,14 +9,18 @@ CONFIG_BASE="/home/mircea/docker"
 
 echo "🎬 Starting Media Server Stack..."
 
+cd "${SCRIPT_DIR}"
+
 # --- Transmission Setup ---
+# Copy settings using a temporary container to handle rootless Docker permissions
 echo "📋 Copying Transmission settings..."
-TRANSMISSION_CONFIG="${CONFIG_BASE}/transmission"
-cp "${SCRIPT_DIR}/transmission/settings.json" "${TRANSMISSION_CONFIG}/settings.json"
+docker run --rm \
+  -v "${SCRIPT_DIR}/transmission/settings.json:/src/settings.json:ro" \
+  -v "${CONFIG_BASE}/transmission:/dest" \
+  alpine cp /src/settings.json /dest/settings.json
 
 # --- Pull and Start Containers ---
 echo "📦 Pulling latest images..."
-cd "${SCRIPT_DIR}"
 docker compose pull
 
 echo "🚀 Starting containers..."
