@@ -112,3 +112,52 @@ image: ghcr.io/sct/overseerr:develop
 - Add DNS entries (`dns: [1.1.1.1, 1.0.0.1, 8.8.8.8]`) for services needing external resolution
 - Add comments for non-obvious port mappings
 - For multi-step tasks: present numbered plan, keep steps atomic, explain changes
+
+## Adding or Migrating a Service
+
+When adding a new service or migrating an existing one (e.g., switching torrent clients), follow this checklist:
+
+### 1. Docker Compose
+- Add/update service in `<stack>/compose.yml`
+- Use `env_file: - ../.env` for secrets
+- Pin image version for Renovate tracking
+- Join `media-net` network if inter-container communication needed
+
+### 2. Cloudflare Tunnel (if externally accessible)
+- **`cloudflare-tunnel/tunnel.tf`**: Add ingress rule with hostname and service URL
+- **`cloudflare-tunnel/dns.tf`**: Add CNAME record pointing to tunnel
+- Run `terraform plan && terraform apply` to deploy
+
+### 3. Homepage Dashboard
+- **`homepage/services.yaml`**: Add service entry with widget config
+- **`homepage/custom.js`**: Add URL mapping in `urlMappings` object for Cloudflare tunnel rewriting
+  ```javascript
+  'homelab:<port>': '<service>.home-server.me',
+  ```
+
+### 4. Monitoring (Gatus)
+- **`monitoring/config.yaml`**: Add endpoint for health checks
+- Include appropriate conditions (`[STATUS] == 200`, `[RESPONSE_TIME] < 1000`)
+- Add Discord alert if critical service
+
+### 5. Environment Variables
+- **`.env`**: Add any new secrets/credentials
+- **`.env.example`**: Add placeholder for documentation
+
+### 6. Start Scripts & Deployment
+- **`<stack>/start.sh`**: Update if service requires pre-start setup (config copying, migrations)
+- **`.github/workflows/deploy-<stack>.yml`**: Update if new service needs special deployment steps
+- **`.github/actions/deploy-service/action.yml`**: Check if reusable action covers new service needs
+
+### 7. Documentation
+- Update relevant `README.md` files
+- Update `copilot-instructions.md` if architecture changes
+
+### 8. Cleanup (for migrations)
+- Stop and remove old container: `docker stop <old> && docker rm <old>`
+- Delete old config directory using container (for rootless Docker permissions):
+  ```bash
+  docker run --rm -v /home/mircea/docker:/data alpine rm -rf /data/<old-service>
+  ```
+- Remove old files from repo (settings, configs)
+- Update any *arr apps or other services that reference the old service
