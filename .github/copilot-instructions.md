@@ -12,7 +12,7 @@ Self-hosted homelab running Docker in **rootless mode** on Linux. Services are o
 
 | Stack | Purpose | Key Files |
 |-------|---------|-----------|
-| `media-server/` | Plex, Sonarr, Radarr, Prowlarr, Transmission, Overseerr, FlareSolverr | `compose.yml`, `buildarr/buildarr.yml` |
+| `media-server/` | Plex, Sonarr, Radarr, Prowlarr, qBittorrent, Overseerr, FlareSolverr | `compose.yml`, `buildarr/buildarr.yml` |
 | `cloudflare-tunnel/` | Zero Trust tunnel + Terraform for DNS/R2 | `compose.yml`, `*.tf` |
 | `homepage/` | Dashboard aggregating all services | Config yamls mounted read-only |
 | `home-assistant/` | Smart home automation | Configs mounted from repo |
@@ -67,7 +67,7 @@ networks:
 
 ## Startup Commands
 ```bash
-# Media stack (uses start.sh to copy Transmission settings first)
+# Media stack
 cd /home/mircea/compose-files/media-server && ./start.sh
 
 # Most services

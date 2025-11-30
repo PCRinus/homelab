@@ -6,7 +6,7 @@ This directory contains the Docker Compose configuration for the media server st
 
 | Service | Port | Description |
 |---------|------|-------------|
-| Transmission | 9091 | Torrent client |
+| qBittorrent | 8080 | Torrent client |
 | Sonarr | 8989 | TV series management |
 | Radarr | 7878 | Movie management |
 | Prowlarr | 9696 | Indexer manager |
@@ -16,83 +16,55 @@ This directory contains the Docker Compose configuration for the media server st
 | FlareSolverr | 8191 | Cloudflare bypass for indexers |
 | Buildarr | - | Configuration management for *arr stack |
 
-## Torrent Client Setup (Transmission)
+## Torrent Client Setup (qBittorrent)
 
 ### Configuration
 
-Transmission is configured via `transmission/settings.json`, which is version-controlled.
+qBittorrent stores its configuration in `/home/mircea/docker/qbittorrent/`. Settings are managed via the WebUI.
 
 **Key settings:**
 - Download directory: `/data/torrents`
 - Incomplete directory: `/data/torrents/incomplete`
-- WebUI port: 9091
-- Peer port: 51413 (not exposed externally)
-
-**Speed limits (always-on):**
-- Download: 50 MB/s (400 Mbps)
-- Upload: 10 MB/s (80 Mbps)
-- Active downloads: 8 concurrent
-- Seed queue: 10 torrents
+- WebUI port: 8080
+- Peer port: 6881
 
 ### Starting the Stack
 
-Use the startup script to apply settings and start all services:
 ```bash
 cd /home/mircea/compose-files/media-server
-sudo ./start.sh
+./start.sh
 ```
-
-This script:
-1. Copies `transmission/settings.json` to the config directory
-2. Pulls latest images
-3. Starts all containers
-
-This approach keeps the git repo clean — the container modifies the copy in `/home/mircea/docker/transmission/`, not the versioned file.
 
 ### Authentication
 
 WebUI credentials are set via environment variables in `.env`:
-- `TRANSMISSION_USER`
-- `TRANSMISSION_PASS`
+- `QBITTORRENT_USER`
+- `QBITTORRENT_PASS`
 
-**Do not** set `rpc-username` or `rpc-password` in `settings.json` — the LinuxServer container handles this via env vars.
+### First-Time Setup
 
-### WebUI (Flood)
-
-We use [Flood for Transmission](https://github.com/johman10/flood-for-transmission) — a modern, dark-themed UI.
-
-**Installation location:** `/home/mircea/docker/transmission/flood-for-transmission/`
-
-This is mounted into the container at `/config/flood-for-transmission/` and set via:
-```yaml
-environment:
-  - TRANSMISSION_WEB_HOME=/config/flood-for-transmission/
-```
-
-**Note:** LinuxServer no longer bundles third-party UIs, so Flood is installed manually to the config directory where it persists across container updates.
-
-**To update Flood:**
+On first launch, qBittorrent generates a temporary password. Check the logs:
 ```bash
-cd /tmp
-curl -OL https://github.com/johman10/flood-for-transmission/releases/download/latest/flood-for-transmission.zip
-unzip flood-for-transmission.zip
-sudo rm -rf /home/mircea/docker/transmission/flood-for-transmission
-sudo mv flood-for-transmission /home/mircea/docker/transmission/
-sudo chown -R 1000:1000 /home/mircea/docker/transmission/flood-for-transmission
-rm flood-for-transmission.zip
-# Restart Transmission
-cd /home/mircea/compose-files/media-server && docker compose restart transmission
+docker logs qbittorrent
 ```
 
-**Alternative UIs:** To switch to a different UI, download it to the config directory and update `TRANSMISSION_WEB_HOME`:
-- [Combustion](https://github.com/Secretmapper/combustion)
-- [Transmission Web Control](https://github.com/ronggang/transmission-web-control)
+Then log in and set your permanent credentials via **Tools → Options → Web UI**.
+
+### Download Client Configuration in Sonarr/Radarr
+
+| Setting | Value |
+|---------|-------|
+| Host | `qbittorrent` |
+| Port | `8080` |
+| Username | (from .env) |
+| Password | (from .env) |
+| Category | `tv-sonarr` / `radarr` |
 
 ## Media Flow
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────────────┐
-│  Overseerr  │────▶│ Sonarr/     │────▶│    Transmission     │
+│  Overseerr  │────▶│ Sonarr/     │────▶│    qBittorrent      │
 │  (request)  │     │ Radarr      │     │    (download)       │
 └─────────────┘     └─────────────┘     └──────────┬──────────┘
                                                    │
@@ -126,7 +98,7 @@ cd /home/mircea/compose-files/media-server && docker compose restart transmissio
 ```
 /mnt/unas/media/                 # NAS mount (mapped to /data in containers)
 ├── torrents/
-│   ├── incomplete/              # Active downloads (Transmission)
+│   ├── incomplete/              # Active downloads (qBittorrent)
 │   ├── movies/                  # Completed movie torrents (seeding)
 │   └── tv/                      # Completed TV torrents (seeding)
 └── media/
@@ -136,21 +108,93 @@ cd /home/mircea/compose-files/media-server && docker compose restart transmissio
 
 ### How Downloads Are Organized
 
-Transmission doesn't have categories like qBittorrent. Instead, Sonarr/Radarr specify the download directory per-torrent:
+qBittorrent uses **categories** to organize downloads. Configure categories in Sonarr/Radarr:
 
-| App | Download Directory |
-|-----|-------------------|
-| Sonarr | `/data/torrents/tv` |
-| Radarr | `/data/torrents/movies` |
-
-Configure this in each app under **Settings → Download Clients → Transmission → Directory**.
+| App | Category | Save Path |
+|-----|----------|-----------|
+| Sonarr | `tv-sonarr` | `/data/torrents/tv` |
+| Radarr | `radarr` | `/data/torrents/movies` |
 
 ### Hardlinks
 
 Since `/data/torrents` and `/data/media` are on the same filesystem (NAS), Sonarr/Radarr use **hardlinks** when importing. This means:
 - Instant "moves" (no copying)
 - Files exist in both locations but use disk space only once
-- Transmission keeps seeding from `torrents/` while Plex serves from `media/`
+- qBittorrent keeps seeding from `torrents/` while Plex serves from `media/`
+
+## API Commands
+
+Useful API commands for managing the *arr stack. Source the `.env` file first to get API keys:
+
+```bash
+source /home/mircea/compose-files/.env
+```
+
+### Radarr
+
+**Search for all missing movies:**
+```bash
+curl -s "http://localhost:7878/api/v3/command" \
+  -H "X-Api-Key: $RADARR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "MissingMoviesSearch"}'
+```
+
+**Refresh all movies (rescan disk):**
+```bash
+curl -s "http://localhost:7878/api/v3/command" \
+  -H "X-Api-Key: $RADARR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "RefreshMovie"}'
+```
+
+**List queue (active downloads):**
+```bash
+curl -s "http://localhost:7878/api/v3/queue" \
+  -H "X-Api-Key: $RADARR_API_KEY" | jq '.records[] | {title: .title, status: .status}'
+```
+
+### Sonarr
+
+**Search for all missing episodes:**
+```bash
+curl -s "http://localhost:8989/api/v3/command" \
+  -H "X-Api-Key: $SONARR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "MissingEpisodeSearch"}'
+```
+
+**Refresh all series (rescan disk):**
+```bash
+curl -s "http://localhost:8989/api/v3/command" \
+  -H "X-Api-Key: $SONARR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "RefreshSeries"}'
+```
+
+**List queue (active downloads):**
+```bash
+curl -s "http://localhost:8989/api/v3/queue" \
+  -H "X-Api-Key: $SONARR_API_KEY" | jq '.records[] | {title: .title, status: .status}'
+```
+
+### Prowlarr
+
+**Test all indexers:**
+```bash
+curl -s "http://localhost:9696/api/v1/command" \
+  -H "X-Api-Key: $PROWLARR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "TestAllIndexers"}'
+```
+
+**Sync indexers to apps:**
+```bash
+curl -s "http://localhost:9696/api/v1/command" \
+  -H "X-Api-Key: $PROWLARR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "SyncIndexers"}'
+```
 
 ## Buildarr
 
@@ -161,7 +205,7 @@ Buildarr manages configuration for Sonarr and Prowlarr. See `buildarr/README.md`
 ## Accessing Services
 
 All services are accessible via Cloudflare Tunnel:
-- `transmission.home-server.me`
+- `qbittorrent.home-server.me`
 - `sonarr.home-server.me`
 - `radarr.home-server.me`
 - `prowlarr.home-server.me`
