@@ -5,11 +5,6 @@ services:
     env_file:
       - ../.env
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - USER=${TRANSMISSION_USER}
-      - PASS=${TRANSMISSION_PASS}
       - TRANSMISSION_WEB_HOME=/config/flood-for-transmission/
     volumes:
       - /home/mircea/docker/transmission:/config
@@ -27,10 +22,6 @@ services:
     container_name: sonarr
     env_file:
       - ../.env
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
     volumes:
       - /home/mircea/docker/sonarr:/config
       - /mnt/unas/media:/data
@@ -49,10 +40,6 @@ services:
     container_name: radarr
     env_file:
       - ../.env
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
     volumes:
       - /home/mircea/docker/radarr:/config
       - /mnt/unas/media:/data
@@ -72,11 +59,7 @@ services:
     env_file:
       - ../.env
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
       - UMASK=002
-      - ARGS=
     volumes:
       - /home/mircea/docker/prowlarr:/config
     ports:
@@ -95,12 +78,11 @@ services:
     env_file:
       - ../.env
     environment:
-      - LOG_LEVEL=${LOG_LEVEL:-info}
-      - LOG_HTML=${LOG_HTML:-false}
-      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
-      - TZ=${TZ}
+      - LOG_LEVEL=info
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=none
     ports:
-      - "${PORT:-8191}:8191"
+      - "8191:8191"
     networks:
       - media-net
     restart: unless-stopped
@@ -112,7 +94,6 @@ services:
       - ../.env
     environment:
       - LOG_LEVEL=debug
-      - TZ=${TZ}
     ports:
       - 5055:5055
     volumes:
@@ -131,11 +112,7 @@ services:
     env_file:
       - ../.env
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
       - VERSION=docker
-      - PLEX_CLAIM=${PLEX_CLAIM}
     volumes:
       - /home/mircea/docker/plex/config:/config
       - /mnt/unas/media:/data
@@ -158,10 +135,6 @@ services:
     container_name: bazarr
     env_file:
       - ../.env
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
     volumes:
       - /home/mircea/docker/bazarr:/config
       - /mnt/unas/media:/data
@@ -180,10 +153,6 @@ services:
     container_name: buildarr
     env_file:
       - ../.env
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
     volumes:
       - type: bind
         source: ./buildarr

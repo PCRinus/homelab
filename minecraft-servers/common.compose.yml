@@ -14,10 +14,8 @@ x-minecraft-base: &minecraft-base
     MAX_PLAYERS: "10"
     ICON: "https://img.icons8.com/?size=100&id=36055&format=png&color=000000"
     USE_AIKAR_FLAGS: "true"
-    TZ: ${TZ}
     DIFFICULTY: "2"
     SIMULATION_DISTANCE: "14"
-    CF_API_KEY: ${CF_API_KEY}
     OPS: |-
       PCRinus1
       Covaliu

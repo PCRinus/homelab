@@ -23,6 +23,23 @@ Self-hosted homelab running Docker in **rootless mode** on Linux. Services are o
 
 **Environment variables:** Use root-level `.env` file via `env_file: - ../.env`. Contains `PUID`, `PGID`, `TZ`, API keys. Never hardcode secrets.
 
+**Important:** When using `env_file`, do NOT re-declare those variables in the `environment` section with `${VAR}` interpolation. Docker Compose looks for interpolation variables in the **same directory** as the compose file, not in `env_file`. The `env_file` directive passes variables directly to the container.
+
+```yaml
+# ✅ Correct - env_file passes PUID, PGID, TZ directly to container
+env_file:
+  - ../.env
+environment:
+  - CUSTOM_VAR=value  # Only add vars NOT in .env
+
+# ❌ Wrong - ${PUID} won't resolve, container gets empty value
+env_file:
+  - ../.env
+environment:
+  - PUID=${PUID}
+  - PGID=${PGID}
+```
+
 **Volume pattern:**
 ```yaml
 volumes:
