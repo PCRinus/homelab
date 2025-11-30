@@ -106,12 +106,12 @@ resource "cloudflare_dns_record" "prowlarr" {
   comment = "Prowlarr indexer manager"
 }
 
-resource "cloudflare_dns_record" "transmission" {
+resource "cloudflare_dns_record" "qbittorrent" {
   content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
-  name    = "transmission"
+  name    = "qbittorrent"
   proxied = true
   ttl     = 1
   type    = "CNAME"
   zone_id = var.zone_id
-  comment = "Transmission torrent client"
+  comment = "qBittorrent torrent client"
 }

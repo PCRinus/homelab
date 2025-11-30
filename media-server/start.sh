@@ -1,34 +1,13 @@
 #!/bin/bash
 # Media Server Stack startup script
-# Prepares configuration and starts all containers
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_BASE="/home/mircea/docker"
-BACKUP_DIR="/home/mircea/docker/backups/transmission"
 
 echo "🎬 Starting Media Server Stack..."
 
 cd "${SCRIPT_DIR}"
-
-# --- Backup Transmission state before any changes ---
-echo "💾 Backing up Transmission state..."
-mkdir -p "${BACKUP_DIR}"
-BACKUP_NAME="transmission-$(date +%Y%m%d-%H%M%S).tar.gz"
-docker run --rm \
-  -v "${CONFIG_BASE}/transmission:/src:ro" \
-  -v "${BACKUP_DIR}:/backup" \
-  alpine sh -c "cd /src && tar czf /backup/${BACKUP_NAME} torrents/ resume/ 2>/dev/null || echo 'No torrent state to backup (first run?)'"
-echo "   Backup saved to: ${BACKUP_DIR}/${BACKUP_NAME}"
-
-# --- Transmission Setup ---
-# Copy settings using a temporary container to handle rootless Docker permissions
-echo "📋 Copying Transmission settings..."
-docker run --rm \
-  -v "${SCRIPT_DIR}/transmission/settings.json:/src/settings.json:ro" \
-  -v "${CONFIG_BASE}/transmission:/dest" \
-  alpine cp /src/settings.json /dest/settings.json
 
 # --- Pull and Start Containers ---
 echo "📦 Pulling latest images..."

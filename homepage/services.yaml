@@ -68,18 +68,18 @@
           key: {{HOMEPAGE_VAR_PROWLARR_API_KEY}}
           fields: ["numberOfGrabs", "numberOfQueries"]
 
-    - Transmission:
-        icon: transmission.png
-        href: http://homelab:9091
+    - qBittorrent:
+        icon: qbittorrent.png
+        href: http://homelab:8080
         description: Torrent Client
         server: my-docker
-        container: transmission
+        container: qbittorrent
         showStats: true
         widget:
-          type: transmission
-          url: http://transmission:9091
-          username: {{HOMEPAGE_VAR_TRANSMISSION_USER}}
-          password: {{HOMEPAGE_VAR_TRANSMISSION_PASS}}
+          type: qbittorrent
+          url: http://qbittorrent:8080
+          username: {{HOMEPAGE_VAR_QBITTORRENT_USER}}
+          password: {{HOMEPAGE_VAR_QBITTORRENT_PASS}}
           fields: ["leech", "download", "seed", "upload"]
 
     - Bazarr:

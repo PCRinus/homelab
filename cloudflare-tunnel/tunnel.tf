@@ -36,9 +36,9 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       originRequest = {}
       service       = "http://prowlarr:9696"
       }, {
-      hostname      = "transmission.home-server.me"
+      hostname      = "qbittorrent.home-server.me"
       originRequest = {}
-      service       = "http://transmission:9091"
+      service       = "http://qbittorrent:8080"
       }, {
       hostname      = "ha.home-server.me"
       originRequest = {}
