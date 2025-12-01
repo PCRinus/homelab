@@ -27,7 +27,7 @@ services:
     restart: unless-stopped
 
   qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:5.1.4
+    image: lscr.io/linuxserver/qbittorrent:20.04.1
     container_name: qbittorrent
     network_mode: service:gluetun  # Route all traffic through VPN
     depends_on:
