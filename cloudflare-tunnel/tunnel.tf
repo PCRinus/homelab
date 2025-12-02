@@ -58,7 +58,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       }, {
       hostname      = "gatus.home-server.me"
       originRequest = {}
-      service       = "http://gatus:8080"
+      service       = "http://gatus:8082"
       }, {
       originRequest = {}
       service       = "http_status:404"
