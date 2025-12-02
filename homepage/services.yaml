@@ -77,7 +77,7 @@
         showStats: true
         widget:
           type: qbittorrent
-          url: http://qbittorrent:8080
+          url: http://gluetun:8080 # Note: use gluetun hostname if behind VPN
           username: {{HOMEPAGE_VAR_QBITTORRENT_USER}}
           password: {{HOMEPAGE_VAR_QBITTORRENT_PASS}}
           fields: ["leech", "download", "seed", "upload"]
