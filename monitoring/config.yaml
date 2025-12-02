@@ -25,20 +25,9 @@ alerting:
 
 endpoints:
   # Media Server Stack
-  - name: Gluetun VPN
-    group: Media Server
-    url: "http://gluetun:8000/v1/publicip/ip"
-    interval: 60s
-    conditions:
-      - "[STATUS] == 200"
-      - "[RESPONSE_TIME] < 1000"
-    alerts:
-      - type: discord
-        description: "Gluetun VPN is down - torrents not protected!"
-
   - name: qBittorrent
     group: Media Server
-    url: "http://gluetun:8080"
+    url: "http://qbittorrent:8080"
     interval: 60s
     conditions:
       - "[STATUS] == 200"

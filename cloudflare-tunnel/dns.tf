@@ -113,7 +113,7 @@ resource "cloudflare_dns_record" "qbittorrent" {
   ttl     = 1
   type    = "CNAME"
   zone_id = var.zone_id
-  comment = "qBittorrent torrent client (via Gluetun VPN)"
+  comment = "qBittorrent torrent client (with built-in VPN)"
 }
 
 resource "cloudflare_dns_record" "bazarr" {

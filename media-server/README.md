@@ -6,8 +6,7 @@ This directory contains the Docker Compose configuration for the media server st
 
 | Service | Port | Description |
 |---------|------|-------------|
-| Gluetun | 8000 (control) | VPN client (ProtonVPN) - routes qBittorrent traffic |
-| qBittorrent | 8080 | Torrent client (via Gluetun VPN) |
+| qBittorrent | 8080 | Torrent client with built-in WireGuard VPN (Hotio image) |
 | Sonarr | 8989 | TV series management |
 | Radarr | 7878 | Movie management |
 | Prowlarr | 9696 | Indexer manager |
@@ -17,44 +16,40 @@ This directory contains the Docker Compose configuration for the media server st
 | FlareSolverr | 8191 | Cloudflare bypass for indexers |
 | Buildarr | - | Configuration management for *arr stack |
 
-## VPN Setup (Gluetun + ProtonVPN)
+## VPN Setup (Hotio qBittorrent + ProtonVPN)
 
-All torrent traffic is routed through ProtonVPN via Gluetun. This protects your IP and enables seeding via ProtonVPN's port forwarding.
+The Hotio qBittorrent image includes built-in WireGuard VPN support with automatic port forwarding for ProtonVPN.
 
 ### How It Works
 
-- **Gluetun** creates a VPN tunnel to ProtonVPN using WireGuard
-- **qBittorrent** uses `network_mode: service:gluetun` to route all traffic through the VPN
-- **Port forwarding** is automatic - Gluetun obtains a forwarded port from ProtonVPN
+- **qBittorrent (Hotio)** has WireGuard built-in - no separate VPN container needed
+- **`VPN_AUTO_PORT_FORWARD=true`** automatically retrieves and configures the forwarded port
+- **`VPN_HEALTHCHECK_ENABLED=true`** marks container unhealthy if VPN fails
 
 ### Configuration
 
-VPN credentials are in `.env`:
-- `WIREGUARD_PRIVATE_KEY` - Get from https://account.protonvpn.com/downloads (WireGuard config)
-- `SERVER_COUNTRIES` - Server location (default: Netherlands, must support P2P + port forwarding)
+WireGuard config file location: `/home/mircea/docker/qbittorrent/wireguard/wg0.conf`
+
+To set up:
+1. Go to https://account.protonvpn.com/downloads
+2. Select: WireGuard configuration, Platform: Router
+3. Enable: NAT-PMP (Port Forwarding)
+4. Choose a Netherlands P2P server
+5. Save the config to `/home/mircea/docker/qbittorrent/wireguard/wg0.conf`
 
 ### Checking VPN Status
 
 ```bash
-# Check if VPN is connected
-docker exec gluetun wget -qO- ifconfig.me
+# Check if VPN is connected (should show VPN IP, not home IP)
+docker exec qbittorrent curl -s ifconfig.me
 
-# Check forwarded port
-cat /home/mircea/docker/gluetun/forwarded_port
-
-# View Gluetun logs
-docker logs gluetun
+# View qBittorrent/VPN logs
+docker logs qbittorrent
 ```
 
 ### Port Forwarding for Seeding
 
-Gluetun automatically obtains a forwarded port from ProtonVPN and writes it to `/home/mircea/docker/gluetun/forwarded_port`. Configure qBittorrent to use this port:
-
-1. Check the port: `cat /home/mircea/docker/gluetun/forwarded_port`
-2. In qBittorrent: **Settings → Connection → Listening Port**
-3. Set the port to match the forwarded port
-
-**Note:** The forwarded port may change when Gluetun reconnects. For automation, consider using Gluetun's control server API.
+Port forwarding is **automatic** with `VPN_AUTO_PORT_FORWARD=true`. The Hotio image retrieves the forwarded port from ProtonVPN and configures qBittorrent automatically.
 
 ## Torrent Client Setup (qBittorrent)
 
@@ -66,7 +61,7 @@ qBittorrent stores its configuration in `/home/mircea/docker/qbittorrent/`. Sett
 - Download directory: `/data/torrents`
 - Incomplete directory: `/data/torrents/incomplete`
 - WebUI port: 8080
-- Peer port: (use forwarded port from Gluetun)
+- Peer port: (automatically configured by VPN_AUTO_PORT_FORWARD)
 
 ### Starting the Stack
 

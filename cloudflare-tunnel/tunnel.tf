@@ -38,7 +38,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       }, {
       hostname      = "qbittorrent.home-server.me"
       originRequest = {}
-      service       = "http://gluetun:8080"
+      service       = "http://qbittorrent:8080"
       }, {
       hostname      = "bazarr.home-server.me"
       originRequest = {}

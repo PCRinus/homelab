@@ -1,45 +1,32 @@
 services:
-  gluetun:
-    image: qmcgaw/gluetun:v3.40.3
-    container_name: gluetun
+  qbittorrent:
+    image: ghcr.io/hotio/qbittorrent:release-5.1.4
+    container_name: qbittorrent
+    hostname: qbittorrent.internal
     cap_add:
       - NET_ADMIN
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv6.conf.all.disable_ipv6=1
     devices:
       - /dev/net/tun:/dev/net/tun
     env_file:
       - ../.env
     environment:
-      - VPN_SERVICE_PROVIDER=protonvpn
-      - VPN_TYPE=wireguard
-      - VPN_PORT_FORWARDING=on
-      - VPN_PORT_FORWARDING_PROVIDER=protonvpn
-      - PORT_FORWARD_ONLY=on
-      - HTTP_CONTROL_SERVER_ADDRESS=:8000  # Enable control server for health checks
-    volumes:
-      - /home/mircea/docker/gluetun:/gluetun
-    ports:
-      - "8080:8080"      # qBittorrent WebUI (exposed through gluetun)
-      - "8000:8000"      # Gluetun control server (health checks)
-      - "6881:6881"      # BitTorrent TCP (exposed through gluetun)
-      - "6881:6881/udp"  # BitTorrent UDP (exposed through gluetun)
-    networks:
-      - media-net
-    restart: unless-stopped
-
-  qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:5.1.4
-    container_name: qbittorrent
-    network_mode: service:gluetun  # Route all traffic through VPN
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    env_file:
-      - ../.env
-    environment:
-      - WEBUI_PORT=8080
+      - WEBUI_PORTS=8080/tcp,8080/udp
+      - VPN_ENABLED=true
+      - VPN_CONF=wg0
+      - VPN_PROVIDER=proton
+      - VPN_LAN_NETWORK=192.168.1.0/24,172.18.0.0/16
+      - VPN_AUTO_PORT_FORWARD=true
+      - VPN_HEALTHCHECK_ENABLED=true
     volumes:
       - /home/mircea/docker/qbittorrent:/config
       - /mnt/unas/media:/data
+    ports:
+      - "8080:8080"      # qBittorrent WebUI
+    networks:
+      - media-net
     restart: unless-stopped
 
   sonarr:
@@ -98,7 +85,7 @@ services:
     restart: unless-stopped
 
   flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:v3.4.6
+    image: ghcr.io/flaresolverr/flaresolverr:v3.4.5
     container_name: flaresolverr
     env_file:
       - ../.env

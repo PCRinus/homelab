@@ -71,27 +71,16 @@
     - qBittorrent:
         icon: qbittorrent.png
         href: http://homelab:8080
-        description: Torrent Client
+        description: Torrent Client (VPN)
         server: my-docker
         container: qbittorrent
         showStats: true
         widget:
           type: qbittorrent
-          url: http://gluetun:8080 # Note: use gluetun hostname if behind VPN
+          url: http://qbittorrent:8080
           username: {{HOMEPAGE_VAR_QBITTORRENT_USER}}
           password: {{HOMEPAGE_VAR_QBITTORRENT_PASS}}
           fields: ["leech", "download", "seed", "upload"]
-
-    - Gluetun:
-        icon: gluetun.png
-        description: VPN Container
-        server: my-docker
-        container: gluetun
-        showStats: true
-        widget:
-          type: gluetun
-          url: http://gluetun:8000
-          fields: ["public_ip", "region", "country", "port_forwarded"]
 
     - Bazarr:
         icon: bazarr.png
