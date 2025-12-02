@@ -236,6 +236,38 @@ curl -s "http://localhost:9696/api/v1/command" \
   -d '{"name": "SyncIndexers"}'
 ```
 
+## Bazarr + Plex Integration
+
+Bazarr connects to Plex to trigger library refreshes after downloading subtitles. When authenticating via OAuth, Bazarr auto-selects a Plex connection URL, but it often picks the `.plex.direct` secure URL which doesn't work well from within the Docker network.
+
+### Initial Setup
+
+1. **Connect to Plex via OAuth** in Bazarr Settings → Plex
+2. **Fix the server URL** (see below) - required before libraries can be detected
+3. **Select Plex libraries** to monitor (e.g., "Movies", "TV Shows") in Settings → Plex
+
+### Fix: Use Internal Docker Hostname
+
+After connecting Bazarr to Plex via OAuth, manually update the server URL in the config:
+
+```bash
+# Stop Bazarr
+cd /home/mircea/compose-files/media-server && docker compose stop bazarr
+
+# Edit config (use container for rootless Docker permissions)
+docker run --rm -v /home/mircea/docker/bazarr/config:/config alpine \
+  sed -i 's|server_url: https://.*plex.direct:32400|server_url: http://plex:32400|' /config/config.yaml
+
+# Verify the change
+grep "server_url" /home/mircea/docker/bazarr/config/config.yaml
+# Should show: server_url: http://plex:32400
+
+# Start Bazarr
+docker compose start bazarr
+```
+
+This changes the connection from `https://*.plex.direct:32400` (external, can timeout) to `http://plex:32400` (internal Docker network, fast and reliable).
+
 ## Buildarr
 
 Buildarr manages configuration for Sonarr and Prowlarr. See `buildarr/README.md` for details.
