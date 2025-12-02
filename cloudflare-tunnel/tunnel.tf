@@ -56,7 +56,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       originRequest = {}
       service       = "http://dozzle:8080"
       }, {
-      hostname      = "uptime.home-server.me"
+      hostname      = "gatus.home-server.me"
       originRequest = {}
       service       = "http://gatus:8080"
       }, {

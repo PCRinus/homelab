@@ -56,14 +56,14 @@ resource "cloudflare_dns_record" "dozzle" {
   comment = "Dozzle Docker logs viewer"
 }
 
-resource "cloudflare_dns_record" "uptime" {
+resource "cloudflare_dns_record" "gatus" {
   content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
-  name    = "uptime"
+  name    = "gatus"
   proxied = true
   ttl     = 1
   type    = "CNAME"
   zone_id = var.zone_id
-  comment = "Uptime Kuma monitoring"
+  comment = "Gatus health monitoring"
 }
 
 resource "cloudflare_dns_record" "overseerr" {
