@@ -72,18 +72,32 @@ cd /home/mircea/compose-files/media-server
 
 ### Authentication
 
-WebUI credentials are set via environment variables in `.env`:
-- `QBITTORRENT_USER`
-- `QBITTORRENT_PASS`
+The Hotio image does **not** support environment variables for WebUI credentials (unlike linuxserver). On first launch, qBittorrent generates a temporary password:
 
-### First-Time Setup
-
-On first launch, qBittorrent generates a temporary password. Check the logs:
 ```bash
-docker logs qbittorrent
+docker logs qbittorrent | grep -i password
 ```
 
-Then log in and set your permanent credentials via **Tools → Options → Web UI**.
+Log in with the temporary password and set your permanent credentials via **Tools → Options → Web UI**.
+
+The `.env` variables `QBITTORRENT_USER` and `QBITTORRENT_PASS` are still used by Homepage widgets to authenticate with qBittorrent's API.
+
+### Hotio Image Directory Structure
+
+The Hotio qBittorrent image uses a different directory layout than linuxserver:
+
+```
+/home/mircea/docker/qbittorrent/     # Mounted as /config in container
+├── config/                          # qBittorrent app config
+│   ├── qBittorrent.conf             # Main config file
+│   └── categories.json              # Download categories
+├── data/                            # qBittorrent data
+│   └── BT_backup/                   # Torrent resume data (*.torrent + *.fastresume)
+└── wireguard/
+    └── wg0.conf                     # WireGuard VPN config
+```
+
+**Important:** If migrating from linuxserver, torrent resume data must be copied to `/config/data/BT_backup/` (not `/config/qBittorrent/BT_backup/`).
 
 ### Download Client Configuration in Sonarr/Radarr
 
