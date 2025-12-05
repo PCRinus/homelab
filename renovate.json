@@ -46,8 +46,8 @@
     ]
   },
   "github-actions": {
-    "fileMatch": [
-      "^\\.github/workflows/[^/]+\\.ya?ml$"
+    "managerFilePatterns": [
+      "/^\\.github/workflows/[^/]+\\.ya?ml$/"
     ]
   }
 }
