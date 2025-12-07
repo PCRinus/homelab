@@ -14,7 +14,8 @@ This directory contains the Docker Compose configuration for the media server st
 | Overseerr | 5055 | Media request system |
 | Plex | 32400 | Media server |
 | FlareSolverr | 8191 | Cloudflare bypass for indexers |
-| Buildarr | - | Configuration management for *arr stack |
+| Buildarr | - | Configuration management for *arr stack (basic settings) |
+| Configarr | - | Quality profiles & custom formats via TRaSH-Guides |
 
 ## VPN Setup (Hotio qBittorrent + ProtonVPN)
 
@@ -282,6 +283,74 @@ This changes the connection from `https://*.plex.direct:32400` (external, can ti
 Buildarr manages configuration for Sonarr and Prowlarr. See `buildarr/README.md` for details.
 
 **Note:** Download client configuration is managed manually in Sonarr/Radarr due to Buildarr plugin limitations with password serialization.
+
+## Configarr (Quality Profiles & Custom Formats)
+
+Configarr syncs quality profiles and custom formats from [TRaSH-Guides](https://trash-guides.info/) to Sonarr and Radarr. This enables 4K content, HDR preferences, and optimized release scoring.
+
+### What It Does
+
+- **Quality Profiles**: Pre-configured profiles like `WEB-1080p`, `WEB-2160p` (4K), `HD Bluray + WEB`, `UHD Bluray + WEB`
+- **Custom Formats**: Scoring rules for HDR, Dolby Vision, audio codecs, release groups, etc.
+- **Automatic Sync**: Pulls latest recommendations from TRaSH-Guides
+
+### Configuration
+
+- Config: `configarr/config.yml` - Defines which profiles/formats to sync
+- Secrets: `configarr/secrets.yml` - API keys (gitignored, see `.example`)
+
+### Usage
+
+Configarr is a **one-shot job**, not a daemon. Run it manually or via cron:
+
+```bash
+# Run once to sync profiles
+cd /home/mircea/compose-files/media-server
+docker compose run --rm configarr
+
+# Dry-run to see what would change (check logs)
+docker compose run --rm configarr
+```
+
+### Setting Up Secrets
+
+```bash
+# Copy example and fill in API keys
+cp configarr/secrets.yml.example configarr/secrets.yml
+
+# Get API keys from:
+# - Sonarr: Settings → General → API Key
+# - Radarr: Settings → General → API Key
+nano configarr/secrets.yml
+```
+
+### Included Profiles (TRaSH-Guides)
+
+| Profile | Quality | Use Case |
+|---------|---------|----------|
+| WEB-1080p | 1080p streaming | Standard TV shows |
+| WEB-2160p | 4K streaming | 4K TV shows (HDR/DV) |
+| HD Bluray + WEB | 1080p | Standard movies |
+| UHD Bluray + WEB | 4K | 4K movies (HDR/DV) |
+
+### Scheduling (Optional)
+
+Add to host crontab to run weekly:
+
+```bash
+# Edit crontab
+crontab -e
+
+# Add line (runs every Monday at 4 AM)
+0 4 * * 1 cd /home/mircea/compose-files/media-server && docker compose run --rm configarr >> /home/mircea/docker/configarr/configarr.log 2>&1
+```
+
+### Switching to 4K
+
+After running Configarr, new quality profiles will appear in Sonarr/Radarr:
+1. Go to **Movies/Series → Edit** (or bulk edit)
+2. Change **Quality Profile** to `UHD Bluray + WEB` (movies) or `WEB-2160p` (TV)
+3. Optionally trigger a search for upgrades
 
 ## Accessing Services
 

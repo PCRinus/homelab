@@ -1,0 +1,61 @@
+# Configarr Configuration
+# Syncs quality profiles and custom formats from TRaSH-Guides to Sonarr/Radarr
+# Documentation: https://configarr.de/docs/
+
+# ============================================================================
+# SONARR CONFIGURATION
+# ============================================================================
+sonarr:
+  main:
+    base_url: http://sonarr:8989
+    api_key: !secret SONARR_API_KEY
+
+    # Include TRaSH-Guides templates via Recyclarr format
+    include:
+      # Quality definitions for TV series
+      - template: sonarr-quality-definition-series
+
+      # WEB-1080p profile (good balance of quality and size)
+      - template: sonarr-v4-quality-profile-web-1080p
+      - template: sonarr-v4-custom-formats-web-1080p
+
+      # WEB-2160p profile (4K content)
+      - template: sonarr-v4-quality-profile-web-2160p
+      - template: sonarr-v4-custom-formats-web-2160p
+
+    # Custom format overrides (optional - uncomment to customize)
+    # custom_formats:
+    #   - trash_ids:
+    #       - 32b367365729d530ca1c124a0b180c64  # Bad Dual Groups
+    #     quality_profiles:
+    #       - name: WEB-1080p
+    #         score: -10000
+
+# ============================================================================
+# RADARR CONFIGURATION
+# ============================================================================
+radarr:
+  main:
+    base_url: http://radarr:7878
+    api_key: !secret RADARR_API_KEY
+
+    # Include TRaSH-Guides templates via Recyclarr format
+    include:
+      # Quality definitions for movies
+      - template: radarr-quality-definition-movie
+
+      # HD Bluray + WEB profile (1080p - balanced quality)
+      - template: radarr-quality-profile-hd-bluray-web
+      - template: radarr-custom-formats-hd-bluray-web
+
+      # UHD Bluray + WEB profile (4K content)
+      - template: radarr-quality-profile-uhd-bluray-web
+      - template: radarr-custom-formats-uhd-bluray-web
+
+    # Custom format overrides (optional - uncomment to customize)
+    # custom_formats:
+    #   - trash_ids:
+    #       - b6832f586342ef70d9c128d40c07b872  # Bad Dual Groups
+    #     quality_profiles:
+    #       - name: UHD Bluray + WEB
+    #         score: -10000

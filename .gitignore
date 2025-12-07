@@ -4,6 +4,9 @@
 # Buildarr secrets
 buildarr-secrets.yml
 
+# Configarr secrets
+media-server/configarr/secrets.yml
+
 # Home Assistant secrets
 home-assistant/secrets.yaml
 

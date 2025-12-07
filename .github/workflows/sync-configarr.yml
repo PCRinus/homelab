@@ -1,0 +1,36 @@
+name: Sync TRaSH-Guides (Configarr)
+
+on:
+  # Run weekly on Monday at 4 AM UTC
+  schedule:
+    - cron: '0 4 * * 1'
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+          version: latest
+
+      - name: Run Configarr sync
+        uses: appleboy/ssh-action@v1
+        with:
+          host: homelab
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command_timeout: 10m
+          script: |
+            cd compose-files/media-server
+            echo "Starting Configarr TRaSH-Guides sync..."
+            docker compose run --rm configarr 2>&1 | tee /tmp/configarr-$(date +%Y%m%d).log
+            echo "Configarr sync completed"
