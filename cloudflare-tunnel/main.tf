@@ -46,6 +46,21 @@ variable "domain" {
   default     = "home-server.me"
 }
 
+# -----------------------------------------------------------------------------
+# Google OAuth Variables (for Cloudflare Access)
+# -----------------------------------------------------------------------------
+variable "google_oauth_client_id" {
+  description = "Google OAuth Client ID for Cloudflare Access"
+  type        = string
+  sensitive   = true
+}
+
+variable "google_oauth_client_secret" {
+  description = "Google OAuth Client Secret for Cloudflare Access"
+  type        = string
+  sensitive   = true
+}
+
 resource "cloudflare_dns_record" "www" {
   zone_id = var.zone_id
   name    = "www"
