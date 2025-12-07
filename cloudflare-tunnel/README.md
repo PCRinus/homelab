@@ -309,9 +309,26 @@ The Google Identity Provider is configured in `access.tf`. OAuth credentials are
 - `google_oauth_client_secret` - Variable in `terraform.tfvars`
 
 **Google Cloud Console Setup:**
-1. Create OAuth 2.0 Client ID (Web application)
-2. Authorized redirect URI: `https://pcrinus.cloudflareaccess.com/cdn-cgi/access/callback`
-3. Copy Client ID and Client Secret to `terraform.tfvars`
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Create a new project (or use existing)
+3. Navigate to **APIs & Services** → **OAuth consent screen**
+   - Select **External** user type
+   - Fill in app name, support email, and developer email
+   - **Scopes**: Leave as default (no additional scopes needed)
+     - Cloudflare Access only needs: `openid`, `email`, `profile` (included by default)
+   - Add yourself as a **Test user**
+   - Leave publishing status as **Testing** (limits to approved test users only)
+4. Navigate to **APIs & Services** → **Credentials**
+   - Click **+ Create Credentials** → **OAuth client ID**
+   - Application type: **Web application**
+   - Name: `Cloudflare Access`
+   - Authorized redirect URI: `https://pcrinus.cloudflareaccess.com/cdn-cgi/access/callback`
+5. Copy **Client ID** and **Client Secret** to `terraform.tfvars`
+
+> **Note on Scopes**: Cloudflare Access only requires basic OpenID Connect scopes (`openid`, `email`, `profile`) which are included by default. You don't need to add any additional scopes in the OAuth consent screen.
+
+> **Note on Publishing Status**: Keep the app in "Testing" mode. This means only explicitly added test users can authenticate — acting as an additional security layer. Users will see a "Google hasn't verified this app" warning on first login, which they can click through.
 
 ### Adding a New Protected Service
 
