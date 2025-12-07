@@ -1,7 +1,7 @@
 services:
   dozzle:
     container_name: dozzle
-    image: amir20/dozzle:v8.14.9
+    image: amir20/dozzle:v8.14.10
     volumes:
       - /run/user/1000/docker.sock:/var/run/docker.sock
     ports:
