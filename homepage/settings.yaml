@@ -4,6 +4,11 @@
 title: Homelab Dashboard
 
 layout:
+  # Bookmarks at the top
+  Quick Links:
+    style: row
+    columns: 4
+  # Services below
   Media Management:
     style: row
     columns: 4

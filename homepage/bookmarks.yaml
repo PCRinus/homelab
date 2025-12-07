@@ -2,8 +2,14 @@
 # For configuration options and examples, please see:
 # https://gethomepage.dev/configs/bookmarks
 
-- Links:
+- Quick Links:
     - Homelab Repo:
         - abbr: GH
           icon: github.png
           href: https://github.com/PCRinus/homelab
+
+    - FileList:
+        - abbr: FL
+          icon: https://filelist.io/favicon.ico
+          href: https://filelist.io/browse.php
+          description: Private Tracker
