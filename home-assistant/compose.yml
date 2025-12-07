@@ -6,10 +6,8 @@ services:
     dns:
       - 1.1.1.1
       - 8.8.8.8
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Bucharest
+    env_file:
+      - ../.env
     volumes:
       # Persistent data (databases, cache, storage) stays in ~/docker
       - /home/mircea/docker/home-assistant:/config
