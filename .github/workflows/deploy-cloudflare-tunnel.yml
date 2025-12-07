@@ -37,6 +37,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
           TF_VAR_zone_id: ${{ vars.CLOUDFLARE_ZONE_ID }}
           TF_VAR_account_id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          TF_VAR_google_oauth_client_id: ${{ vars.CLOUDFLARE_GOOGLE_OAUTH_CLIENT_ID }}
+          TF_VAR_google_oauth_client_secret: ${{ secrets.CLOUDFLARE_GOOGLE_OAUTH_CLIENT_SECRET }}
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
@@ -46,6 +48,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
           TF_VAR_zone_id: ${{ vars.CLOUDFLARE_ZONE_ID }}
           TF_VAR_account_id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          TF_VAR_google_oauth_client_id: ${{ vars.CLOUDFLARE_GOOGLE_OAUTH_CLIENT_ID }}
+          TF_VAR_google_oauth_client_secret: ${{ secrets.CLOUDFLARE_GOOGLE_OAUTH_CLIENT_SECRET }}
 
   deploy:
     name: Deploy Docker Compose
