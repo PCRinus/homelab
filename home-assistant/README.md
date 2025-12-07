@@ -42,6 +42,44 @@ This setup uses a **hybrid approach**:
   - Cache and storage (`.storage/`, `.cache/`)
   - Runtime files
 
+## Installing HACS (Home Assistant Community Store)
+
+HACS enables installing custom integrations, themes, and frontend cards (like Mushroom Cards).
+
+### Installation
+
+1. Run the HACS installer inside the container:
+   ```bash
+   docker exec -it homeassistant bash -c "wget -O - https://get.hacs.xyz | bash -"
+   ```
+
+2. Restart Home Assistant:
+   ```bash
+   docker compose restart
+   ```
+
+3. In Home Assistant UI:
+   - Go to **Settings** → **Devices & Services** → **Add Integration**
+   - Search for **HACS**
+   - Follow the GitHub authorization flow
+
+### Recommended HACS Add-ons
+
+After HACS is configured, install these from **HACS** → **Frontend**:
+
+| Add-on | Purpose |
+|--------|---------|
+| **Mushroom Cards** | Modern, clean card designs |
+| **Button Card** | Highly customizable buttons |
+| **card-mod** | CSS styling for any card |
+| **layout-card** | Better control over card placement |
+
+### Notes
+
+- HACS installs to `/config/custom_components/hacs/` which persists in `~/docker/home-assistant`
+- HACS Supervisor add-ons won't work (requires Home Assistant OS), but frontend cards and integrations work fine
+- The container needs DNS access to download from GitHub (already configured in `compose.yml`)
+
 ## Notes
 
 - `configuration.yaml` is mounted **read-only** - edit it in this repo
