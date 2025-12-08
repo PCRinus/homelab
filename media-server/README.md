@@ -204,6 +204,14 @@ curl -s "http://localhost:7878/api/v3/queue" \
   -H "X-Api-Key: $RADARR_API_KEY" | jq '.records[] | {title: .title, status: .status}'
 ```
 
+**Search for upgrades (cutoff unmet):**
+```bash
+curl -s "http://localhost:7878/api/v3/command" \
+  -H "X-Api-Key: $RADARR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "CutoffUnmetMoviesSearch"}'
+```
+
 ### Sonarr
 
 **Search for all missing episodes:**
@@ -351,6 +359,24 @@ After running Configarr, new quality profiles will appear in Sonarr/Radarr:
 1. Go to **Movies/Series → Edit** (or bulk edit)
 2. Change **Quality Profile** to `UHD Bluray + WEB` (movies) or `WEB-2160p` (TV)
 3. Optionally trigger a search for upgrades
+
+### Upgrading Quality Profiles
+
+#### Via Web UI (Manual)
+
+**Bulk update multiple movies/shows:**
+1. **Movies** (or **Series**) → Select items using checkboxes
+2. Click **Edit** in the bottom toolbar
+3. Change **Quality Profile** → Select desired profile
+4. Click **Save**
+
+**Trigger upgrade search:**
+1. **Wanted → Cutoff Unmet** - shows everything below target quality
+2. Select items → **Search Selected**
+
+#### Via API
+
+See [API Commands](#api-commands) section for `CutoffUnmetMoviesSearch`.
 
 ## Accessing Services
 
