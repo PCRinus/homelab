@@ -142,6 +142,25 @@ services:
       - media-net
     restart: unless-stopped
 
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:10.10.6
+    container_name: jellyfin
+    env_file:
+      - ../.env
+    volumes:
+      - /home/mircea/docker/jellyfin:/config
+      - /mnt/unas/media:/data
+    ports:
+      - "8096:8096"     # Jellyfin Web UI
+      - "7359:7359/udp" # Jellyfin auto-discovery
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
+    networks:
+      - media-net
+    restart: unless-stopped
+
   bazarr:
     image: ghcr.io/hotio/bazarr:release-1.5.3
     container_name: bazarr

@@ -20,6 +20,10 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       originRequest = {}
       service       = "http://plex:32400"
       }, {
+      hostname      = "jellyfin.home-server.me"
+      originRequest = {}
+      service       = "http://jellyfin:8096"
+      }, {
       hostname      = "overseerr.home-server.me"
       originRequest = {}
       service       = "http://overseerr:5055"

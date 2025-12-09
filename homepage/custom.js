@@ -5,6 +5,7 @@
     const urlMappings = {
       // Media Management
       'homelab:32400': 'plex.home-server.me',
+      'homelab:8096': 'jellyfin.home-server.me',
       'homelab:5055': 'overseerr.home-server.me',
       'homelab:8989': 'sonarr.home-server.me',
       'homelab:7878': 'radarr.home-server.me',
