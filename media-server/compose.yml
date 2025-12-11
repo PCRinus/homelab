@@ -143,7 +143,7 @@ services:
     restart: unless-stopped
 
   jellyfin:
-    image: lscr.io/linuxserver/jellyfin:10.10.6
+    image: lscr.io/linuxserver/jellyfin:2021.12.16
     container_name: jellyfin
     env_file:
       - ../.env
