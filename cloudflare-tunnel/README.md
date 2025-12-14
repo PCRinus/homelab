@@ -12,6 +12,7 @@ cloudflare-tunnel/
 ├── dns.tf                  # DNS records
 ├── tunnel.tf               # Zero Trust tunnel configuration
 ├── access.tf               # Zero Trust Access configuration (SSO/authentication)
+├── waf.tf                  # WAF custom rules and security settings
 ├── r2.tf                   # R2 bucket for Terraform state
 ├── terraform.tfvars        # Variable values (gitignored - contains sensitive data)
 └── README.md              # This file
@@ -184,6 +185,13 @@ domain     = "home-server.me"
 - TLS 1.3: Enabled
 - Automatic HTTPS Rewrites: Enabled
 - SSL Mode: Strict
+
+### WAF & Security (waf.tf)
+- Custom WAF rules for traffic filtering
+- Country allowlist (RO, GR, RS, HU only)
+- Threat score challenges
+- Bad bot/scanner blocking
+- Cache bypass rules for Plex streaming
 
 ### Zero Trust Access
 - **Identity Provider**: Google OAuth
@@ -390,6 +398,100 @@ resource "cloudflare_zero_trust_access_application" "myservice_bypass" {
 - `terraform.tfvars` - Contains zone/account IDs
 - `tunnel-token` - Tunnel authentication token
 - `.terraform/` - Provider binaries
+
+## 🛡️ WAF (Web Application Firewall)
+
+WAF custom rules provide an additional security layer by filtering malicious traffic before it reaches your services. Configuration is in `waf.tf`.
+
+### Current Rules (Free Plan: 5 custom rules max)
+
+| Rule | Action | Description |
+|------|--------|-------------|
+| Allow only allowed countries | Block | Block traffic from outside RO, GR, RS, HU |
+| Challenge high threat score | Managed Challenge | Challenge IPs with threat score > 40 |
+| Block bad user agents | Block | Block scanners (sqlmap, nikto, nmap, etc.) |
+
+### Security Settings
+
+| Setting | Value | Description |
+|---------|-------|-------------|
+| Security Level | Medium | Balance between security and false positives |
+| Browser Integrity Check | On | Block requests with suspicious headers |
+| Email Obfuscation | On | Protect email addresses from scrapers |
+| Cache Level | No Query String | Required for Plex iOS Direct Play |
+
+### Design Decisions
+
+**Country Allowlist (not blocklist):**
+- Only traffic from Romania, Greece, Serbia, and Hungary is allowed
+- This is stricter than blocking specific countries
+- Blocks all bots (Googlebot, Bingbot, etc.) - intentional since this is a private homelab
+- Add more countries when traveling by editing `waf.tf`
+
+**No bot exceptions:**
+- Search engine bots are blocked (site won't be indexed)
+- This is intentional for a private homelab
+
+### Actions Available
+
+| Action | Description |
+|--------|-------------|
+| `block` | Immediately block the request |
+| `managed_challenge` | Smart challenge (JS or CAPTCHA as needed) |
+| `js_challenge` | JavaScript challenge only |
+| `challenge` | CAPTCHA challenge (legacy) |
+| `skip` | Skip remaining rules in the ruleset |
+
+### Expression Fields
+
+Common fields for building rule expressions:
+
+```
+ip.src.country          # ISO country code (e.g., "US", "RO")
+cf.threat_score         # Cloudflare threat score (0-100, higher = worse)
+cf.client.bot           # True if verified bot (Googlebot, Bingbot, etc.)
+http.user_agent         # User-Agent header
+http.host               # Hostname
+http.request.uri.path   # Request path
+```
+
+### Customizing Country Allowlist
+
+Edit `waf.tf` to adjust allowed countries:
+
+```hcl
+# Current allowlist
+expression = "(not ip.src.country in {\"RO\" \"GR\" \"RS\" \"HU\"})"
+
+# Add Germany for travel
+expression = "(not ip.src.country in {\"RO\" \"GR\" \"RS\" \"HU\" \"DE\"})"
+
+# Allow specific service globally (e.g., Plex)
+expression = "(not ip.src.country in {\"RO\" \"GR\" \"RS\" \"HU\"}) and (not http.host eq \"plex.home-server.me\")"
+```
+
+### What WAF Does NOT Affect
+
+| Traffic Type | Path | WAF Applies? |
+|--------------|------|--------------|
+| Torrent peers (seeding/leeching) | ProtonVPN tunnel | ❌ No |
+| LAN access (`192.168.1.x`) | Local network | ❌ No |
+| Web services via `*.home-server.me` | Cloudflare tunnel | ✅ Yes |
+
+Your torrent seeding works globally because it goes through ProtonVPN, not Cloudflare.
+
+### Cache Rules (For Plex Streaming)
+
+The `waf.tf` file also includes cache bypass rules required for Plex streaming compatibility, especially for iOS Direct Play seeking. This prevents Cloudflare from caching media requests.
+
+Reference: [How to set up free, secure, high-quality remote access for Plex](https://mythofechelon.co.uk/blog/2024/1/7/how-to-set-up-free-secure-high-quality-remote-access-for-plex)
+
+### Monitoring WAF Activity
+
+View blocked requests in Cloudflare Dashboard:
+1. Go to [dash.cloudflare.com](https://dash.cloudflare.com)
+2. Select your zone (home-server.me)
+3. Navigate to **Security** → **Events**
 
 > **Note**: `terraform.tfstate` is stored remotely in R2, not locally.
 
