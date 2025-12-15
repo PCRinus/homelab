@@ -149,7 +149,7 @@ services:
     restart: unless-stopped
 
   jellyfin:
-    image: lscr.io/linuxserver/jellyfin:10.11.4
+    image: lscr.io/linuxserver/jellyfin:10.11.5
     container_name: jellyfin
     env_file:
       - ../.env
@@ -192,7 +192,7 @@ services:
     restart: unless-stopped
 
   tautulli:
-    image: lscr.io/linuxserver/tautulli:2.15.1
+    image: lscr.io/linuxserver/tautulli:2.16.0
     container_name: tautulli
     env_file:
       - ../.env
