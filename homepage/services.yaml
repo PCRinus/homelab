@@ -108,6 +108,19 @@
           key: {{HOMEPAGE_VAR_BAZARR_API_KEY}}
           fields: ["missingEpisodes", "missingMovies"]
 
+    - Tautulli:
+        icon: tautulli.png
+        href: http://homelab:8181
+        description: Plex Statistics & Monitoring
+        server: my-docker
+        container: tautulli
+        showStats: true
+        widget:
+          type: tautulli
+          url: http://tautulli:8181
+          key: {{HOMEPAGE_VAR_TAUTULLI_API_KEY}}
+          fields: ["watching", "stream_count", "total_plays"]
+
     - FlareSolverr:
         icon: flaresolverr.png
         href: http://homelab:8191

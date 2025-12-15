@@ -36,6 +36,17 @@ endpoints:
       - type: discord
         description: "qBittorrent is down or not responding"
 
+  - name: Tautulli
+    group: Media Server
+    url: "http://tautulli:8181"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 1000"
+    alerts:
+      - type: discord
+        description: "Tautulli is down or not responding"
+
   - name: Sonarr
     group: Media Server
     url: "http://sonarr:8989/api/v3/system/status"

@@ -7,9 +7,11 @@
         "Configarr",
         "Dozzle",
         "flaresolverr",
+        "HEALTHCHECK",
         "homeassistant",
         "hotio",
         "jellyfin",
+        "lscr",
         "mircea",
         "overseerr",
         "PGID",
@@ -18,6 +20,8 @@
         "qbittorrent",
         "radarr",
         "sonarr",
+        "sysctls",
+        "tautulli",
         "unas"
     ]
 }

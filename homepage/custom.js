@@ -12,6 +12,7 @@
       'homelab:9696': 'prowlarr.home-server.me',
       'homelab:8080': 'qbittorrent.home-server.me',
       'homelab:6767': 'bazarr.home-server.me',
+      'homelab:8181': 'tautulli.home-server.me',
       'homelab:8191': 'flaresolverr.home-server.me',
       // Infrastructure
       'homelab:8081': 'dozzle.home-server.me',

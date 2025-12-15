@@ -48,6 +48,10 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       originRequest = {}
       service       = "http://bazarr:6767"
       }, {
+      hostname      = "tautulli.home-server.me"
+      originRequest = {}
+      service       = "http://tautulli:8181"
+      }, {
       hostname      = "flaresolverr.home-server.me"
       originRequest = {}
       service       = "http://flaresolverr:8191"
