@@ -125,6 +125,12 @@ services:
       - ../.env
     environment:
       - VERSION=docker
+    devices:
+      - /dev/dri:/dev/dri  # AMD Vega GPU for VA-API hardware acceleration
+    device_cgroup_rules:
+      - 'c 226:* rwm'  # Allow access to DRI devices (render nodes)
+    group_add:
+      - "993"  # render group GID for GPU access
     volumes:
       - /home/mircea/docker/plex/config:/config
       - /mnt/unas/media:/data
