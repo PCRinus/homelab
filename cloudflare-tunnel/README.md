@@ -25,6 +25,28 @@ cloudflare-tunnel/
 - **Docker & Docker Compose** (for running the tunnel)
 - **cf-terraforming** (installed at `/usr/local/bin/cf-terraforming`)
 
+### System Requirements
+
+Cloudflared requires increased UDP buffer sizes for optimal performance. This has been configured system-wide:
+
+```bash
+# Already configured in /etc/sysctl.d/99-cloudflared.conf
+net.core.rmem_max=7500000
+net.core.wmem_max=7500000
+```
+
+These settings:
+- Increase UDP receive/send buffer max from 416KB to 7.5MB
+- Eliminate QUIC buffer warnings in cloudflared logs
+- Are system-wide (affect all applications, but only used when explicitly requested)
+- Persist across reboots
+- Are safe and commonly used for high-throughput network applications
+
+If you need to reapply these settings:
+```bash
+sudo sysctl -p /etc/sysctl.d/99-cloudflared.conf
+```
+
 ### Environment Variables
 Set these before running Terraform commands:
 

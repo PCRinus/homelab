@@ -21,7 +21,9 @@ services:
       - TUNNEL_METRICS=0.0.0.0:20241
     volumes:
       - ./tunnel-token:/etc/cloudflared/token:ro
-    command: ["tunnel", "run", "--token-file", "/etc/cloudflared/token"]
+    # Using HTTP/2 instead of QUIC (default) for better stability on this network
+    # QUIC (UDP-based) experienced frequent connection timeouts, while HTTP/2 (TCP-based) is rock solid
+    command: ["tunnel", "run", "--token-file", "/etc/cloudflared/token", "--protocol", "http2"]
     healthcheck:
       # Check if the Cloudflare Tunnel is healthy by querying the metrics endpoint
       # https://github.com/cloudflare/cloudflared/pull/1135#issuecomment-2495472654
@@ -32,6 +34,8 @@ services:
       retries: 3
       start_period: 30s
   
+  # Autoheal monitors cloudflared's health and automatically restarts it if unhealthy
+  # Scoped to only watch containers with autoheal=true label
   autoheal:
     image: willfarrell/autoheal:1.2.0
     container_name: cloudflare-autoheal
