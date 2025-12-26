@@ -3,6 +3,8 @@ services:
     image: cloudflare/cloudflared:2025.11.1
     container_name: cloudflared
     restart: unless-stopped
+    labels:
+      - autoheal=true
     networks:
       - media-net
       - homepage_default
@@ -28,7 +30,18 @@ services:
       interval: 30s
       timeout: 30s
       retries: 3
-      start_period: 10s
+      start_period: 30s
+  
+  autoheal:
+    image: willfarrell/autoheal:1.2.0
+    container_name: cloudflare-autoheal
+    restart: unless-stopped
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=autoheal
+      - AUTOHEAL_INTERVAL=60
+      - AUTOHEAL_START_PERIOD=300
+    volumes:
+      - /run/user/1000/docker.sock:/var/run/docker.sock:ro
 
 networks:
   media-net:
