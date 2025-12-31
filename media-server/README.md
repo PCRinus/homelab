@@ -22,6 +22,30 @@ This directory contains the Docker Compose configuration for the media server st
 
 Jellyfin uses VA-API for hardware-accelerated transcoding on the AMD Ryzen 5 PRO 2400GE's integrated Radeon Vega graphics.
 
+### NAS Mount (NFS)
+
+The media stack requires `/mnt/unas/media` to be mounted from the NAS before starting services.
+
+**fstab entry** (`/etc/fstab`):
+```
+192.168.1.30:/var/nfs/shared/Media  /mnt/unas/media  nfs  defaults,_netdev,x-systemd.automount,x-systemd.mount-timeout=30,rw,hard  0  0
+```
+
+The `x-systemd.automount` option creates an automount unit that mounts the NFS share on first access, avoiding race conditions with network initialization at boot time.
+
+**Manual mount** (if needed after reboot):
+```bash
+sudo mount -a
+# Or specifically:
+sudo mount /mnt/unas/media
+```
+
+**Verify mount**:
+```bash
+df -h | grep unas
+# Should show: 192.168.1.30:/var/nfs/shared/Media mounted at /mnt/unas/media
+```
+
 ### Host Setup (Rootless Docker)
 
 Rootless Docker requires the render device to be world-readable since GID mapping doesn't preserve group permissions inside containers.
