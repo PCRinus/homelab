@@ -28,6 +28,12 @@ services:
     networks:
       - media-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080 > /dev/null && curl -sf --max-time 10 https://ifconfig.me > /dev/null || exit 1"]
+      interval: 2m
+      timeout: 15s
+      retries: 3
+      start_period: 1m
 
   sonarr:
     image: ghcr.io/hotio/sonarr:release-4.0.16.2944

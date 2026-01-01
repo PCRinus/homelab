@@ -31,10 +31,11 @@ endpoints:
     interval: 60s
     conditions:
       - "[STATUS] == 200"
+      - "[BODY] != ''"
       - "[RESPONSE_TIME] < 1000"
     alerts:
       - type: discord
-        description: "qBittorrent is down or not responding"
+        description: "qBittorrent is down, not responding, or VPN connection failed"
 
   - name: Tautulli
     group: Media Server
