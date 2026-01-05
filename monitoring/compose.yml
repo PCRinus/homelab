@@ -8,7 +8,7 @@ services:
       - 8081:8080
 
   gatus:
-    image: twinproduction/gatus:v5.33.1
+    image: twinproduction/gatus:v5.34.0
     container_name: gatus
     ports:
       - 8082:8080
