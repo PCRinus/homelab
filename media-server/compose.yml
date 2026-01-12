@@ -232,7 +232,7 @@ services:
   # Run manually: docker compose run --rm configarr
   # Or scheduled via cron on host
   configarr:
-    image: ghcr.io/raydak-labs/configarr:1.19.0
+    image: ghcr.io/raydak-labs/configarr:1.20.0
     container_name: configarr
     env_file:
       - ../.env
