@@ -155,7 +155,7 @@ services:
     restart: unless-stopped
 
   jellyfin:
-    image: lscr.io/linuxserver/jellyfin:10.11.5
+    image: lscr.io/linuxserver/jellyfin:10.11.6
     container_name: jellyfin
     env_file:
       - ../.env
