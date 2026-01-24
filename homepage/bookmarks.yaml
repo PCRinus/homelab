@@ -13,3 +13,9 @@
           icon: https://filelist.io/favicon.ico
           href: https://filelist.io/browse.php
           description: Private Tracker
+
+    - SpeedApp:
+        - abbr: SA
+          icon: https://speedapp.io/favicon.ico
+          href: https://speedapp.io
+          description: Private Tracker
