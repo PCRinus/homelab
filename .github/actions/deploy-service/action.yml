@@ -12,8 +12,7 @@ inputs:
     description: 'Custom deployment script'
     required: false
     default: |
-      docker compose pull
-      docker compose up -d
+      docker compose up -d --pull always --force-recreate
   ts_oauth_client_id:
     description: 'Tailscale OAuth client ID'
     required: true
