@@ -43,6 +43,8 @@ runs:
         host: homelab
         username: ${{ inputs.ssh_user }}
         key: ${{ inputs.ssh_private_key }}
+        timeout: 30m
+        command_timeout: 25m
         script: |
           cd compose-files/${{ inputs.service_path }}
-          ${{ inputs.deploy_script }}
+          ${{ inputs.deploy_script }} --quiet 2>&1 | tail -20
