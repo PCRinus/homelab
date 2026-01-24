@@ -6,6 +6,13 @@ services:
       - /run/user/1000/docker.sock:/var/run/docker.sock
     ports:
       - 8081:8080
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/dozzle", "healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   gatus:
     image: ghcr.io/twin/gatus:v5.34.0
@@ -34,6 +41,12 @@ services:
         max-file: "3"
     labels:
       - "dozzle.enable=true"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 networks:
   media-net:

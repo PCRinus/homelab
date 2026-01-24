@@ -33,3 +33,9 @@ services:
         dungeons-and-taverns
     volumes:
       - /home/mircea/docker/minecraft-server-world-generation:/data
+    healthcheck:
+      test: ["CMD", "mc-health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 180s

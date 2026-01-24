@@ -18,3 +18,9 @@ services:
       - ./scenes.yaml:/config/scenes.yaml
       - ./secrets.yaml:/config/secrets.yaml
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123/api/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s

@@ -52,6 +52,12 @@ services:
     networks:
       - media-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8989/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   radarr:
     image: ghcr.io/hotio/radarr:release-6.0.4.10291
@@ -70,6 +76,12 @@ services:
     networks:
       - media-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7878/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   prowlarr:
     image: ghcr.io/hotio/prowlarr:release-2.3.0.5236
@@ -89,6 +101,12 @@ services:
     networks:
       - media-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9696/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:v3.4.6
@@ -104,6 +122,12 @@ services:
     networks:
       - media-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8191/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   overseerr:
     image: ghcr.io/sct/overseerr:develop
@@ -123,6 +147,12 @@ services:
     networks:
       - media-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5055/api/v1/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   plex:
     image: lscr.io/linuxserver/plex:1.42.2
@@ -153,6 +183,12 @@ services:
     networks:
       - media-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:32400/identity"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
 
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:10.11.6
@@ -178,6 +214,12 @@ services:
     networks:
       - media-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
 
   bazarr:
     image: ghcr.io/hotio/bazarr:release-1.5.3
@@ -196,6 +238,12 @@ services:
     networks:
       - media-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6767/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   tautulli:
     image: lscr.io/linuxserver/tautulli:2.16.0
@@ -213,6 +261,12 @@ services:
     networks:
       - media-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8181/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   buildarr:
     image: callum027/buildarr:0.7.8
