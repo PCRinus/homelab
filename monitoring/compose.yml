@@ -41,12 +41,6 @@ services:
         max-file: "3"
     labels:
       - "dozzle.enable=true"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
 networks:
   media-net:
