@@ -1,0 +1,323 @@
+#!/bin/bash
+# ===========================================
+# NAS Mount Setup
+# ===========================================
+# Configures a persistent NAS mount via /etc/fstab.
+# Supports NFS and SMB (CIFS) shares.
+#
+# Can be run standalone or called from init.sh.
+#
+# Usage:
+#   ./scripts/setup-nas-mount.sh                      # Interactive
+#   ./scripts/setup-nas-mount.sh /mnt/unas/media      # Pre-set mount point
+# ===========================================
+
+set -e
+
+# --- Colors ---
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+# Accept mount point as argument (from init.sh) or ask
+MOUNT_POINT="${1:-}"
+
+echo -e "${BLUE}${BOLD}========================================${NC}"
+echo -e "${BLUE}${BOLD}  NAS Mount Setup${NC}"
+echo -e "${BLUE}${BOLD}========================================${NC}"
+echo
+
+# --- Check for required tools ---
+check_deps() {
+    local missing=()
+
+    if ! command -v mount >/dev/null 2>&1; then
+        missing+=("mount")
+    fi
+
+    # We'll check protocol-specific deps after selection
+    if [ ${#missing[@]} -gt 0 ]; then
+        echo -e "${RED}Missing required tools: ${missing[*]}${NC}"
+        exit 1
+    fi
+}
+
+check_deps
+
+# ===========================================
+# 1. Mount point
+# ===========================================
+if [ -z "$MOUNT_POINT" ]; then
+    echo -e "${BOLD}Mount point${NC}"
+    echo "Where should the NAS share be mounted on this machine?"
+    read -rp "> Path [/mnt/unas/media]: " MOUNT_POINT
+    MOUNT_POINT="${MOUNT_POINT:-/mnt/unas/media}"
+    echo
+fi
+
+# Check if already mounted
+if mountpoint -q "$MOUNT_POINT" 2>/dev/null; then
+    echo -e "${GREEN}${MOUNT_POINT} is already mounted.${NC}"
+    df -h "$MOUNT_POINT" | tail -1
+    echo
+    read -rp "Reconfigure anyway? [y/N]: " RECONFIG
+    if [[ "${RECONFIG,,}" != "y" ]]; then
+        echo -e "${GREEN}Keeping existing mount.${NC}"
+        exit 0
+    fi
+    echo
+fi
+
+# ===========================================
+# 2. Protocol selection
+# ===========================================
+echo -e "${BOLD}Share protocol${NC}"
+echo "  1) NFS  — Network File System (common on Linux NAS, TrueNAS, Synology)"
+echo "  2) SMB  — Windows/Samba share (CIFS)"
+read -rp "> Protocol [1]: " PROTO_CHOICE
+case "${PROTO_CHOICE:-1}" in
+    2|smb|SMB|cifs|CIFS)
+        PROTOCOL="cifs"
+        ;;
+    *)
+        PROTOCOL="nfs"
+        ;;
+esac
+echo -e "Selected: ${GREEN}${PROTOCOL}${NC}"
+echo
+
+# ===========================================
+# 3. NAS server address
+# ===========================================
+echo -e "${BOLD}NAS server address${NC}"
+echo "IP address or hostname of your NAS."
+read -rp "> Server: " NAS_SERVER
+
+if [ -z "$NAS_SERVER" ]; then
+    echo -e "${RED}Server address is required.${NC}"
+    exit 1
+fi
+echo
+
+# ===========================================
+# 4. Share name / export path
+# ===========================================
+if [ "$PROTOCOL" = "nfs" ]; then
+    echo -e "${BOLD}NFS export path${NC}"
+    echo "The exported path on the NAS (e.g., /volume1/media, /mnt/pool/media)"
+
+    # Try to discover NFS exports
+    if command -v showmount >/dev/null 2>&1; then
+        echo -e "${YELLOW}Querying NFS exports from ${NAS_SERVER}...${NC}"
+        EXPORTS=$(showmount -e "$NAS_SERVER" 2>/dev/null | tail -n +2 || true)
+        if [ -n "$EXPORTS" ]; then
+            echo -e "${GREEN}Available exports:${NC}"
+            echo "$EXPORTS" | sed 's/^/  /'
+        else
+            echo -e "${YELLOW}Could not list exports (NAS may block showmount).${NC}"
+        fi
+    fi
+
+    read -rp "> Export path: " NAS_SHARE
+    if [ -z "$NAS_SHARE" ]; then
+        echo -e "${RED}Export path is required.${NC}"
+        exit 1
+    fi
+else
+    echo -e "${BOLD}SMB share name${NC}"
+    echo "The share name on the NAS (e.g., media, Media, shared)"
+
+    # Try to discover SMB shares
+    if command -v smbclient >/dev/null 2>&1; then
+        echo -e "${YELLOW}Querying SMB shares from ${NAS_SERVER}...${NC}"
+        SHARES=$(smbclient -N -L "$NAS_SERVER" 2>/dev/null | grep "Disk" | awk '{print $1}' || true)
+        if [ -n "$SHARES" ]; then
+            echo -e "${GREEN}Available shares:${NC}"
+            echo "$SHARES" | sed 's/^/  /'
+        else
+            echo -e "${YELLOW}Could not list shares (may need credentials).${NC}"
+        fi
+    fi
+
+    read -rp "> Share name: " NAS_SHARE
+    if [ -z "$NAS_SHARE" ]; then
+        echo -e "${RED}Share name is required.${NC}"
+        exit 1
+    fi
+fi
+echo
+
+# ===========================================
+# 5. Protocol-specific options
+# ===========================================
+if [ "$PROTOCOL" = "nfs" ]; then
+    # Check NFS client tools
+    if ! command -v mount.nfs >/dev/null 2>&1 && [ ! -f /sbin/mount.nfs ]; then
+        echo -e "${YELLOW}NFS client utilities not found.${NC}"
+        echo -e "Install with: ${YELLOW}sudo apt install nfs-common${NC} (Debian/Ubuntu)"
+        echo -e "          or: ${YELLOW}sudo dnf install nfs-utils${NC}  (Fedora/RHEL)"
+        read -rp "Continue anyway? [y/N]: " CONTINUE
+        if [[ "${CONTINUE,,}" != "y" ]]; then
+            exit 1
+        fi
+    fi
+
+    # NFS source format: server:/export
+    FSTAB_SOURCE="${NAS_SERVER}:${NAS_SHARE}"
+    FSTAB_TYPE="nfs"
+
+    echo -e "${BOLD}NFS mount options${NC}"
+    DEFAULT_NFS_OPTS="rw,soft,intr,timeo=150,retrans=3,_netdev,nofail,x-systemd.automount,x-systemd.mount-timeout=30"
+    echo -e "Default: ${GREEN}${DEFAULT_NFS_OPTS}${NC}"
+    echo "  rw             — Read/write access"
+    echo "  soft,intr      — Don't hang if NAS is unreachable"
+    echo "  _netdev,nofail — Wait for network, don't block boot if unavailable"
+    echo "  x-systemd.*    — Systemd automount (mount on first access)"
+    read -rp "> Options [accept defaults]: " CUSTOM_OPTS
+    MOUNT_OPTS="${CUSTOM_OPTS:-$DEFAULT_NFS_OPTS}"
+
+else
+    # Check CIFS client tools
+    if ! command -v mount.cifs >/dev/null 2>&1 && [ ! -f /sbin/mount.cifs ]; then
+        echo -e "${YELLOW}CIFS/SMB client utilities not found.${NC}"
+        echo -e "Install with: ${YELLOW}sudo apt install cifs-utils${NC} (Debian/Ubuntu)"
+        echo -e "          or: ${YELLOW}sudo dnf install cifs-utils${NC}  (Fedora/RHEL)"
+        read -rp "Continue anyway? [y/N]: " CONTINUE
+        if [[ "${CONTINUE,,}" != "y" ]]; then
+            exit 1
+        fi
+    fi
+
+    # SMB source format: //server/share
+    FSTAB_SOURCE="//${NAS_SERVER}/${NAS_SHARE}"
+    FSTAB_TYPE="cifs"
+
+    # SMB credentials
+    echo -e "${BOLD}SMB credentials${NC}"
+    echo "If your share requires authentication, enter username/password."
+    echo "Leave blank for guest/anonymous access."
+    read -rp "> Username (blank for guest): " SMB_USER
+    echo
+
+    if [ -n "$SMB_USER" ]; then
+        read -rsp "> Password: " SMB_PASS
+        echo
+        echo
+
+        # Store credentials securely
+        CREDS_FILE="/etc/nas-credentials-$(echo "$NAS_SERVER" | tr '.' '-')"
+        echo -e "${BOLD}Credentials will be stored in: ${GREEN}${CREDS_FILE}${NC}"
+        echo "  (root-only readable, permissions 600)"
+
+        CREDS_CONTENT="username=${SMB_USER}\npassword=${SMB_PASS}"
+        CRED_OPTS="credentials=${CREDS_FILE}"
+    else
+        CREDS_FILE=""
+        CRED_OPTS="guest"
+    fi
+
+    CURRENT_UID=$(id -u)
+    CURRENT_GID=$(id -g)
+
+    DEFAULT_SMB_OPTS="${CRED_OPTS},uid=${CURRENT_UID},gid=${CURRENT_GID},iocharset=utf8,file_mode=0775,dir_mode=0775,_netdev,nofail,x-systemd.automount,x-systemd.mount-timeout=30"
+    echo -e "${BOLD}SMB mount options${NC}"
+    echo -e "Default: ${GREEN}${DEFAULT_SMB_OPTS}${NC}"
+    echo "  uid/gid        — Map files to your user (rootless Docker needs this)"
+    echo "  _netdev,nofail — Wait for network, don't block boot if unavailable"
+    echo "  x-systemd.*    — Systemd automount (mount on first access)"
+    read -rp "> Options [accept defaults]: " CUSTOM_OPTS
+    MOUNT_OPTS="${CUSTOM_OPTS:-$DEFAULT_SMB_OPTS}"
+fi
+echo
+
+# ===========================================
+# Summary & confirmation
+# ===========================================
+FSTAB_LINE="${FSTAB_SOURCE}  ${MOUNT_POINT}  ${FSTAB_TYPE}  ${MOUNT_OPTS}  0  0"
+
+echo -e "${BOLD}Summary:${NC}"
+echo -e "  Protocol    : ${GREEN}${PROTOCOL}${NC}"
+echo -e "  Source      : ${GREEN}${FSTAB_SOURCE}${NC}"
+echo -e "  Mount point : ${GREEN}${MOUNT_POINT}${NC}"
+echo -e "  Options     : ${GREEN}${MOUNT_OPTS}${NC}"
+if [ "$PROTOCOL" = "cifs" ] && [ -n "$CREDS_FILE" ]; then
+    echo -e "  Credentials : ${GREEN}${CREDS_FILE}${NC}"
+fi
+echo
+echo -e "${BOLD}fstab entry:${NC}"
+echo -e "  ${YELLOW}${FSTAB_LINE}${NC}"
+echo
+read -rp "Apply this configuration? (requires sudo) [Y/n]: " CONFIRM
+if [[ "${CONFIRM,,}" == "n" ]]; then
+    echo "Aborted."
+    exit 0
+fi
+
+# ===========================================
+# Apply configuration
+# ===========================================
+
+# 1. Create mount point
+if [ ! -d "$MOUNT_POINT" ]; then
+    echo -e "Creating mount point ${MOUNT_POINT}..."
+    sudo mkdir -p "$MOUNT_POINT"
+    echo -e "${GREEN}Created ${MOUNT_POINT}${NC}"
+fi
+
+# 2. Write SMB credentials file (if applicable)
+if [ "$PROTOCOL" = "cifs" ] && [ -n "$CREDS_FILE" ]; then
+    echo -e "Writing credentials to ${CREDS_FILE}..."
+    echo -e "$CREDS_CONTENT" | sudo tee "$CREDS_FILE" > /dev/null
+    sudo chmod 600 "$CREDS_FILE"
+    echo -e "${GREEN}Credentials saved (mode 600)${NC}"
+fi
+
+# 3. Update /etc/fstab
+# Remove any existing entry for this mount point
+FSTAB="/etc/fstab"
+MARKER="# NAS mount managed by homelab setup"
+
+if sudo grep -q "^[^#].*[[:space:]]${MOUNT_POINT}[[:space:]]" "$FSTAB" 2>/dev/null; then
+    echo -e "${YELLOW}Removing existing fstab entry for ${MOUNT_POINT}...${NC}"
+    # Remove the entry and any preceding marker comment
+    sudo cp "$FSTAB" "${FSTAB}.bak"
+    sudo sed -i "\|^${MARKER}$|{N;/\n.*[[:space:]]${MOUNT_POINT}[[:space:]]/d}" "$FSTAB"
+    # Also remove standalone entry without marker
+    sudo sed -i "\|^[^#].*[[:space:]]${MOUNT_POINT}[[:space:]]|d" "$FSTAB"
+fi
+
+echo -e "Adding fstab entry..."
+echo -e "\n${MARKER}\n${FSTAB_LINE}" | sudo tee -a "$FSTAB" > /dev/null
+echo -e "${GREEN}Updated /etc/fstab${NC}"
+
+# 4. Reload systemd (for x-systemd.automount entries)
+if command -v systemctl >/dev/null 2>&1; then
+    echo "Reloading systemd daemon..."
+    sudo systemctl daemon-reload
+fi
+
+# 5. Mount now
+echo "Mounting ${MOUNT_POINT}..."
+if sudo mount "$MOUNT_POINT"; then
+    echo -e "${GREEN}Successfully mounted!${NC}"
+    df -h "$MOUNT_POINT" | tail -1
+else
+    echo -e "${RED}Mount failed.${NC}"
+    echo -e "Check your NAS is reachable: ${YELLOW}ping ${NAS_SERVER}${NC}"
+    if [ "$PROTOCOL" = "nfs" ]; then
+        echo -e "Verify NFS export: ${YELLOW}showmount -e ${NAS_SERVER}${NC}"
+    fi
+    echo -e "The fstab entry has been added — it will retry on next boot."
+    echo -e "You can also retry manually: ${YELLOW}sudo mount ${MOUNT_POINT}${NC}"
+    exit 1
+fi
+
+echo
+echo -e "${GREEN}${BOLD}NAS mount configured!${NC}"
+echo -e "  Mount persists across reboots via /etc/fstab."
+echo -e "  With x-systemd.automount, the mount activates on first access."
+echo -e "  To unmount: ${YELLOW}sudo umount ${MOUNT_POINT}${NC}"
+echo -e "  To remove:  edit ${YELLOW}/etc/fstab${NC} and delete the homelab entry."

@@ -66,6 +66,22 @@ if [ ! -d "$MEDIA_PATH" ]; then
     echo -e "${YELLOW}Directory does not exist: ${MEDIA_PATH}${NC}"
     echo "Make sure your NAS is mounted before starting media services."
 fi
+
+# Offer to configure NAS mount if not already mounted
+NAS_MOUNT_SCRIPT="${SCRIPT_DIR}/setup-nas-mount.sh"
+if [ -x "$NAS_MOUNT_SCRIPT" ]; then
+    if ! mountpoint -q "$MEDIA_PATH" 2>/dev/null; then
+        echo
+        echo -e "${BOLD}NAS mount setup${NC}"
+        echo "The media path is not currently mounted."
+        read -rp "Configure NAS mount for ${MEDIA_PATH}? [Y/n]: " SETUP_NAS
+        if [[ "${SETUP_NAS,,}" != "n" ]]; then
+            "$NAS_MOUNT_SCRIPT" "$MEDIA_PATH"
+        fi
+    else
+        echo -e "${GREEN}NAS already mounted at ${MEDIA_PATH}${NC}"
+    fi
+fi
 echo
 
 # ===========================================
