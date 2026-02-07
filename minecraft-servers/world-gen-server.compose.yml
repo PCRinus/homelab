@@ -32,7 +32,7 @@ services:
         trek:B0.5.1+mod
         dungeons-and-taverns
     volumes:
-      - /home/mircea/docker/minecraft-server-world-generation:/data
+      - ${DOCKER_DATA}/minecraft-server-world-generation:/data
     healthcheck:
       test: ["CMD", "mc-health"]
       interval: 60s

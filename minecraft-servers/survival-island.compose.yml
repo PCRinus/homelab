@@ -14,7 +14,7 @@ services:
       MODRINTH_PROJECTS: |-
         *common-mods
     volumes:
-      - /home/mircea/docker/minecraft-server-survival-island:/data
+      - ${DOCKER_DATA}/minecraft-server-survival-island:/data
     healthcheck:
       test: ["CMD", "mc-health"]
       interval: 60s

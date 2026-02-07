@@ -19,10 +19,10 @@ services:
       - ./kubernetes.yaml:/app/config/kubernetes.yaml:ro
       - ./proxmox.yaml:/app/config/proxmox.yaml:ro
       # Container-writable data - not versioned
-      - /home/mircea/docker/homepage/logs:/app/config/logs
+      - ${DOCKER_DATA}/homepage/logs:/app/config/logs
       # Other mounts
-      - /run/user/1000/docker.sock:/var/run/docker.sock:ro
-      - /mnt/unas/media:/mnt/unas/media:ro
+      - ${DOCKER_SOCK}:/var/run/docker.sock:ro
+      - ${MEDIA_PATH}:/mnt/unas/media:ro
     environment:
       - HOMEPAGE_ALLOWED_HOSTS=homelab:3000,home-server.me
     extra_hosts:

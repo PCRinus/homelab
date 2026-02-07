@@ -21,8 +21,8 @@ services:
       - VPN_AUTO_PORT_FORWARD=true
       - VPN_HEALTHCHECK_ENABLED=true
     volumes:
-      - /home/mircea/docker/qbittorrent:/config
-      - /mnt/unas/media:/data
+      - ${DOCKER_DATA}/qbittorrent:/config
+      - ${MEDIA_PATH}:/data
     ports:
       - "8080:8080"      # qBittorrent WebUI
     networks:
@@ -41,8 +41,8 @@ services:
     env_file:
       - ../.env
     volumes:
-      - /home/mircea/docker/sonarr:/config
-      - /mnt/unas/media:/data
+      - ${DOCKER_DATA}/sonarr:/config
+      - ${MEDIA_PATH}:/data
     ports:
       - "8989:8989"
     dns:
@@ -65,8 +65,8 @@ services:
     env_file:
       - ../.env
     volumes:
-      - /home/mircea/docker/radarr:/config
-      - /mnt/unas/media:/data
+      - ${DOCKER_DATA}/radarr:/config
+      - ${MEDIA_PATH}:/data
     ports:
       - "7878:7878"
     dns:
@@ -91,7 +91,7 @@ services:
     environment:
       - UMASK=002
     volumes:
-      - /home/mircea/docker/prowlarr:/config
+      - ${DOCKER_DATA}/prowlarr:/config
     ports:
       - "9696:9696"
     dns:
@@ -139,7 +139,7 @@ services:
     ports:
       - 5055:5055
     volumes:
-      - /home/mircea/docker/overseerr:/app/config
+      - ${DOCKER_DATA}/overseerr:/app/config
     dns:
       - 1.1.1.1
       - 1.0.0.1
@@ -168,8 +168,8 @@ services:
     group_add:
       - "993"  # render group GID for GPU access
     volumes:
-      - /home/mircea/docker/plex/config:/config
-      - /mnt/unas/media:/data
+      - ${DOCKER_DATA}/plex/config:/config
+      - ${MEDIA_PATH}:/data
     ports:
       - "32400:32400"     # Plex Web UI (required)
       - "32410:32410/udp" # GDM network discovery
@@ -202,8 +202,8 @@ services:
     group_add:
       - "993"  # render group GID for GPU access
     volumes:
-      - /home/mircea/docker/jellyfin:/config
-      - /mnt/unas/media:/data
+      - ${DOCKER_DATA}/jellyfin:/config
+      - ${MEDIA_PATH}:/data
     ports:
       - "8096:8096"     # Jellyfin Web UI
       - "7359:7359/udp" # Jellyfin auto-discovery
@@ -227,8 +227,8 @@ services:
     env_file:
       - ../.env
     volumes:
-      - /home/mircea/docker/bazarr:/config
-      - /mnt/unas/media:/data
+      - ${DOCKER_DATA}/bazarr:/config
+      - ${MEDIA_PATH}:/data
     ports:
       - "6767:6767"
     dns:
@@ -251,7 +251,7 @@ services:
     env_file:
       - ../.env
     volumes:
-      - /home/mircea/docker/tautulli:/config
+      - ${DOCKER_DATA}/tautulli:/config
     ports:
       - "8181:8181"
     dns:
@@ -292,7 +292,7 @@ services:
       - ../.env
     volumes:
       - ./configarr:/app/config:ro           # Config files (config.yml, secrets.yml)
-      - /home/mircea/docker/configarr/repos:/app/repos  # Cache for TRaSH-Guides/Recyclarr repos
+      - ${DOCKER_DATA}/configarr/repos:/app/repos  # Cache for TRaSH-Guides/Recyclarr repos
     networks:
       - media-net
     # No restart policy - this is a one-shot job, not a daemon

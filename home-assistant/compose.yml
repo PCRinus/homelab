@@ -10,7 +10,7 @@ services:
       - ../.env
     volumes:
       # Persistent data (databases, cache, storage) stays in ~/docker
-      - /home/mircea/docker/home-assistant:/config
+      - ${DOCKER_DATA}/home-assistant:/config
       # Configuration files are mounted from this repo
       - ./configuration.yaml:/config/configuration.yaml
       - ./automations.yaml:/config/automations.yaml

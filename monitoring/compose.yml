@@ -3,7 +3,7 @@ services:
     container_name: dozzle
     image: ghcr.io/amir20/dozzle:v9.0.2
     volumes:
-      - /run/user/1000/docker.sock:/var/run/docker.sock
+      - ${DOCKER_SOCK}:/var/run/docker.sock
     ports:
       - 8081:8080
     restart: unless-stopped
@@ -21,7 +21,7 @@ services:
       - 8082:8080
     volumes:
       - ./config.yaml:/config/config.yaml:ro
-      - /home/mircea/docker/gatus/data:/data
+      - ${DOCKER_DATA}/gatus/data:/data
     env_file:
       - ../.env
     restart: unless-stopped

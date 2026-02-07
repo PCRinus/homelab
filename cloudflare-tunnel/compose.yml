@@ -3,8 +3,6 @@ services:
     image: cloudflare/cloudflared:2025.11.1
     container_name: cloudflared
     restart: unless-stopped
-    labels:
-      - autoheal=true
     networks:
       - media-net
       - homepage_default
@@ -24,28 +22,51 @@ services:
     # Using HTTP/2 instead of QUIC (default) for better stability on this network
     # QUIC (UDP-based) experienced frequent connection timeouts, while HTTP/2 (TCP-based) is rock solid
     command: ["tunnel", "run", "--token-file", "/etc/cloudflared/token", "--protocol", "http2"]
-    healthcheck:
-      # Check if the Cloudflare Tunnel is healthy by querying the metrics endpoint
-      # https://github.com/cloudflare/cloudflared/pull/1135#issuecomment-2495472654
-      # https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/monitor-tunnels/metrics/#configure-the-metrics-server-address
-      test: ["CMD", "cloudflared", "tunnel", "--metrics", "localhost:20241", "ready"]
-      interval: 30s
-      timeout: 30s
-      retries: 3
-      start_period: 30s
-  
-  # Autoheal monitors cloudflared's health and automatically restarts it if unhealthy
-  # Scoped to only watch containers with autoheal=true label
-  autoheal:
-    image: willfarrell/autoheal:1.2.0
-    container_name: cloudflare-autoheal
+
+  # Watchdog that monitors cloudflared metrics and restarts it when tunnel connection is lost
+  # The cloudflared image has no shell, so we use a sidecar to check the metrics endpoint
+  # cloudflared_tunnel_ha_connections metric shows active HA connections to Cloudflare edge
+  # When this drops to 0, the tunnel is disconnected (error 1033 scenario)
+  cloudflared-watchdog:
+    image: alpine:3.21
+    container_name: cloudflared-watchdog
     restart: unless-stopped
-    environment:
-      - AUTOHEAL_CONTAINER_LABEL=autoheal
-      - AUTOHEAL_INTERVAL=60
-      - AUTOHEAL_START_PERIOD=300
+    depends_on:
+      - cloudflared
     volumes:
-      - /run/user/1000/docker.sock:/var/run/docker.sock:ro
+      - ${DOCKER_SOCK}:/var/run/docker.sock:ro
+    environment:
+      - CHECK_INTERVAL=30
+      - UNHEALTHY_THRESHOLD=3
+    command:
+      - sh
+      - -c
+      - |
+        apk add --no-cache curl docker-cli > /dev/null 2>&1
+        echo "Cloudflared watchdog started"
+        failures=0
+        while true; do
+          sleep $${CHECK_INTERVAL}
+          # Check if cloudflared has active HA connections (should be 1-4 when healthy)
+          ha_connections=$$(curl -sf http://cloudflared:20241/metrics 2>/dev/null | grep -E '^cloudflared_tunnel_ha_connections ' | awk '{print $$2}' | cut -d. -f1)
+          if [ -z "$$ha_connections" ] || [ "$$ha_connections" -lt 1 ]; then
+            failures=$$((failures + 1))
+            echo "[WARN] Tunnel unhealthy: HA connections=$$ha_connections, failures=$$failures/$${UNHEALTHY_THRESHOLD}"
+            if [ $$failures -ge $${UNHEALTHY_THRESHOLD} ]; then
+              echo "[ACTION] Restarting cloudflared container..."
+              docker restart cloudflared
+              failures=0
+              sleep 60  # Wait for tunnel to reconnect before next check
+            fi
+          else
+            if [ $$failures -gt 0 ]; then
+              echo "[OK] Tunnel recovered: HA connections=$$ha_connections"
+            fi
+            failures=0
+          fi
+        done
+    networks:
+      - media-net
 
 networks:
   media-net:
