@@ -1,0 +1,29 @@
+# ===========================================
+# SOPS Configuration
+# ===========================================
+# Defines encryption rules for secret files.
+# Uses age for encryption — key stored at ~/.config/sops/age/keys.txt
+#
+# Structured files (.env, .yaml, .yml) are encrypted with sops (value-level).
+# Unstructured files (tunnel-token, wg0.conf) are encrypted with raw age.
+# See scripts/secrets.sh for the encrypt/decrypt workflow.
+# ===========================================
+
+creation_rules:
+  # Dotenv files — sops encrypts values, keeps keys visible
+  - path_regex: ^\.env$
+    age: age13przqengtm203ntnckywpztfh7h700pglqn44ggukjpw98usd9ws4vks4c
+
+  # Terraform tfvars — treated as dotenv (key = "value" format)
+  - path_regex: ^cloudflare-tunnel/terraform\.tfvars$
+    age: age13przqengtm203ntnckywpztfh7h700pglqn44ggukjpw98usd9ws4vks4c
+
+  # YAML secret files
+  - path_regex: ^home-assistant/secrets\.yaml$
+    age: age13przqengtm203ntnckywpztfh7h700pglqn44ggukjpw98usd9ws4vks4c
+
+  - path_regex: ^media-server/buildarr/buildarr-secrets\.yml$
+    age: age13przqengtm203ntnckywpztfh7h700pglqn44ggukjpw98usd9ws4vks4c
+
+  - path_regex: ^media-server/configarr/secrets\.yml$
+    age: age13przqengtm203ntnckywpztfh7h700pglqn44ggukjpw98usd9ws4vks4c

@@ -9,6 +9,8 @@ Self-hosted homelab running Docker on Linux. Services are organized into stacks,
 - **Docker Engine** with Docker Compose v2 plugin
 - **Git** — to clone and manage this repo
 - **NAS mount** — media storage mounted at a local path (e.g., `/mnt/unas/media`)
+- **sops** — secrets encryption ([install](https://github.com/getsops/sops/releases))
+- **age** — encryption backend (`sudo apt install age` or [releases](https://github.com/FiloSottile/age/releases))
 
 ### Installing Docker
 
@@ -38,23 +40,26 @@ chsh -s $(which zsh)
 git clone <repo-url> ~/compose-files
 cd ~/compose-files
 
-# 2. Run the setup script
-./init.sh
+# 2. Copy your age key (from old machine or password manager)
+mkdir -p ~/.config/sops/age
+cp /path/to/keys.txt ~/.config/sops/age/keys.txt
 
-# 3. Load the new environment
+# 3. Run the setup script (configures paths + decrypts secrets)
+./scripts/init.sh
+
+# 4. Load the new environment
 source ~/.zshenv
-
-# 4. Fill in your secrets
-nano .env   # API keys, passwords, tokens — see .env.example
 
 # 5. Create the shared Docker network
 docker network create media-net
 
-# 6. Start a stack
-cd media-server && docker compose up -d
+# 6. Start all services
+./scripts/start.sh
 ```
 
-## What `init.sh` Does
+For a **fresh setup** with no existing secrets, skip step 2 and create secrets manually from examples (see Secrets section).
+
+## What `scripts/init.sh` Does
 
 The setup script interactively configures machine-specific paths and writes them to `~/.zshenv`:
 
@@ -66,7 +71,7 @@ The setup script interactively configures machine-specific paths and writes them
 
 These are used by all `compose.yml` files via `${VARIABLE}` interpolation. Docker Compose reads them from the shell environment automatically.
 
-Re-running `init.sh` is safe — it replaces the existing block in `~/.zshenv`.
+Re-running `scripts/init.sh` is safe — it replaces the existing block in `~/.zshenv`.
 
 ## Service Stacks
 
@@ -81,17 +86,55 @@ Re-running `init.sh` is safe — it replaces the existing block in `~/.zshenv`.
 
 ## Secrets & Configuration
 
-Secrets are **not** checked into git. After cloning, create these from their examples:
+Secrets are encrypted in the repo using [sops](https://github.com/getsops/sops) + [age](https://github.com/FiloSottile/age). Plaintext files are gitignored; encrypted `.enc` variants are tracked.
 
-| File | Template | Purpose |
-|------|----------|---------|
-| `.env` | `.env.example` | API keys, credentials, common settings |
-| `cloudflare-tunnel/tunnel-token` | — | Cloudflare tunnel auth token |
-| `cloudflare-tunnel/terraform.tfvars` | — | Cloudflare zone/account IDs, OAuth secrets |
-| `media-server/wg0.conf` | — | ProtonVPN WireGuard config |
-| `media-server/buildarr/buildarr-secrets.yml` | `buildarr-secrets.yml.example` | Arr app API keys for Buildarr |
-| `media-server/configarr/secrets.yml` | `secrets.yml.example` | Arr app API keys for Configarr |
-| `home-assistant/secrets.yaml` | `secrets.yaml.example` | Home Assistant secrets |
+| Plaintext (gitignored) | Encrypted (tracked) | Method |
+|------------------------|---------------------|--------|
+| `.env` | `.env.enc` | sops |
+| `cloudflare-tunnel/terraform.tfvars` | `...tfvars.enc` | sops |
+| `home-assistant/secrets.yaml` | `...yaml.enc` | sops |
+| `media-server/buildarr/buildarr-secrets.yml` | `...yml.enc` | sops |
+| `media-server/configarr/secrets.yml` | `...yml.enc` | sops |
+| `cloudflare-tunnel/tunnel-token` | `...token.enc` | age |
+| `media-server/wg0.conf` | `...conf.enc` | age |
+
+### Decrypt (after clone / on new machine)
+
+```bash
+./scripts/secrets.sh decrypt
+```
+
+`scripts/init.sh` runs this automatically if it finds your age key at `~/.config/sops/age/keys.txt`.
+
+### Encrypt (after editing a secret)
+
+```bash
+./scripts/secrets.sh encrypt
+git add -A '*.enc'
+git commit -m "Update secrets"
+```
+
+### Check status
+
+```bash
+./scripts/secrets.sh status
+```
+
+### First-time setup (no existing secrets)
+
+Generate an age keypair and create secrets from examples:
+
+```bash
+age-keygen -o ~/.config/sops/age/keys.txt
+cp .env.example .env
+cp media-server/buildarr/buildarr-secrets.yml.example media-server/buildarr/buildarr-secrets.yml
+cp media-server/configarr/secrets.yml.example media-server/configarr/secrets.yml
+cp home-assistant/secrets.yaml.example home-assistant/secrets.yaml
+# Fill in values, then encrypt:
+./scripts/secrets.sh encrypt
+```
+
+> **Back up your age key** (`~/.config/sops/age/keys.txt`) — it's the one secret needed to unlock everything.
 
 ## CI/CD
 

@@ -6,7 +6,7 @@
 # Sets up path variables in ~/.zshenv so Docker Compose
 # can resolve them in compose files.
 #
-# Usage: ./init.sh
+# Usage: ./scripts/init.sh
 # ===========================================
 
 set -e
@@ -21,6 +21,7 @@ NC='\033[0m'
 
 ZSHENV="$HOME/.zshenv"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"
 MARKER_START="# --- Homelab paths (managed by init.sh) ---"
 MARKER_END="# --- End homelab paths ---"
 
@@ -125,11 +126,43 @@ EOF
 echo -e "${GREEN}Wrote to ${ZSHENV}${NC}"
 
 # ===========================================
-# Create .env from .env.example if missing
+# Decrypt secrets (if encrypted files exist)
 # ===========================================
 echo
-ENV_FILE="${SCRIPT_DIR}/.env"
-ENV_EXAMPLE="${SCRIPT_DIR}/.env.example"
+SECRETS_SCRIPT="${SCRIPT_DIR}/secrets.sh"
+
+if [ -x "$SECRETS_SCRIPT" ]; then
+    # Check if any .enc files exist
+    ENC_COUNT=$(find "$REPO_DIR" -name '*.enc' -not -path '*/.terraform/*' | wc -l)
+    if [ "$ENC_COUNT" -gt 0 ]; then
+        if command -v sops >/dev/null 2>&1 && command -v age >/dev/null 2>&1; then
+            AGE_KEY="${SOPS_AGE_KEY_FILE:-$HOME/.config/sops/age/keys.txt}"
+            if [ -f "$AGE_KEY" ]; then
+                echo -e "${BOLD}Found ${ENC_COUNT} encrypted secret files. Decrypting...${NC}"
+                "$SECRETS_SCRIPT" decrypt
+            else
+                echo -e "${YELLOW}Encrypted secrets found but no age key at ${AGE_KEY}${NC}"
+                echo -e "Copy your age key from the old machine, then run:"
+                echo -e "  ${YELLOW}./scripts/secrets.sh decrypt${NC}"
+            fi
+        else
+            echo -e "${YELLOW}Encrypted secrets found but sops/age not installed${NC}"
+            echo -e "Install them, then run: ${YELLOW}./scripts/secrets.sh decrypt${NC}"
+        fi
+    else
+        echo -e "${YELLOW}No encrypted secret files found${NC}"
+        echo -e "If this is a fresh setup, create secrets from examples or copy them manually."
+    fi
+else
+    echo -e "${YELLOW}secrets.sh not found — skipping decryption${NC}"
+fi
+
+# ===========================================
+# Create .env from .env.example if still missing
+# ===========================================
+echo
+ENV_FILE="${REPO_DIR}/.env"
+ENV_EXAMPLE="${REPO_DIR}/.env.example"
 
 if [ ! -f "$ENV_FILE" ] && [ -f "$ENV_EXAMPLE" ]; then
     cp "$ENV_EXAMPLE" "$ENV_FILE"
@@ -149,11 +182,13 @@ echo -e "${GREEN}${BOLD}Setup complete!${NC}"
 echo
 echo -e "Next steps:"
 echo -e "  1. Run ${YELLOW}source ~/.zshenv${NC} or open a new terminal"
-echo -e "  2. Fill in secrets in ${YELLOW}.env${NC}"
-echo -e "  3. Create secret files from their examples:"
-echo -e "     ${YELLOW}cp media-server/buildarr/buildarr-secrets.yml.example media-server/buildarr/buildarr-secrets.yml${NC}"
-echo -e "     ${YELLOW}cp media-server/configarr/secrets.yml.example media-server/configarr/secrets.yml${NC}"
-echo -e "     ${YELLOW}cp home-assistant/secrets.yaml.example home-assistant/secrets.yaml${NC}"
-echo -e "  4. Start all services:"
-echo -e "     ${YELLOW}./start.sh${NC}        # Core stacks (media, monitoring, homepage, HA, tunnel)"
-echo -e "     ${YELLOW}./start.sh --all${NC}  # Also includes Minecraft servers"
+echo -e "  2. If secrets were not decrypted above:"
+echo -e "     a. Copy your age key to ${YELLOW}~/.config/sops/age/keys.txt${NC}"
+echo -e "     b. Run ${YELLOW}./scripts/secrets.sh decrypt${NC}"
+echo -e "     Or manually create secrets from examples:"
+echo -e "       ${YELLOW}cp media-server/buildarr/buildarr-secrets.yml.example media-server/buildarr/buildarr-secrets.yml${NC}"
+echo -e "       ${YELLOW}cp media-server/configarr/secrets.yml.example media-server/configarr/secrets.yml${NC}"
+echo -e "       ${YELLOW}cp home-assistant/secrets.yaml.example home-assistant/secrets.yaml${NC}"
+echo -e "  3. Start all services:"
+echo -e "     ${YELLOW}./scripts/start.sh${NC}        # Core stacks (media, monitoring, homepage, HA, tunnel)"
+echo -e "     ${YELLOW}./scripts/start.sh --all${NC}  # Also includes Minecraft servers"

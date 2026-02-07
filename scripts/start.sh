@@ -6,13 +6,14 @@
 # Minecraft servers are optional and skipped by default.
 #
 # Usage:
-#   ./start.sh              # Start core services only
-#   ./start.sh --all        # Include Minecraft servers
+#   ./scripts/start.sh              # Start core services only
+#   ./scripts/start.sh --all        # Include Minecraft servers
 # ===========================================
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"
 
 # --- Colors ---
 RED='\033[0;31m'
@@ -29,8 +30,22 @@ fi
 # --- Preflight checks ---
 if [ -z "$DOCKER_DATA" ] || [ -z "$MEDIA_PATH" ] || [ -z "$DOCKER_SOCK" ]; then
     echo -e "${RED}Environment variables not set (DOCKER_DATA, MEDIA_PATH, DOCKER_SOCK)${NC}"
-    echo -e "Run ${YELLOW}./init.sh${NC} first, then ${YELLOW}source ~/.zshenv${NC}"
+    echo -e "Run ${YELLOW}./scripts/init.sh${NC} first, then ${YELLOW}source ~/.zshenv${NC}"
     exit 1
+fi
+
+# --- Check secrets are decrypted ---
+if [ ! -f "${REPO_DIR}/.env" ]; then
+    # Check if encrypted version exists
+    if [ -f "${REPO_DIR}/.env.enc" ]; then
+        echo -e "${RED}Secrets not decrypted — .env.enc exists but .env does not${NC}"
+        echo -e "Run ${YELLOW}./scripts/secrets.sh decrypt${NC} first"
+        exit 1
+    else
+        echo -e "${RED}.env file not found${NC}"
+        echo -e "Run ${YELLOW}./scripts/init.sh${NC} first"
+        exit 1
+    fi
 fi
 
 if ! docker info > /dev/null 2>&1; then
@@ -61,7 +76,7 @@ echo
 FAILED=()
 
 for stack in "${STACKS[@]}"; do
-    script="${SCRIPT_DIR}/${stack}/start.sh"
+    script="${REPO_DIR}/${stack}/start.sh"
     if [ -x "$script" ]; then
         echo -e "${BOLD}━━━ ${stack} ━━━${NC}"
         if "$script"; then
@@ -79,7 +94,7 @@ done
 # --- Optional: Minecraft servers ---
 if $INCLUDE_MINECRAFT; then
     echo -e "${BOLD}━━━ minecraft-servers ━━━${NC}"
-    MC_DIR="${SCRIPT_DIR}/minecraft-servers"
+    MC_DIR="${REPO_DIR}/minecraft-servers"
     cd "$MC_DIR"
     for f in *.compose.yml; do
         [[ "$f" == "common.compose.yml" ]] && continue

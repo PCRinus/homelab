@@ -24,5 +24,9 @@
         "sysctls",
         "tautulli",
         "unas"
-    ]
+    ],
+    "chat.tools.terminal.autoApprove": {
+        "sops": true,
+        "age": true
+    }
 }

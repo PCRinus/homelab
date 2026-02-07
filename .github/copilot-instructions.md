@@ -73,6 +73,9 @@ cd /home/mircea/compose-files/media-server && ./start.sh
 # Most services
 cd /home/mircea/compose-files/<service> && docker compose up -d
 
+# All services at once
+cd /home/mircea/compose-files && ./scripts/start.sh
+
 # Minecraft (specify the server file)
 docker compose -f survival-island.compose.yml up -d
 ```
