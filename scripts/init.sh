@@ -88,12 +88,42 @@ fi
 echo
 
 # ===========================================
+# 4. RENDER_GID - GPU render group for HW transcoding
+# ===========================================
+echo -e "${BOLD}GPU render group${NC}"
+echo "Used by Plex/Jellyfin for hardware-accelerated transcoding."
+
+if getent group render > /dev/null 2>&1; then
+    DETECTED_GID=$(getent group render | cut -d: -f3)
+    echo -e "Detected render group GID: ${GREEN}${DETECTED_GID}${NC}"
+elif getent group video > /dev/null 2>&1; then
+    DETECTED_GID=$(getent group video | cut -d: -f3)
+    echo -e "No render group found. Detected video group GID: ${GREEN}${DETECTED_GID}${NC}"
+else
+    DETECTED_GID=""
+    echo -e "${YELLOW}No render or video group found — GPU transcoding may not be available${NC}"
+fi
+
+if [ -n "$DETECTED_GID" ]; then
+    read -rp "> GID [${DETECTED_GID}]: " INPUT_RENDER_GID
+    RENDER_GID="${INPUT_RENDER_GID:-$DETECTED_GID}"
+else
+    read -rp "> GID (leave empty to skip): " RENDER_GID
+fi
+echo
+
+# ===========================================
 # Summary & confirmation
 # ===========================================
 echo -e "${BOLD}Summary:${NC}"
 echo -e "  DOCKER_DATA = ${GREEN}${DOCKER_DATA}${NC}"
 echo -e "  MEDIA_PATH  = ${GREEN}${MEDIA_PATH}${NC}"
 echo -e "  DOCKER_SOCK = ${GREEN}${DOCKER_SOCK}${NC}"
+if [ -n "$RENDER_GID" ]; then
+    echo -e "  RENDER_GID  = ${GREEN}${RENDER_GID}${NC}"
+else
+    echo -e "  RENDER_GID  = ${YELLOW}(not set — no GPU transcoding)${NC}"
+fi
 echo
 read -rp "Write these to ${ZSHENV}? [Y/n]: " CONFIRM
 if [[ "${CONFIRM,,}" == "n" ]]; then
@@ -111,7 +141,8 @@ if [ -f "$ZSHENV" ]; then
     grep -v "$MARKER_END" | \
     grep -v "^export DOCKER_DATA=" | \
     grep -v "^export MEDIA_PATH=" | \
-    grep -v "^export DOCKER_SOCK=" > "${ZSHENV}.tmp" || true
+    grep -v "^export DOCKER_SOCK=" | \
+    grep -v "^export RENDER_GID=" > "${ZSHENV}.tmp" || true
     mv "${ZSHENV}.tmp" "$ZSHENV"
 fi
 
@@ -120,6 +151,7 @@ ${MARKER_START}
 export DOCKER_DATA="${DOCKER_DATA}"
 export MEDIA_PATH="${MEDIA_PATH}"
 export DOCKER_SOCK="${DOCKER_SOCK}"
+export RENDER_GID="${RENDER_GID}"
 ${MARKER_END}
 EOF
 

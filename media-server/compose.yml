@@ -162,11 +162,11 @@ services:
     environment:
       - VERSION=docker
     devices:
-      - /dev/dri:/dev/dri  # AMD Vega GPU for VA-API hardware acceleration
+      - /dev/dri:/dev/dri  # GPU for VA-API hardware acceleration
     device_cgroup_rules:
-      - 'c 226:* rwm'  # Allow access to DRI devices (render nodes)
+      - 'c 226:* rwm'  # Allow access to DRI devices (no-op on rootful, required for rootless)
     group_add:
-      - "993"  # render group GID for GPU access
+      - "${RENDER_GID}"  # render group GID for GPU access
     volumes:
       - ${DOCKER_DATA}/plex/config:/config
       - ${MEDIA_PATH}:/data
@@ -196,11 +196,11 @@ services:
     env_file:
       - ../.env
     devices:
-      - /dev/dri:/dev/dri  # AMD Vega GPU for VA-API hardware acceleration
+      - /dev/dri:/dev/dri  # GPU for VA-API hardware acceleration
     device_cgroup_rules:
-      - 'c 226:* rwm'  # Allow access to DRI devices (render nodes)
+      - 'c 226:* rwm'  # Allow access to DRI devices (no-op on rootful, required for rootless)
     group_add:
-      - "993"  # render group GID for GPU access
+      - "${RENDER_GID}"  # render group GID for GPU access
     volumes:
       - ${DOCKER_DATA}/jellyfin:/config
       - ${MEDIA_PATH}:/data
