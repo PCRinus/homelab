@@ -299,20 +299,57 @@ if command -v systemctl >/dev/null 2>&1; then
     sudo systemctl daemon-reload
 fi
 
-# 5. Mount now
-echo "Mounting ${MOUNT_POINT}..."
-if sudo mount "$MOUNT_POINT"; then
-    echo -e "${GREEN}Successfully mounted!${NC}"
-    df -h "$MOUNT_POINT" | tail -1
-else
-    echo -e "${RED}Mount failed.${NC}"
-    echo -e "Check your NAS is reachable: ${YELLOW}ping ${NAS_SERVER}${NC}"
-    if [ "$PROTOCOL" = "nfs" ]; then
-        echo -e "Verify NFS export: ${YELLOW}showmount -e ${NAS_SERVER}${NC}"
+# 5. Activate mount
+# Convert mount path to systemd unit name: /mnt/unas/media -> mnt-unas-media
+SYSTEMD_UNIT=$(echo "$MOUNT_POINT" | sed 's|^/||;s|/$||;s|/|-|g')
+
+# If using x-systemd.automount, activate the automount unit (mounts on first access, non-blocking).
+# Otherwise fall back to a direct mount.
+if echo "$MOUNT_OPTS" | grep -q "x-systemd.automount"; then
+    echo "Activating automount for ${MOUNT_POINT}..."
+    if sudo systemctl start "${SYSTEMD_UNIT}.automount" 2>/dev/null; then
+        echo -e "${GREEN}Automount activated!${NC}"
+        echo -e "The NFS share will connect on first access (e.g., ${YELLOW}ls ${MOUNT_POINT}${NC})."
+
+        # Quick reachability check (don't block if NAS is unavailable)
+        echo -e "Testing NAS reachability (5s timeout)..."
+        if timeout 5 ping -c 1 "$NAS_SERVER" >/dev/null 2>&1; then
+            echo -e "${GREEN}NAS is reachable at ${NAS_SERVER}${NC}"
+            # Try to trigger the automount with a short timeout
+            if timeout 10 ls "$MOUNT_POINT" >/dev/null 2>&1; then
+                echo -e "${GREEN}Mount verified!${NC}"
+                df -h "$MOUNT_POINT" | tail -1
+            else
+                echo -e "${YELLOW}NAS reachable but mount timed out — it may need a moment.${NC}"
+                echo -e "Try: ${YELLOW}ls ${MOUNT_POINT}${NC}"
+            fi
+        else
+            echo -e "${YELLOW}NAS not reachable right now — mount will connect when available.${NC}"
+            echo -e "Check connectivity: ${YELLOW}ping ${NAS_SERVER}${NC}"
+        fi
+    else
+        echo -e "${YELLOW}Could not start automount unit. Trying direct mount...${NC}"
+        # Fall through to direct mount
+        timeout 15 sudo mount "$MOUNT_POINT" && \
+            echo -e "${GREEN}Successfully mounted!${NC}" && \
+            df -h "$MOUNT_POINT" | tail -1 || \
+            echo -e "${YELLOW}Direct mount timed out — NAS may not be reachable yet.${NC}"
     fi
-    echo -e "The fstab entry has been added — it will retry on next boot."
-    echo -e "You can also retry manually: ${YELLOW}sudo mount ${MOUNT_POINT}${NC}"
-    exit 1
+else
+    echo "Mounting ${MOUNT_POINT}..."
+    if timeout 30 sudo mount "$MOUNT_POINT"; then
+        echo -e "${GREEN}Successfully mounted!${NC}"
+        df -h "$MOUNT_POINT" | tail -1
+    else
+        echo -e "${RED}Mount failed or timed out.${NC}"
+        echo -e "Check your NAS is reachable: ${YELLOW}ping ${NAS_SERVER}${NC}"
+        if [ "$PROTOCOL" = "nfs" ]; then
+            echo -e "Verify NFS export: ${YELLOW}showmount -e ${NAS_SERVER}${NC}"
+        fi
+        echo -e "The fstab entry has been added — it will retry on next boot."
+        echo -e "You can also retry manually: ${YELLOW}sudo mount ${MOUNT_POINT}${NC}"
+        exit 1
+    fi
 fi
 
 echo
