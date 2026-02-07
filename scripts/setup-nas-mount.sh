@@ -280,13 +280,12 @@ fi
 FSTAB="/etc/fstab"
 MARKER="# NAS mount managed by homelab setup"
 
-if sudo grep -q "^[^#].*[[:space:]]${MOUNT_POINT}[[:space:]]" "$FSTAB" 2>/dev/null; then
+if sudo grep -q "${MOUNT_POINT}" "$FSTAB" 2>/dev/null; then
     echo -e "${YELLOW}Removing existing fstab entry for ${MOUNT_POINT}...${NC}"
-    # Remove the entry and any preceding marker comment
     sudo cp "$FSTAB" "${FSTAB}.bak"
-    sudo sed -i "\|^${MARKER}$|{N;/\n.*[[:space:]]${MOUNT_POINT}[[:space:]]/d}" "$FSTAB"
-    # Also remove standalone entry without marker
-    sudo sed -i "\|^[^#].*[[:space:]]${MOUNT_POINT}[[:space:]]|d" "$FSTAB"
+    # Filter out the marker comment and any line containing this mount point
+    sudo grep -v -F "$MARKER" "$FSTAB" | sudo grep -v "[[:space:]]${MOUNT_POINT}[[:space:]]" | sudo tee "${FSTAB}.tmp" > /dev/null
+    sudo mv "${FSTAB}.tmp" "$FSTAB"
 fi
 
 echo -e "Adding fstab entry..."
