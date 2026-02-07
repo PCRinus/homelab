@@ -20,9 +20,7 @@ jobs:
         with:
           service_name: Minecraft Servers
           service_path: minecraft-servers
-          deploy_script: |
-            docker compose -f common.compose.yml -f survival-island.compose.yml -f world-gen-server.compose.yml pull
-            docker compose -f common.compose.yml -f survival-island.compose.yml -f world-gen-server.compose.yml up -d
+          deploy_script: ./start.sh
           ts_oauth_client_id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           ts_oauth_secret: ${{ secrets.TS_OAUTH_SECRET }}
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
