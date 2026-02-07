@@ -27,7 +27,7 @@ services:
   # cloudflared_tunnel_ha_connections metric shows active HA connections to Cloudflare edge
   # When this drops to 0, the tunnel is disconnected (error 1033 scenario)
   cloudflared-watchdog:
-    image: alpine:3.21
+    image: alpine:3.23
     container_name: cloudflared-watchdog
     restart: unless-stopped
     depends_on:
