@@ -48,8 +48,30 @@ if [ ! -f "${REPO_DIR}/.env" ]; then
     fi
 fi
 
+# If DOCKER_SOCK is set but DOCKER_HOST isn't, export DOCKER_HOST so the
+# docker CLI uses the correct socket (important for rootless Docker).
+if [ -n "$DOCKER_SOCK" ] && [ -z "$DOCKER_HOST" ]; then
+    export DOCKER_HOST="unix://${DOCKER_SOCK}"
+fi
+
 if ! docker info > /dev/null 2>&1; then
-    echo -e "${RED}Docker is not running or not accessible${NC}"
+    # Determine which socket we're trying to use
+    SOCK="${DOCKER_SOCK:-/var/run/docker.sock}"
+
+    if [ ! -S "$SOCK" ]; then
+        echo -e "${RED}Docker socket not found at ${SOCK}${NC}"
+        echo -e "Is Docker installed and running?"
+        echo -e "  Check with: ${YELLOW}systemctl --user status docker${NC}  (rootless)"
+        echo -e "         or:  ${YELLOW}sudo systemctl status docker${NC}   (root mode)"
+    elif [ ! -r "$SOCK" ] || [ ! -w "$SOCK" ]; then
+        echo -e "${RED}Docker is running but your user cannot access the socket at ${SOCK}${NC}"
+        echo -e "Fix with one of:"
+        echo -e "  ${YELLOW}sudo usermod -aG docker \$USER${NC}  then log out and back in"
+        echo -e "  or set up rootless Docker: ${YELLOW}dockerd-rootless-setuptool.sh install${NC}"
+    else
+        echo -e "${RED}Docker is not responding (socket exists at ${SOCK} but 'docker info' failed)${NC}"
+        echo -e "  Try: ${YELLOW}sudo systemctl restart docker${NC}"
+    fi
     exit 1
 fi
 
