@@ -75,14 +75,16 @@ if ! docker info > /dev/null 2>&1; then
     exit 1
 fi
 
-# Create media-net if it doesn't exist
-if ! docker network inspect media-net > /dev/null 2>&1; then
-    echo -e "${YELLOW}Creating media-net network...${NC}"
-    docker network create media-net
+# --- Check NAS mount ---
+if [ -n "$MEDIA_PATH" ] && [ ! -d "$MEDIA_PATH" ]; then
+    echo -e "${YELLOW}WARNING: Media path ${MEDIA_PATH} does not exist${NC}"
+    echo -e "Services mounting this path (media-server, homepage) will fail."
+    echo -e "Set up the NAS mount first: ${YELLOW}./scripts/setup-nas-mount.sh${NC}"
+    echo
 fi
 
 # --- Start stacks in order ---
-# Media server first (creates the media-net network definition)
+# Media server first (creates the media-net network via compose)
 # Then services that depend on media-net
 STACKS=(
     "media-server"
@@ -100,6 +102,23 @@ FAILED=()
 for stack in "${STACKS[@]}"; do
     script="${REPO_DIR}/${stack}/start.sh"
     if [ -x "$script" ]; then
+        # cloudflare-tunnel depends on networks from other stacks — verify they exist
+        if [[ "$stack" == "cloudflare-tunnel" ]]; then
+            MISSING_NETS=()
+            for net in homepage_default monitoring_default media-net; do
+                if ! docker network inspect "$net" > /dev/null 2>&1; then
+                    MISSING_NETS+=("$net")
+                fi
+            done
+            if [ ${#MISSING_NETS[@]} -gt 0 ]; then
+                echo -e "${BOLD}━━━ ${stack} ━━━${NC}"
+                echo -e "${RED}Skipping ${stack} — missing external networks: ${MISSING_NETS[*]}${NC}"
+                echo -e "Fix the failed stacks above first, then re-run."
+                FAILED+=("$stack")
+                echo
+                continue
+            fi
+        fi
         echo -e "${BOLD}━━━ ${stack} ━━━${NC}"
         if "$script"; then
             echo
