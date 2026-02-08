@@ -5,7 +5,7 @@
 - Media Management:
     - Plex:
         icon: plex.png
-        href: http://homelab:32400/web
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:32400/web
         description: Media Server
         server: my-docker
         container: plex
@@ -18,7 +18,7 @@
 
     - Jellyfin:
         icon: jellyfin.png
-        href: http://homelab:8096
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8096
         description: Media Server (Alt)
         server: my-docker
         container: jellyfin
@@ -31,7 +31,7 @@
 
     - Overseerr:
         icon: overseerr.png
-        href: http://homelab:5055
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:5055
         description: Media Requests
         server: my-docker
         container: overseerr
@@ -44,7 +44,7 @@
 
     - Sonarr:
         icon: sonarr.png
-        href: http://homelab:8989
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8989
         description: TV Series Management
         server: my-docker
         container: sonarr
@@ -57,7 +57,7 @@
 
     - Radarr:
         icon: radarr.png
-        href: http://homelab:7878
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:7878
         description: Movies Management
         server: my-docker
         container: radarr
@@ -70,7 +70,7 @@
 
     - Prowlarr:
         icon: prowlarr.png
-        href: http://homelab:9696
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:9696
         description: Indexer Manager
         server: my-docker
         container: prowlarr
@@ -83,7 +83,7 @@
 
     - qBittorrent:
         icon: qbittorrent.png
-        href: http://homelab:8080
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8080
         description: Torrent Client (VPN)
         server: my-docker
         container: qbittorrent
@@ -97,7 +97,7 @@
 
     - Bazarr:
         icon: bazarr.png
-        href: http://homelab:6767
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:6767
         description: Subtitle Management
         server: my-docker
         container: bazarr
@@ -110,7 +110,7 @@
 
     - Tautulli:
         icon: tautulli.png
-        href: http://homelab:8181
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8181
         description: Plex Statistics & Monitoring
         server: my-docker
         container: tautulli
@@ -123,7 +123,7 @@
 
     - FlareSolverr:
         icon: flaresolverr.png
-        href: http://homelab:8191
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8191
         description: Cloudflare Solver
         server: my-docker
         container: flaresolverr
@@ -132,7 +132,7 @@
 - Infrastructure:
     - Dozzle:
         icon: dozzle.png
-        href: http://homelab:8081
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8081
         description: Docker Logs Viewer
         server: my-docker
         container: dozzle
@@ -140,7 +140,7 @@
 
     - Gatus:
         icon: gatus.png
-        href: http://homelab:8082
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8082
         description: Health Dashboard
         server: my-docker
         container: gatus
@@ -148,7 +148,7 @@
 
     - Homepage:
         icon: homepage.png
-        href: http://homelab:3000
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:3000
         description: This Dashboard
         server: my-docker
         container: homepage
@@ -157,7 +157,7 @@
 - Home Automation:
     - Home Assistant:
         icon: home-assistant.png
-        href: http://homelab:8123
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8123
         description: Home Automation Platform
         server: my-docker
         container: homeassistant

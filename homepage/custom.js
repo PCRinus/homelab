@@ -1,36 +1,41 @@
 // Rewrite service URLs when accessed via Cloudflare tunnel
-(function() {
+(function () {
   // Only run if accessed via home-server.me (Cloudflare tunnel)
   if (window.location.hostname === 'home-server.me') {
-    const urlMappings = {
+    // Port-to-subdomain mapping (hostname-agnostic)
+    const portMappings = {
       // Media Management
-      'homelab:32400': 'plex.home-server.me',
-      'homelab:8096': 'jellyfin.home-server.me',
-      'homelab:5055': 'overseerr.home-server.me',
-      'homelab:8989': 'sonarr.home-server.me',
-      'homelab:7878': 'radarr.home-server.me',
-      'homelab:9696': 'prowlarr.home-server.me',
-      'homelab:8080': 'qbittorrent.home-server.me',
-      'homelab:6767': 'bazarr.home-server.me',
-      'homelab:8181': 'tautulli.home-server.me',
-      'homelab:8191': 'flaresolverr.home-server.me',
+      '32400': 'plex.home-server.me',
+      '8096': 'jellyfin.home-server.me',
+      '5055': 'overseerr.home-server.me',
+      '8989': 'sonarr.home-server.me',
+      '7878': 'radarr.home-server.me',
+      '9696': 'prowlarr.home-server.me',
+      '8080': 'qbittorrent.home-server.me',
+      '6767': 'bazarr.home-server.me',
+      '8181': 'tautulli.home-server.me',
+      '8191': 'flaresolverr.home-server.me',
       // Infrastructure
-      'homelab:8081': 'dozzle.home-server.me',
-      'homelab:8082': 'gatus.home-server.me',
-      'homelab:3000': 'home-server.me',
+      '8081': 'dozzle.home-server.me',
+      '8082': 'gatus.home-server.me',
+      '3000': 'home-server.me',
       // Home Automation
-      'homelab:8123': 'ha.home-server.me'
+      '8123': 'ha.home-server.me'
     };
 
     // Function to rewrite URLs in links
     function rewriteLinks() {
-      document.querySelectorAll('a[href^="http://homelab:"]').forEach(link => {
-        const originalUrl = new URL(link.href);
-        const hostPort = `${originalUrl.hostname}:${originalUrl.port}`;
-        
-        if (urlMappings[hostPort]) {
-          // Replace with HTTPS Cloudflare tunnel URL
-          link.href = `https://${urlMappings[hostPort]}${originalUrl.pathname}${originalUrl.search}${originalUrl.hash}`;
+      document.querySelectorAll('a[href^="http://"]').forEach(link => {
+        try {
+          const url = new URL(link.href);
+          // Skip if already pointing to a Cloudflare tunnel URL
+          if (url.hostname.endsWith('home-server.me')) return;
+          // Match by port number regardless of hostname
+          if (url.port && portMappings[url.port]) {
+            link.href = `https://${portMappings[url.port]}${url.pathname}${url.search}${url.hash}`;
+          }
+        } catch (e) {
+          // Ignore malformed URLs
         }
       });
     }
