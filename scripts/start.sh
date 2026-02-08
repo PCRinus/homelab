@@ -76,11 +76,28 @@ if ! docker info > /dev/null 2>&1; then
 fi
 
 # --- Check NAS mount ---
-if [ -n "$MEDIA_PATH" ] && [ ! -d "$MEDIA_PATH" ]; then
-    echo -e "${YELLOW}WARNING: Media path ${MEDIA_PATH} does not exist${NC}"
-    echo -e "Services mounting this path (media-server, homepage) will fail."
-    echo -e "Set up the NAS mount first: ${YELLOW}./scripts/setup-nas-mount.sh${NC}"
-    echo
+if [ -n "$MEDIA_PATH" ]; then
+    if [ ! -d "$MEDIA_PATH" ]; then
+        echo -e "${YELLOW}WARNING: Media path ${MEDIA_PATH} does not exist${NC}"
+        echo -e "Services mounting this path (media-server, homepage) will fail."
+        echo -e "Set up the NAS mount first: ${YELLOW}./scripts/setup-nas-mount.sh${NC}"
+        echo
+    else
+        # With x-systemd.automount, the mount point exists but the NFS share
+        # only connects on first access. Docker bind-mounts don't trigger
+        # automount, so we need to access the path to wake it up.
+        if ! mountpoint -q "$MEDIA_PATH" 2>/dev/null; then
+            echo -e "${YELLOW}Activating NAS mount at ${MEDIA_PATH}...${NC}"
+            if ls "$MEDIA_PATH" > /dev/null 2>&1 && mountpoint -q "$MEDIA_PATH" 2>/dev/null; then
+                echo -e "${GREEN}NAS mount active${NC}"
+            else
+                echo -e "${RED}WARNING: ${MEDIA_PATH} is not a mount point${NC}"
+                echo -e "Services mounting this path (media-server, homepage) will fail."
+                echo -e "Check NAS connectivity: ${YELLOW}sudo mount ${MEDIA_PATH}${NC}"
+                echo
+            fi
+        fi
+    fi
 fi
 
 # --- Start stacks in order ---
