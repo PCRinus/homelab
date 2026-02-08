@@ -5,7 +5,6 @@ services:
     restart: unless-stopped
     networks:
       - media-net
-      - homepage_default
       - monitoring_default
     ports:
       - "20241:20241"
@@ -70,8 +69,6 @@ services:
 
 networks:
   media-net:
-    external: true
-  homepage_default:
     external: true
   monitoring_default:
     external: true

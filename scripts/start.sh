@@ -122,7 +122,7 @@ for stack in "${STACKS[@]}"; do
         # cloudflare-tunnel depends on networks from other stacks — verify they exist
         if [[ "$stack" == "cloudflare-tunnel" ]]; then
             MISSING_NETS=()
-            for net in homepage_default monitoring_default media-net; do
+            for net in monitoring_default media-net; do
                 if ! docker network inspect "$net" > /dev/null 2>&1; then
                     MISSING_NETS+=("$net")
                 fi
