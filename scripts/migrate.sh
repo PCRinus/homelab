@@ -18,6 +18,7 @@
 #   ./scripts/migrate.sh --dry-run          # Preview rsync without changes
 #   ./scripts/migrate.sh --skip-stop        # Don't stop services on old machine
 #   ./scripts/migrate.sh --stack media-server  # Migrate a single stack
+#   ./scripts/migrate.sh --ssh-keys         # Migrate GitHub Actions SSH keys only
 # ===========================================
 
 set -e
@@ -43,6 +44,7 @@ INCLUDE_MINECRAFT=false
 DRY_RUN=false
 SKIP_STOP=false
 SINGLE_STACK=""
+MIGRATE_SSH_KEYS=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -50,6 +52,7 @@ while [[ $# -gt 0 ]]; do
         --dry-run) DRY_RUN=true; shift ;;
         --skip-stop) SKIP_STOP=true; shift ;;
         --stack) SINGLE_STACK="$2"; shift 2 ;;
+        --ssh-keys) MIGRATE_SSH_KEYS=true; shift ;;
         --host) OLD_HOST="$2"; shift 2 ;;
         -h|--help)
             echo "Usage: $(basename "$0") [OPTIONS]"
@@ -59,6 +62,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --dry-run       Preview rsync without making changes"
             echo "  --skip-stop     Don't stop services on old machine"
             echo "  --stack NAME    Migrate a single stack"
+            echo "  --ssh-keys      Migrate GitHub Actions SSH keys only"
             echo "  --host HOST     Override old machine hostname (default: homelab)"
             echo "  -h, --help      Show this help"
             exit 0
@@ -118,6 +122,64 @@ if ! ssh -o ConnectTimeout=5 -o BatchMode=yes "$OLD_HOST" "echo ok" > /dev/null 
 fi
 echo -e "${GREEN}SSH connection OK${NC}"
 echo
+
+migrate_ssh_keys() {
+    local remote_ssh_dir="~/.ssh"
+    local local_ssh_dir="$HOME/.ssh"
+    local timestamp
+    timestamp=$(date +%Y%m%d%H%M%S)
+    local keys=(
+        "github_actions_homelab"
+        "github_actions_homelab.pub"
+    )
+
+    mkdir -p "$local_ssh_dir"
+
+    echo -e "${BOLD}Migrating GitHub Actions SSH keys from ${OLD_HOST}...${NC}"
+
+    for key in "${keys[@]}"; do
+        if ! ssh "$OLD_HOST" "test -f ${remote_ssh_dir}/${key}"; then
+            echo -e "  ${YELLOW}Missing on remote: ${remote_ssh_dir}/${key}${NC}"
+            continue
+        fi
+
+        if [ -f "${local_ssh_dir}/${key}" ]; then
+            mv "${local_ssh_dir}/${key}" "${local_ssh_dir}/${key}.bak-${timestamp}"
+            echo -e "  ${YELLOW}Backed up existing ${key} to .bak-${timestamp}${NC}"
+        fi
+
+        rsync -avP "${OLD_HOST}:${remote_ssh_dir}/${key}" "${local_ssh_dir}/${key}"
+    done
+
+    if [ -f "${local_ssh_dir}/github_actions_homelab" ]; then
+        chmod 600 "${local_ssh_dir}/github_actions_homelab"
+    fi
+    if [ -f "${local_ssh_dir}/github_actions_homelab.pub" ]; then
+        chmod 644 "${local_ssh_dir}/github_actions_homelab.pub"
+    fi
+
+    if [ -f "${local_ssh_dir}/github_actions_homelab.pub" ]; then
+        local pub_key
+        pub_key=$(cat "${local_ssh_dir}/github_actions_homelab.pub")
+        touch "${local_ssh_dir}/authorized_keys"
+        chmod 600 "${local_ssh_dir}/authorized_keys"
+        if ! grep -Fq "$pub_key" "${local_ssh_dir}/authorized_keys"; then
+            echo "$pub_key" >> "${local_ssh_dir}/authorized_keys"
+            echo -e "  ${GREEN}Added public key to authorized_keys${NC}"
+        else
+            echo -e "  ${GREEN}Public key already present in authorized_keys${NC}"
+        fi
+    fi
+
+    echo -e "${GREEN}SSH key migration complete.${NC}"
+    echo -e "Update the GitHub Actions secret SSH_PRIVATE_KEY with:${NC}"
+    echo -e "  ${YELLOW}cat ~/.ssh/github_actions_homelab${NC}"
+}
+
+if $MIGRATE_SSH_KEYS; then
+    migrate_ssh_keys
+    exit 0
+fi
 
 # --- Helper functions ---
 rsync_data() {
