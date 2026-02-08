@@ -210,13 +210,18 @@ The Hotio qBittorrent image uses a different directory layout than linuxserver:
 
 ```
 /mnt/unas/media/                 # NAS mount (mapped to /data in containers)
-├── torrents/
-│   ├── incomplete/              # Active downloads (qBittorrent)
-│   ├── movies/                  # Completed movie torrents (seeding)
-│   └── tv/                      # Completed TV torrents (seeding)
-└── media/
-    ├── movies/                  # Movie library (Plex)
-    └── tv/                      # TV library (Plex)
+├── incomplete/                  # Active downloads (qBittorrent temp dir)
+│   ├── radarr/                  # Active movie downloads
+│   ├── tv-sonarr/               # Active TV downloads
+│   └── anime-sonarr/            # Active anime downloads
+├── torrents/                    # Completed downloads (seeding)
+│   ├── movies/                  # Completed movie torrents
+│   ├── tv/                      # Completed TV torrents
+│   └── anime/                   # Completed anime torrents
+└── media/                       # Media libraries (Plex)
+    ├── movies/                  # Movie library
+    ├── tv/                      # TV library
+    └── anime/                   # Anime library
 ```
 
 ### How Downloads Are Organized
@@ -226,6 +231,7 @@ qBittorrent uses **categories** to organize downloads. Configure categories in S
 | App | Category | Save Path |
 |-----|----------|-----------|
 | Sonarr | `tv-sonarr` | `/data/torrents/tv` |
+| Sonarr Anime | `anime-sonarr` | `/data/torrents/anime` |
 | Radarr | `radarr` | `/data/torrents/movies` |
 
 ### Hardlinks

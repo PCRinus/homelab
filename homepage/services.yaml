@@ -42,6 +42,19 @@
           key: {{HOMEPAGE_VAR_SONARR_API_KEY}}
           fields: ["wanted", "queued", "series"]
 
+    - Sonarr Anime:
+        icon: sonarr.png
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8990
+        description: Anime Series Management
+        server: my-docker
+        container: sonarr-anime
+        showStats: true
+        widget:
+          type: sonarr
+          url: http://sonarr-anime:8989
+          key: {{HOMEPAGE_VAR_SONARR_ANIME_API_KEY}}
+          fields: ["wanted", "queued", "series"]
+
     - Radarr:
         icon: radarr.png
         href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:7878

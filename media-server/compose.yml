@@ -59,6 +59,30 @@ services:
       retries: 3
       start_period: 30s
 
+  sonarr-anime:
+    image: ghcr.io/hotio/sonarr:release-4.0.16.2944
+    container_name: sonarr-anime
+    env_file:
+      - ../.env
+    volumes:
+      - ${DOCKER_DATA}/sonarr-anime:/config
+      - ${MEDIA_PATH}:/data
+    ports:
+      - "8990:8989"
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
+    networks:
+      - media-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8989/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   radarr:
     image: ghcr.io/hotio/radarr:release-6.0.4.10291
     container_name: radarr

@@ -28,6 +28,10 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       originRequest = {}
       service       = "http://sonarr:8989"
       }, {
+      hostname      = "sonarr-anime.home-server.me"
+      originRequest = {}
+      service       = "http://sonarr-anime:8989"
+      }, {
       hostname      = "radarr.home-server.me"
       originRequest = {}
       service       = "http://radarr:7878"

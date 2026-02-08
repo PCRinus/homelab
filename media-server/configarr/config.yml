@@ -31,6 +31,19 @@ sonarr:
     #       - name: WEB-1080p
     #         score: -10000
 
+  # Anime-dedicated Sonarr instance
+  anime:
+    base_url: http://sonarr-anime:8989
+    api_key: !secret SONARR_ANIME_API_KEY
+
+    include:
+      # Anime-specific quality definitions (different file sizes from standard TV)
+      - template: sonarr-quality-definition-anime
+
+      # Anime quality profile and custom formats (Remux-1080p - Anime)
+      - template: sonarr-v4-quality-profile-anime
+      - template: sonarr-v4-custom-formats-anime
+
 # ============================================================================
 # RADARR CONFIGURATION
 # ============================================================================

@@ -61,6 +61,19 @@ endpoints:
       - type: discord
         description: "Sonarr is down or not responding"
 
+  - name: Sonarr Anime
+    group: Media Server
+    url: "http://sonarr-anime:8989/api/v3/system/status"
+    interval: 60s
+    headers:
+      X-Api-Key: "${SONARR_ANIME_API_KEY}"
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 1000"
+    alerts:
+      - type: discord
+        description: "Sonarr Anime is down or not responding"
+
   - name: Radarr
     group: Media Server
     url: "http://radarr:7878/api/v3/system/status"

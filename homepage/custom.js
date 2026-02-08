@@ -8,6 +8,7 @@
       '32400': 'plex.home-server.me',
       '5055': 'overseerr.home-server.me',
       '8989': 'sonarr.home-server.me',
+      '8990': 'sonarr-anime.home-server.me',
       '7878': 'radarr.home-server.me',
       '9696': 'prowlarr.home-server.me',
       '8080': 'qbittorrent.home-server.me',
