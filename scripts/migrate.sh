@@ -135,17 +135,26 @@ rsync_data() {
         mkdir -p "${DOCKER_DATA}/${dir_name}"
     fi
 
+    # Use sudo rsync on the remote side to handle rootless Docker's
+    # subordinate UID-owned files that the SSH user can't read directly.
     rsync -avP --delete \
+        --rsync-path="sudo rsync" \
+        --numeric-ids \
         "${extra_args[@]}" \
         "${OLD_HOST}:${OLD_DOCKER_DATA}/${dir_name}/" \
         "${DOCKER_DATA}/${dir_name}/" 2>&1 | \
-        tail -3  # Show just the summary
+        tail -5  # Show just the summary
 
     return ${PIPESTATUS[0]}
 }
 
 stop_remote_stack() {
     local stack="$1"
+
+    if $DRY_RUN; then
+        echo -e "  ${YELLOW}Dry run — skipping remote stop${NC}"
+        return 0
+    fi
 
     if $SKIP_STOP; then
         echo -e "  ${YELLOW}Skipping remote stop (--skip-stop)${NC}"
