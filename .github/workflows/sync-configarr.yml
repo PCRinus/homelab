@@ -25,7 +25,7 @@ jobs:
       - name: Run Configarr sync
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ vars.HOMELAB_SSH_HOST || 'homelab' }}
+          host: ${{ vars.HOMELAB_SSH_HOST || 'homeserver' }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 10m

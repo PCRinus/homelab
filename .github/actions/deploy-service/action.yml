@@ -52,7 +52,13 @@ runs:
         key: ${{ inputs.ssh_private_key }}
         timeout: 30m
         command_timeout: 25m
+        script_stop: true
         script: |
+          set -euo pipefail
+          if [ ! -d "${{ inputs.repo_dir }}" ]; then
+            echo "Repo dir not found: ${{ inputs.repo_dir }}"
+            exit 1
+          fi
           cd ${{ inputs.repo_dir }}
           git fetch --prune
           git checkout main
