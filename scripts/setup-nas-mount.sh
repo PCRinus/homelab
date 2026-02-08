@@ -107,21 +107,49 @@ echo
 # ===========================================
 if [ "$PROTOCOL" = "nfs" ]; then
     echo -e "${BOLD}NFS export path${NC}"
-    echo "The exported path on the NAS (e.g., /volume1/media, /mnt/pool/media)"
+    echo "The path of the shared folder on the NAS (e.g., /volume1/media, /mnt/pool/media)"
 
     # Try to discover NFS exports
+    EXPORT_PATHS=()
     if command -v showmount >/dev/null 2>&1; then
         echo -e "${YELLOW}Querying NFS exports from ${NAS_SERVER}...${NC}"
         EXPORTS=$(showmount -e "$NAS_SERVER" 2>/dev/null | tail -n +2 || true)
         if [ -n "$EXPORTS" ]; then
+            # Parse export paths into an array
+            while IFS= read -r line; do
+                path=$(echo "$line" | awk '{print $1}')
+                allowed=$(echo "$line" | awk '{$1=""; print $0}' | xargs)
+                EXPORT_PATHS+=("$path")
+                EXPORT_ALLOWED+=("$allowed")
+            done <<< "$EXPORTS"
+
             echo -e "${GREEN}Available exports:${NC}"
-            echo "$EXPORTS" | sed 's/^/  /'
+            for i in "${!EXPORT_PATHS[@]}"; do
+                echo -e "  ${BOLD}$((i+1)))${NC} ${EXPORT_PATHS[$i]}  ${YELLOW}(${EXPORT_ALLOWED[$i]})${NC}"
+            done
+            echo
+            if [ ${#EXPORT_PATHS[@]} -eq 1 ]; then
+                read -rp "> Select export [1] or type a path: " EXPORT_CHOICE
+                EXPORT_CHOICE="${EXPORT_CHOICE:-1}"
+            else
+                read -rp "> Select export (1-${#EXPORT_PATHS[@]}) or type a path: " EXPORT_CHOICE
+            fi
+
+            # Check if input is a number (selection) or a path
+            if [[ "$EXPORT_CHOICE" =~ ^[0-9]+$ ]] && [ "$EXPORT_CHOICE" -ge 1 ] && [ "$EXPORT_CHOICE" -le ${#EXPORT_PATHS[@]} ]; then
+                NAS_SHARE="${EXPORT_PATHS[$((EXPORT_CHOICE-1))]}"
+                echo -e "Selected: ${GREEN}${NAS_SHARE}${NC}"
+            else
+                NAS_SHARE="$EXPORT_CHOICE"
+            fi
         else
             echo -e "${YELLOW}Could not list exports (NAS may block showmount).${NC}"
+            read -rp "> Export path: " NAS_SHARE
         fi
+    else
+        read -rp "> Export path: " NAS_SHARE
     fi
 
-    read -rp "> Export path: " NAS_SHARE
     if [ -z "$NAS_SHARE" ]; then
         echo -e "${RED}Export path is required.${NC}"
         exit 1
