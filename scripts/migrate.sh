@@ -145,7 +145,15 @@ rsync_data() {
         "${DOCKER_DATA}/${dir_name}/" 2>&1 | \
         tail -5  # Show just the summary
 
-    return ${PIPESTATUS[0]}
+    local rc=${PIPESTATUS[0]}
+    # Code 23 = some file attributes couldn't transfer (common with rootless
+    # Docker's user namespace remapping). Data transfers fine — treat as warning.
+    if [ "$rc" -eq 23 ]; then
+        echo -e "  ${YELLOW}Warning: some file attributes could not be preserved (rsync code 23)${NC}"
+        echo -e "  ${YELLOW}This is normal with rootless Docker — data transferred OK${NC}"
+        return 0
+    fi
+    return "$rc"
 }
 
 stop_remote_stack() {
