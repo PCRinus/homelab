@@ -141,6 +141,7 @@ cp home-assistant/secrets.yaml.example home-assistant/secrets.yaml
 GitHub Actions deploy services via SSH over Tailscale when compose files change on `main`. See [.github/SETUP.md](.github/SETUP.md) for configuration.
 
 Set the `HOMELAB_REPO_DIR` repository variable in GitHub to the absolute path of the repo on the server (e.g., `/home/mircea/homeserver`).
+Set the `HOMELAB_SSH_HOST` repository variable to the SSH host (or alias) of the target server.
 
 ## GPU Transcoding (Optional)
 

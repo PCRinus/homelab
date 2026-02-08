@@ -21,6 +21,7 @@ jobs:
           service_name: Homepage
           service_path: homepage
           repo_dir: ${{ vars.HOMELAB_REPO_DIR || '/home/mircea/homeserver' }}
+          ssh_host: ${{ vars.HOMELAB_SSH_HOST || 'homelab' }}
           ts_oauth_client_id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           ts_oauth_secret: ${{ secrets.TS_OAUTH_SECRET }}
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
