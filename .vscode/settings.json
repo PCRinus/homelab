@@ -26,6 +26,8 @@
     ],
     "chat.tools.terminal.autoApprove": {
         "sops": true,
-        "age": true
+        "age": true,
+        "mkdir": true,
+        "docker exec": true
     }
 }
