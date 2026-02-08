@@ -73,7 +73,7 @@ declare -A STACK_DATA
 STACK_DATA[monitoring]="gatus"
 STACK_DATA[homepage]="homepage"
 STACK_DATA[home-assistant]="home-assistant"
-STACK_DATA[media-server]="qbittorrent sonarr radarr prowlarr overseerr plex jellyfin bazarr tautulli configarr"
+STACK_DATA[media-server]="qbittorrent sonarr radarr prowlarr overseerr plex bazarr tautulli configarr"
 STACK_DATA[minecraft-servers]="minecraft-server-survival-island minecraft-server-world-generation"
 # cloudflare-tunnel has no persistent data in DOCKER_DATA
 

@@ -190,37 +190,6 @@ services:
       retries: 3
       start_period: 120s
 
-  jellyfin:
-    image: lscr.io/linuxserver/jellyfin:10.11.6
-    container_name: jellyfin
-    env_file:
-      - ../.env
-    devices:
-      - /dev/dri:/dev/dri  # GPU for VA-API hardware acceleration
-    device_cgroup_rules:
-      - 'c 226:* rwm'  # Allow access to DRI devices (no-op on rootful, required for rootless)
-    group_add:
-      - "${RENDER_GID}"  # render group GID for GPU access
-    volumes:
-      - ${DOCKER_DATA}/jellyfin:/config
-      - ${MEDIA_PATH}:/data
-    ports:
-      - "8096:8096"     # Jellyfin Web UI
-      - "7359:7359/udp" # Jellyfin auto-discovery
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-      - 8.8.8.8
-    networks:
-      - media-net
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 120s
-
   bazarr:
     image: ghcr.io/hotio/bazarr:release-1.5.3
     container_name: bazarr

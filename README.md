@@ -77,7 +77,7 @@ Re-running `scripts/init.sh` is safe — it replaces the existing block in `~/.z
 
 | Directory | Services | Description |
 |-----------|----------|-------------|
-| `media-server/` | Plex, Jellyfin, Sonarr, Radarr, Prowlarr, qBittorrent, Overseerr, Bazarr, Tautulli, FlareSolverr | Media management and streaming |
+| `media-server/` | Plex, Sonarr, Radarr, Prowlarr, qBittorrent, Overseerr, Bazarr, Tautulli, FlareSolverr | Media management and streaming |
 | `cloudflare-tunnel/` | Cloudflared + watchdog | Zero Trust tunnel for external access |
 | `homepage/` | Homepage dashboard | Service dashboard with widgets |
 | `home-assistant/` | Home Assistant | Smart home automation |
@@ -142,7 +142,7 @@ GitHub Actions deploy services via SSH over Tailscale when compose files change 
 
 ## GPU Transcoding (Optional)
 
-For hardware-accelerated transcoding in Plex/Jellyfin, the compose file passes through `/dev/dri`. You need:
+For hardware-accelerated transcoding in Plex, the compose file passes through `/dev/dri`. You need:
 
 ```bash
 # Check for a GPU

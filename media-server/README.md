@@ -13,14 +13,9 @@ This directory contains the Docker Compose configuration for the media server st
 | Bazarr | 6767 | Subtitle management |
 | Overseerr | 5055 | Media request system |
 | Plex | 32400 | Media server |
-| Jellyfin | 8096 | Media server (alt) with VA-API hardware transcoding |
 | FlareSolverr | 8191 | Cloudflare bypass for indexers |
 | Buildarr | - | Configuration management for *arr stack (basic settings) |
 | Configarr | - | Quality profiles & custom formats via TRaSH-Guides |
-
-## Jellyfin Hardware Acceleration (VA-API)
-
-Jellyfin uses VA-API for hardware-accelerated transcoding on the AMD Ryzen 5 PRO 2400GE's integrated Radeon Vega graphics.
 
 ### NAS Mount (NFS)
 
@@ -68,7 +63,7 @@ sudo usermod -aG render $USER
 
 ### Compose Configuration
 
-The Jellyfin service passes through the GPU:
+The Plex service passes through the GPU:
 ```yaml
 devices:
   - /dev/dri:/dev/dri  # AMD Vega GPU for VA-API
@@ -78,24 +73,9 @@ group_add:
   - "993"             # render group GID
 ```
 
-### Jellyfin Settings
-
-Configure in **Dashboard → Playback → Transcoding**:
-
-| Setting | Value |
-|---------|-------|
-| Hardware acceleration | Video Acceleration API (VA-API) |
-| VA-API Device | `/dev/dri/renderD128` |
-| Enable hardware decoding | H.264, HEVC, VP9 |
-| Enable hardware encoding | ✓ |
-| Enable VAAPI tone mapping | ✓ (for HDR→SDR) |
-
 ### Verify It's Working
 
 ```bash
-# Check VA-API is accessible in container
-docker exec jellyfin /usr/lib/jellyfin-ffmpeg/ffmpeg -init_hw_device vaapi=va:/dev/dri/renderD128 -hide_banner
-
 # Monitor GPU usage during transcoding
 watch -n 1 cat /sys/class/drm/card0/device/gpu_busy_percent
 ```

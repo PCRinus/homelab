@@ -132,23 +132,3 @@ resource "cloudflare_zero_trust_access_application" "ha_bypass" {
   }]
 }
 
-# Jellyfin - Uses its own authentication (like Plex)
-resource "cloudflare_zero_trust_access_application" "jellyfin_bypass" {
-  account_id       = var.account_id
-  name             = "Jellyfin (Bypass)"
-  domain           = "jellyfin.home-server.me"
-  type             = "self_hosted"
-  session_duration = "24h"
-
-  allow_authenticate_via_warp = false
-  app_launcher_visible        = false
-
-  policies = [{
-    name       = "Bypass - Allow Everyone"
-    decision   = "bypass"
-    precedence = 1
-    include = [{
-      everyone = {}
-    }]
-  }]
-}

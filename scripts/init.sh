@@ -131,7 +131,7 @@ echo
 # 5. RENDER_GID - GPU render group for HW transcoding
 # ===========================================
 echo -e "${BOLD}GPU render group${NC}"
-echo "Used by Plex/Jellyfin for hardware-accelerated transcoding."
+echo "Used by Plex for hardware-accelerated transcoding."
 
 if getent group render > /dev/null 2>&1; then
     DETECTED_GID=$(getent group render | cut -d: -f3)

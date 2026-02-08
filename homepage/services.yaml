@@ -16,19 +16,6 @@
           key: {{HOMEPAGE_VAR_PLEX_TOKEN}}
           fields: ["streams", "movies", "tv"]
 
-    - Jellyfin:
-        icon: jellyfin.png
-        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8096
-        description: Media Server (Alt)
-        server: my-docker
-        container: jellyfin
-        showStats: true
-        widget:
-          type: jellyfin
-          url: http://jellyfin:8096
-          key: {{HOMEPAGE_VAR_JELLYFIN_API_KEY}}
-          fields: ["movies", "series", "episodes"]
-
     - Overseerr:
         icon: overseerr.png
         href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:5055

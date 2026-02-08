@@ -6,7 +6,6 @@
     const portMappings = {
       // Media Management
       '32400': 'plex.home-server.me',
-      '8096': 'jellyfin.home-server.me',
       '5055': 'overseerr.home-server.me',
       '8989': 'sonarr.home-server.me',
       '7878': 'radarr.home-server.me',
