@@ -18,9 +18,10 @@
     cpu: true
     cputemp: true
     memory: true
+    uptime: true
+    disk: /
 
 - resources:
-    label: Storage devices
+    label: UNAS 2
     disk:
-      - /
       - /mnt/unas/media
