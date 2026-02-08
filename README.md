@@ -37,8 +37,8 @@ chsh -s $(which zsh)
 
 ```bash
 # 1. Clone the repo
-git clone <repo-url> ~/compose-files
-cd ~/compose-files
+git clone <repo-url> ~/homeserver
+cd ~/homeserver
 
 # 2. Copy your age key (from old machine or password manager)
 mkdir -p ~/.config/sops/age
@@ -139,6 +139,8 @@ cp home-assistant/secrets.yaml.example home-assistant/secrets.yaml
 ## CI/CD
 
 GitHub Actions deploy services via SSH over Tailscale when compose files change on `main`. See [.github/SETUP.md](.github/SETUP.md) for configuration.
+
+Set the `HOMELAB_REPO_DIR` repository variable in GitHub to the absolute path of the repo on the server (e.g., `/home/mircea/homeserver`).
 
 ## GPU Transcoding (Optional)
 

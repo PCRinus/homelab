@@ -6,7 +6,7 @@ This directory contains the Buildarr configuration for managing the *arr stack (
 
 1. **Create the secrets file** from the example:
    ```bash
-   cd /home/mircea/compose-files/media-server/buildarr
+   cd /home/mircea/homeserver/media-server/buildarr
    cp buildarr-secrets.yml.example buildarr-secrets.yml
    ```
 
@@ -14,7 +14,7 @@ This directory contains the Buildarr configuration for managing the *arr stack (
 
 3. **Test the configuration** before starting in daemon mode:
    ```bash
-   cd /home/mircea/compose-files/media-server
+   cd /home/mircea/homeserver/media-server
    docker compose run --rm buildarr test-config
    ```
 

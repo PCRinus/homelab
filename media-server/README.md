@@ -130,7 +130,7 @@ qBittorrent stores its configuration in `/home/mircea/docker/qbittorrent/`. Sett
 ### Starting the Stack
 
 ```bash
-cd /home/mircea/compose-files/media-server
+cd /home/mircea/homeserver/media-server
 ./start.sh
 ```
 
@@ -240,7 +240,7 @@ Since `/data/torrents` and `/data/media` are on the same filesystem (NAS), Sonar
 Useful API commands for managing the *arr stack. Source the `.env` file first to get API keys:
 
 ```bash
-source /home/mircea/compose-files/.env
+source /home/mircea/homeserver/.env
 ```
 
 ### Radarr
@@ -333,7 +333,7 @@ After connecting Bazarr to Plex via OAuth, manually update the server URL in the
 
 ```bash
 # Stop Bazarr
-cd /home/mircea/compose-files/media-server && docker compose stop bazarr
+cd /home/mircea/homeserver/media-server && docker compose stop bazarr
 
 # Edit config (use container for rootless Docker permissions)
 docker run --rm -v /home/mircea/docker/bazarr/config:/config alpine \
@@ -376,7 +376,7 @@ Configarr is a **one-shot job**, not a daemon. Run it manually or via cron:
 
 ```bash
 # Run once to sync profiles
-cd /home/mircea/compose-files/media-server
+cd /home/mircea/homeserver/media-server
 docker compose run --rm configarr
 
 # Dry-run to see what would change (check logs)
@@ -413,7 +413,7 @@ Add to host crontab to run weekly:
 crontab -e
 
 # Add line (runs every Monday at 4 AM)
-0 4 * * 1 cd /home/mircea/compose-files/media-server && docker compose run --rm configarr >> /home/mircea/docker/configarr/configarr.log 2>&1
+0 4 * * 1 cd /home/mircea/homeserver/media-server && docker compose run --rm configarr >> /home/mircea/docker/configarr/configarr.log 2>&1
 ```
 
 ### Switching to 4K

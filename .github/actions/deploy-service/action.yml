@@ -12,6 +12,10 @@ inputs:
     description: 'Custom deployment script'
     required: false
     default: ./start.sh
+  repo_dir:
+    description: 'Absolute path to the homelab repo on the server'
+    required: false
+    default: /home/mircea/homeserver
   ts_oauth_client_id:
     description: 'Tailscale OAuth client ID'
     required: true
@@ -45,5 +49,9 @@ runs:
         timeout: 30m
         command_timeout: 25m
         script: |
-          cd compose-files/${{ inputs.service_path }}
+          cd ${{ inputs.repo_dir }}
+          git fetch --prune
+          git checkout main
+          git pull --ff-only
+          cd ${{ inputs.service_path }}
           ${{ inputs.deploy_script }} --quiet 2>&1 | tail -20

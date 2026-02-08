@@ -30,7 +30,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 10m
           script: |
-            cd compose-files/media-server
+            cd ${{ vars.HOMELAB_REPO_DIR || '/home/mircea/homeserver' }}/media-server
             echo "Starting Configarr TRaSH-Guides sync..."
             docker compose run --rm configarr 2>&1 | tee /tmp/configarr-$(date +%Y%m%d).log
             echo "Configarr sync completed"

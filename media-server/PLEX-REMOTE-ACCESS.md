@@ -68,7 +68,7 @@ Set **"Secure connections"** to **"Preferred"** (not required, since Cloudflare 
 1. Click **Save Changes**
 2. Restart Plex:
    ```bash
-   cd /home/mircea/compose-files/media-server && docker restart plex
+   cd /home/mircea/homeserver/media-server && docker restart plex
    ```
 
 ### 7. Refresh Mobile Clients

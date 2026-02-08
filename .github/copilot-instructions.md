@@ -4,7 +4,7 @@
 Self-hosted homelab running Docker in **rootless mode** on Linux. Services are organized in separate directories, each with its own `compose.yml`. All services connect via the `media-net` Docker network for internal communication.
 
 **Key paths:**
-- Compose files: `/home/mircea/compose-files/<service>/`
+- Compose files: `/home/mircea/homeserver/<service>/`
 - Container data: `/home/mircea/docker/<service>/` (persistent state, databases, cache)
 - NAS media storage: `/mnt/unas/media/` (torrents at `/torrents`, media at `/media/`)
 
@@ -68,13 +68,13 @@ networks:
 ## Startup Commands
 ```bash
 # Media stack
-cd /home/mircea/compose-files/media-server && ./start.sh
+cd /home/mircea/homeserver/media-server && ./start.sh
 
 # Most services
-cd /home/mircea/compose-files/<service> && docker compose up -d
+cd /home/mircea/homeserver/<service> && docker compose up -d
 
 # All services at once
-cd /home/mircea/compose-files && ./scripts/start.sh
+cd /home/mircea/homeserver && ./scripts/start.sh
 
 # Minecraft (specify the server file)
 docker compose -f survival-island.compose.yml up -d
