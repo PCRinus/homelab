@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
+    environment:
+      - PGID=${DOCKER_GID} # Docker socket GID — overrides .env so Homepage can access the socket as non-root
     ports:
       - 3000:3000
     volumes:

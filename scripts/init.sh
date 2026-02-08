@@ -104,7 +104,31 @@ fi
 echo
 
 # ===========================================
-# 4. RENDER_GID - GPU render group for HW transcoding
+# 4. DOCKER_GID - Docker socket group
+# ===========================================
+echo -e "${BOLD}Docker socket group${NC}"
+echo "GID of the Docker socket — used by Homepage to access Docker as non-root."
+
+if [ -S "$DOCKER_SOCK" ]; then
+    DETECTED_DOCKER_GID=$(stat -c '%g' "$DOCKER_SOCK")
+    echo -e "Detected Docker socket GID: ${GREEN}${DETECTED_DOCKER_GID}${NC}"
+elif getent group docker > /dev/null 2>&1; then
+    DETECTED_DOCKER_GID=$(getent group docker | cut -d: -f3)
+    echo -e "Detected docker group GID: ${GREEN}${DETECTED_DOCKER_GID}${NC}"
+else
+    DETECTED_DOCKER_GID=""
+    echo -e "${YELLOW}Could not detect Docker GID — Homepage may not be able to access Docker socket${NC}"
+fi
+
+if [ -n "$DETECTED_DOCKER_GID" ]; then
+    DOCKER_GID="$DETECTED_DOCKER_GID"
+else
+    read -rp "> GID (leave empty to skip): " DOCKER_GID
+fi
+echo
+
+# ===========================================
+# 5. RENDER_GID - GPU render group for HW transcoding
 # ===========================================
 echo -e "${BOLD}GPU render group${NC}"
 echo "Used by Plex/Jellyfin for hardware-accelerated transcoding."
@@ -135,6 +159,11 @@ echo -e "${BOLD}Summary:${NC}"
 echo -e "  DOCKER_DATA = ${GREEN}${DOCKER_DATA}${NC}"
 echo -e "  MEDIA_PATH  = ${GREEN}${MEDIA_PATH}${NC}"
 echo -e "  DOCKER_SOCK = ${GREEN}${DOCKER_SOCK}${NC}"
+if [ -n "$DOCKER_GID" ]; then
+    echo -e "  DOCKER_GID  = ${GREEN}${DOCKER_GID}${NC}"
+else
+    echo -e "  DOCKER_GID  = ${YELLOW}(not set)${NC}"
+fi
 if [ -n "$RENDER_GID" ]; then
     echo -e "  RENDER_GID  = ${GREEN}${RENDER_GID}${NC}"
 else
@@ -158,6 +187,7 @@ if [ -f "$ZSHENV" ]; then
     grep -v "^export DOCKER_DATA=" | \
     grep -v "^export MEDIA_PATH=" | \
     grep -v "^export DOCKER_SOCK=" | \
+    grep -v "^export DOCKER_GID=" | \
     grep -v "^export RENDER_GID=" > "${ZSHENV}.tmp" || true
     mv "${ZSHENV}.tmp" "$ZSHENV"
 fi
@@ -167,6 +197,7 @@ ${MARKER_START}
 export DOCKER_DATA="${DOCKER_DATA}"
 export MEDIA_PATH="${MEDIA_PATH}"
 export DOCKER_SOCK="${DOCKER_SOCK}"
+export DOCKER_GID="${DOCKER_GID}"
 export RENDER_GID="${RENDER_GID}"
 ${MARKER_END}
 EOF
