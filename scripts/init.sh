@@ -153,6 +153,39 @@ fi
 echo
 
 # ===========================================
+# 6. Home Assistant trusted proxies
+# ===========================================
+echo -e "${BOLD}Home Assistant trusted proxies${NC}"
+echo "IPs/CIDRs that Home Assistant should trust for X-Forwarded-For."
+echo "Comma-separated list."
+DEFAULT_TRUSTED_PROXIES="127.0.0.1,::1"
+MEDIA_NET_SUBNETS=""
+if command -v docker >/dev/null 2>&1; then
+    MEDIA_NET_SUBNETS=$(docker network inspect media-net \
+        --format '{{range .IPAM.Config}}{{.Subnet}},{{end}}' 2>/dev/null | \
+        sed 's/,$//')
+fi
+if [ -n "$MEDIA_NET_SUBNETS" ]; then
+    echo -e "Detected media-net subnet(s): ${GREEN}${MEDIA_NET_SUBNETS}${NC}"
+    DEFAULT_TRUSTED_PROXIES="${DEFAULT_TRUSTED_PROXIES},${MEDIA_NET_SUBNETS}"
+else
+    echo -e "${YELLOW}Could not detect media-net subnet(s).${NC}"
+fi
+read -rp "> Proxies [${DEFAULT_TRUSTED_PROXIES}]: " INPUT_TRUSTED_PROXIES
+TRUSTED_PROXIES="${INPUT_TRUSTED_PROXIES:-$DEFAULT_TRUSTED_PROXIES}"
+TRUSTED_PROXIES_FILE="${REPO_DIR}/home-assistant/trusted_proxies.yaml"
+> "$TRUSTED_PROXIES_FILE"
+IFS=',' read -ra PROXY_LIST <<< "$TRUSTED_PROXIES"
+for proxy in "${PROXY_LIST[@]}"; do
+    proxy="${proxy// /}"
+    if [ -n "$proxy" ]; then
+        echo "- $proxy" >> "$TRUSTED_PROXIES_FILE"
+    fi
+done
+echo -e "${GREEN}Wrote ${TRUSTED_PROXIES_FILE}${NC}"
+echo
+
+# ===========================================
 # Summary & confirmation
 # ===========================================
 echo -e "${BOLD}Summary:${NC}"

@@ -1,4 +1,3 @@
-
 # Loads default set of integrations. Do not remove.
 default_config:
 
@@ -17,8 +16,4 @@ scene: !include scenes.yaml
 
 http:
   use_x_forwarded_for: true
-  trusted_proxies:
-    - 127.0.0.1
-    - ::1
-    - 172.21.0.0/16
-
+  trusted_proxies: !include trusted_proxies.yaml
