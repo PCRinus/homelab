@@ -136,6 +136,63 @@ cp home-assistant/secrets.yaml.example home-assistant/secrets.yaml
 
 > **Back up your age key** (`~/.config/sops/age/keys.txt`) — it's the one secret needed to unlock everything.
 
+## Plex Integration Setup
+
+For the fully automatic media pipeline to work (request → download → import → Plex library update → Overseerr status update), three pieces of integration must be configured in the service web UIs.
+
+### 1. Sonarr / Radarr → Plex (Library Scan on Import)
+
+Each *arr instance needs a **Plex Media Server** connection so that when a download finishes and gets imported, it tells Plex to scan the relevant library. Without this, files land on disk but Plex never knows they're there.
+
+Configure in **each** of Sonarr (`localhost:8989`), Sonarr Anime (`localhost:8990`), and Radarr (`localhost:7878`):
+
+1. Go to **Settings → Connect → +** → select **Plex Media Server**
+2. Fill in:
+   - **Host:** `plex` (Docker container name — works because all services share `media-net`)
+   - **Port:** `32400`
+   - **Auth Token:** your Plex token (see below)
+   - **Update Library:** enabled
+3. Under **Notification Triggers**, enable:
+   - **On Import** (fires when a download is moved to the media folder)
+   - **On Upgrade** (fires when a higher-quality version replaces an existing file)
+4. Click **Test** to verify the connection, then **Save**
+
+> **Getting your Plex token:** Open Plex web → navigate to any media item → click `⋮` → Get Info → View XML. The `X-Plex-Token` parameter in the URL is your token. Alternatively, extract it from:
+> ```bash
+> grep -oP 'PlexOnlineToken="\K[^"]+' "$DOCKER_DATA/plex/config/Library/Application Support/Plex Media Server/Preferences.xml"
+> ```
+
+### 2. Overseerr → Sonarr / Radarr (Sync Scan)
+
+Overseerr needs **Enable Scan** turned on for each Sonarr and Radarr server so it can poll their state and transition requests from "Requested" to "Available".
+
+1. Go to **Settings → Services → Radarr Servers** → edit the `radarr` server entry
+   - Toggle **Enable Scan** on → Save
+2. Go to **Settings → Services → Sonarr Servers** → edit each server (`sonarr`, `Sonarr Anime`)
+   - Toggle **Enable Scan** on → Save
+
+Without this, Overseerr's periodic Radarr/Sonarr scan jobs will log `Sync not enabled. Skipping...` and requests will stay stuck as "Requested" forever.
+
+### 3. Overseerr → Plex (Recently Added Scan)
+
+This should already be configured if Overseerr was set up with Plex as the media server. Verify under **Settings → Plex** that your Plex server is connected and libraries (Movies, TV Shows, Anime) are all enabled for scanning.
+
+The **Plex Recently Added Scan** job runs every 5 minutes by default and detects newly added content. If content was missed (e.g., after re-enabling sync), use **Run Full Scan** from Settings → Plex to re-index everything.
+
+### End-to-End Flow
+
+```
+User requests media in Overseerr
+  → Overseerr sends request to Sonarr/Radarr
+    → Sonarr/Radarr searches via Prowlarr and sends to qBittorrent
+      → qBittorrent downloads, Sonarr/Radarr imports to media folder
+        → Sonarr/Radarr notifies Plex via Connect (step 1)
+          → Plex scans library and picks up new file
+            → Overseerr's Plex Recently Added Scan detects it (step 3)
+              → Overseerr's Sonarr/Radarr Scan confirms download status (step 2)
+                → Request status updates to "Available"
+```
+
 ## CI/CD
 
 GitHub Actions deploy services via SSH over Tailscale when compose files change on `main`. See [.github/SETUP.md](.github/SETUP.md) for configuration.
