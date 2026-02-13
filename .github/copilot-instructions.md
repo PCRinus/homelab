@@ -1,7 +1,7 @@
 # Copilot Instructions for Homelab Repository
 
 ## Architecture Overview
-Self-hosted homelab running Docker in **rootless mode** on Linux. Services are organized in separate directories, each with its own `compose.yml`. All services connect via the `media-net` Docker network for internal communication.
+Self-hosted homelab running Docker in **rootfull mode** on Linux Server. Services are organized in separate directories, each with its own `compose.yml`. All services connect via the `media-net` Docker network for internal communication.
 
 **Key paths:**
 - Compose files: `/home/mircea/homeserver/<service>/`
@@ -155,12 +155,3 @@ When adding a new service or migrating an existing one (e.g., switching torrent 
 ### 7. Documentation
 - Update relevant `README.md` files
 - Update `copilot-instructions.md` if architecture changes
-
-### 8. Cleanup (for migrations)
-- Stop and remove old container: `docker stop <old> && docker rm <old>`
-- Delete old config directory using container (for rootless Docker permissions):
-  ```bash
-  docker run --rm -v /home/mircea/docker:/data alpine rm -rf /data/<old-service>
-  ```
-- Remove old files from repo (settings, configs)
-- Update any *arr apps or other services that reference the old service
