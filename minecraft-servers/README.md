@@ -7,9 +7,15 @@ This directory contains Docker Compose configurations for multiple Minecraft ser
 ```
 minecraft-servers/
 ├── common.compose.yml           # Shared configuration (base image, mods, settings)
+├── servers/
+│   ├── world-gen-server.compose.yml
+│   └── survival-island.compose.yml
+├── mods/
+│   ├── performance.txt          # Shared performance mods
+│   ├── content.txt              # Shared content/gameplay mods
+│   └── world-generation-extra.txt # World-gen-only extra mods
+├── resolve-modrinth-mods.sh     # Validates and resolves compatible mod versions
 ├── .env                         # Environment variables (CF_API_KEY, TZ)
-├── world-gen-server.compose.yml # World generation server
-├── survival-island.compose.yml  # Survival island server
 └── README.md                    # This file
 ```
 
@@ -18,7 +24,8 @@ minecraft-servers/
 `common.compose.yml` provides reusable configuration through YAML anchors:
 
 - **`x-minecraft-base`**: Base service config (image, EULA, ops, timezone, etc.)
-- **`x-minecraft-common-mods`**: Shared mod list (performance, quality of life, building mods)
+
+Shared mods are now managed from files in `mods/` and resolved automatically before startup.
 
 ## Environment Variables
 
@@ -35,23 +42,55 @@ From this directory, run:
 
 ```bash
 # Start world generation server
-docker compose -f world-gen-server.compose.yml up -d
+docker compose -f common.compose.yml -f servers/world-gen-server.compose.yml up -d
 
 # Start survival island server
-docker compose -f survival-island.compose.yml up -d
+docker compose -f common.compose.yml -f servers/survival-island.compose.yml up -d
 
 # View logs
-docker compose -f world-gen-server.compose.yml logs -f
+docker compose -f common.compose.yml -f servers/world-gen-server.compose.yml logs -f
 
 # Stop a server
-docker compose -f world-gen-server.compose.yml down
+docker compose -f common.compose.yml -f servers/world-gen-server.compose.yml down
 ```
+
+Or start all Minecraft servers with compatibility validation:
+
+```bash
+./start.sh
+```
+
+Start only one specific server:
+
+```bash
+./start.sh survival-island
+```
+
+Start a subset of servers:
+
+```bash
+./start.sh world-gen-server survival-island
+```
+
+To set a specific Minecraft version for startup and mod resolution:
+
+```bash
+MC_VERSION=1.21.11 ./start.sh
+```
+
+`start.sh` runs `resolve-modrinth-mods.sh` first, which:
+- reads mod slugs from `mods/*.txt`
+- checks compatibility against the selected Minecraft version and Fabric loader
+- writes resolved mod references to `.generated-modrinth.env`
+- exports those values to Docker Compose (`MODRINTH_PROJECTS_*`)
+
+If `.generated-modrinth.env` already matches the target `MC_VERSION`, `start.sh` reuses it and skips re-resolving mods.
 
 ## Creating a New Server
 
 1. **Copy an existing server file:**
    ```bash
-   cp world-gen-server.compose.yml my-new-server.compose.yml
+  cp servers/world-gen-server.compose.yml servers/my-new-server.compose.yml
    ```
 
 2. **Edit the new file** to customize:
@@ -72,18 +111,14 @@ docker compose -f world-gen-server.compose.yml down
 
 4. **Start the server:**
    ```bash
-   docker compose -f my-new-server.compose.yml up -d
+  ./start.sh my-new-server
    ```
 
 ## Example Server Configuration
 
 ```yaml
-include:
-  - ./common.compose.yml
-
 services:
-  minecraft:
-    <<: *minecraft-base
+  mc:
     container_name: minecraft-server-my-server
     ports:
       - "25567:25565"
@@ -91,28 +126,32 @@ services:
       MEMORY: "4096M"
       MAX_PLAYERS: "8"
       SEED: "123456789"
-      MODRINTH_PROJECTS: |-
-        *common-mods
-        create
-        ad-astra
+      MODRINTH_PROJECTS: "${MODRINTH_PROJECTS_SURVIVAL_ISLAND}"
     volumes:
       - /home/mircea/docker/minecraft-server-my-server:/data
 ```
+
+Place this file under `servers/` so `start.sh` and `stop.sh` will manage it.
 
 ## Modifying Common Configuration
 
 To add mods or change settings for **all servers**:
 
-1. Edit `common.compose.yml`
+1. Edit `mods/performance.txt` and/or `mods/content.txt`
 2. Restart affected servers:
    ```bash
-   docker compose -f world-gen-server.compose.yml restart
-   docker compose -f survival-island.compose.yml restart
+  ./start.sh
    ```
 
 ## Server-Specific Mods
 
-To add mods to **only one server**, list them under `MODRINTH_PROJECTS` after the `*common-mods` line.
+World-generation-only mods are in `mods/world-generation-extra.txt`.
+
+To target a specific Minecraft version explicitly, set `MC_VERSION` when running:
+
+```bash
+MC_VERSION=1.21.11 ./start.sh
+```
 
 ## Port Mapping
 
@@ -133,3 +172,23 @@ Server data is stored in `/home/mircea/docker/minecraft-server-<name>/` includin
 
 - [itzg/minecraft-server Documentation](https://docker-minecraft-server.readthedocs.io/)
 - [Modrinth](https://modrinth.com/) - Mod downloads
+
+## Stop All Servers
+
+To stop all Minecraft servers in this directory:
+
+```bash
+./stop.sh
+```
+
+Stop only one server:
+
+```bash
+./stop.sh survival-island
+```
+
+Stop a subset of servers:
+
+```bash
+./stop.sh world-gen-server survival-island
+```

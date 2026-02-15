@@ -25,6 +25,9 @@ tunnel-token
 # Log files
 *.log
 
+# Generated Minecraft mod resolver output
+minecraft-servers/.generated-modrinth.env
+
 # Dump files
 *dump*
 

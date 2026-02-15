@@ -1,0 +1,7 @@
+fabric-api
+krypton
+c2me-fabric
+lithium
+scalablelux
+ferrite-core
+distanthorizons

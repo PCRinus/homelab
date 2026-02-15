@@ -1,9 +1,5 @@
-include:
-  - ./common.compose.yml
-
 services:
   mc:
-    <<: *minecraft-base
     container_name: minecraft-server-survival-island
     ports:
       - "25566:25565"
@@ -11,8 +7,7 @@ services:
       SEED: "14897853841"
       MEMORY: "2048M"
       VIEW_DISTANCE: "18"
-      MODRINTH_PROJECTS: |-
-        *common-mods
+      MODRINTH_PROJECTS: "${MODRINTH_PROJECTS_SURVIVAL_ISLAND:?Run resolve-modrinth-mods.sh to generate compatible mods}"
     volumes:
       - ${DOCKER_DATA}/minecraft-server-survival-island:/data
     healthcheck:
