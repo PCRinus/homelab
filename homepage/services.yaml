@@ -16,16 +16,16 @@
           key: {{HOMEPAGE_VAR_PLEX_TOKEN}}
           fields: ["streams", "movies", "tv"]
 
-    - Overseerr:
+    - Seerr:
         icon: overseerr.png
         href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:5055
         description: Media Requests
         server: my-docker
-        container: overseerr
+        container: seerr
         showStats: true
         widget:
           type: overseerr
-          url: http://overseerr:5055
+          url: http://seerr:5055
           key: {{HOMEPAGE_VAR_OVERSEERR_API_KEY}}
           fields: ["pending", "approved", "available"]
 

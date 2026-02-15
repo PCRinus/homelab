@@ -11,7 +11,7 @@ This directory contains the Docker Compose configuration for the media server st
 | Radarr | 7878 | Movie management |
 | Prowlarr | 9696 | Indexer manager |
 | Bazarr | 6767 | Subtitle management |
-| Overseerr | 5055 | Media request system |
+| Seerr | 5055 | Media request system |
 | Plex | 32400 | Media server |
 | FlareSolverr | 8191 | Cloudflare bypass for indexers |
 | Buildarr | - | Configuration management for *arr stack (basic settings) |
@@ -177,7 +177,7 @@ The Hotio qBittorrent image uses a different directory layout than linuxserver:
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────────────┐
-│  Overseerr  │────▶│ Sonarr/     │────▶│    qBittorrent      │
+│   Seerr     │────▶│ Sonarr/     │────▶│    qBittorrent      │
 │  (request)  │     │ Radarr      │     │    (download)       │
 └─────────────┘     └─────────────┘     └──────────┬──────────┘
                                                    │
@@ -454,7 +454,7 @@ All services are accessible via Cloudflare Tunnel:
 - `sonarr.home-server.me`
 - `radarr.home-server.me`
 - `prowlarr.home-server.me`
-- `overseerr.home-server.me`
+- `seerr.home-server.me`
 - `plex.home-server.me`
 
 Or locally via `http://homelab:<port>`.

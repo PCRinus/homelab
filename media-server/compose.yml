@@ -153,11 +153,12 @@ services:
       retries: 3
       start_period: 30s
 
-  overseerr:
-    image: ghcr.io/sct/overseerr:develop
-    container_name: overseerr
+  seerr:
+    image: ghcr.io/seerr-team/seerr:v3.0.1
+    container_name: seerr
     env_file:
       - ../.env
+    init: true
     environment:
       - LOG_LEVEL=debug
     ports:

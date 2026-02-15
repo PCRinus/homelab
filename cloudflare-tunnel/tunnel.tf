@@ -20,9 +20,9 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       originRequest = {}
       service       = "http://plex:32400"
       }, {
-      hostname      = "overseerr.home-server.me"
+      hostname      = "seerr.home-server.me"
       originRequest = {}
-      service       = "http://overseerr:5055"
+      service       = "http://seerr:5055"
       }, {
       hostname      = "sonarr.home-server.me"
       originRequest = {}

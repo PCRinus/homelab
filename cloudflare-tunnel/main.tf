@@ -28,6 +28,11 @@ terraform {
 provider "cloudflare" {
 }
 
+moved {
+  from = cloudflare_dns_record.overseerr
+  to   = cloudflare_dns_record.seerr
+}
+
 variable "zone_id" {
   description = "Cloudflare Zone ID"
   type        = string

@@ -24,6 +24,10 @@ NC='\033[0m'
 
 # Accept mount point as argument (from init.sh) or ask
 MOUNT_POINT="${1:-}"
+DEFAULT_MOUNT_POINT="${NAS_SETUP_DEFAULT_MOUNT_POINT:-/mnt/unas/media}"
+DEFAULT_PROTOCOL="${NAS_SETUP_DEFAULT_PROTOCOL:-nfs}"
+DEFAULT_SERVER="${NAS_SETUP_DEFAULT_SERVER:-}"
+DEFAULT_SHARE="${NAS_SETUP_DEFAULT_SHARE:-}"
 
 echo -e "${BLUE}${BOLD}========================================${NC}"
 echo -e "${BLUE}${BOLD}  NAS Mount Setup${NC}"
@@ -53,8 +57,8 @@ check_deps
 if [ -z "$MOUNT_POINT" ]; then
     echo -e "${BOLD}Mount point${NC}"
     echo "Where should the NAS share be mounted on this machine?"
-    read -rp "> Path [/mnt/unas/media]: " MOUNT_POINT
-    MOUNT_POINT="${MOUNT_POINT:-/mnt/unas/media}"
+    read -rp "> Path [${DEFAULT_MOUNT_POINT}]: " MOUNT_POINT
+    MOUNT_POINT="${MOUNT_POINT:-$DEFAULT_MOUNT_POINT}"
     echo
 fi
 
@@ -77,8 +81,13 @@ fi
 echo -e "${BOLD}Share protocol${NC}"
 echo "  1) NFS  — Network File System (common on Linux NAS, TrueNAS, Synology)"
 echo "  2) SMB  — Windows/Samba share (CIFS)"
-read -rp "> Protocol [1]: " PROTO_CHOICE
-case "${PROTO_CHOICE:-1}" in
+if [ "$DEFAULT_PROTOCOL" = "cifs" ]; then
+    DEFAULT_PROTO_CHOICE="2"
+else
+    DEFAULT_PROTO_CHOICE="1"
+fi
+read -rp "> Protocol [${DEFAULT_PROTO_CHOICE}]: " PROTO_CHOICE
+case "${PROTO_CHOICE:-$DEFAULT_PROTO_CHOICE}" in
     2|smb|SMB|cifs|CIFS)
         PROTOCOL="cifs"
         ;;
@@ -94,7 +103,12 @@ echo
 # ===========================================
 echo -e "${BOLD}NAS server address${NC}"
 echo "IP address or hostname of your NAS."
-read -rp "> Server: " NAS_SERVER
+if [ -n "$DEFAULT_SERVER" ]; then
+    read -rp "> Server [${DEFAULT_SERVER}]: " NAS_SERVER
+    NAS_SERVER="${NAS_SERVER:-$DEFAULT_SERVER}"
+else
+    read -rp "> Server: " NAS_SERVER
+fi
 
 if [ -z "$NAS_SERVER" ]; then
     echo -e "${RED}Server address is required.${NC}"
@@ -144,10 +158,20 @@ if [ "$PROTOCOL" = "nfs" ]; then
             fi
         else
             echo -e "${YELLOW}Could not list exports (NAS may block showmount).${NC}"
-            read -rp "> Export path: " NAS_SHARE
+            if [ -n "$DEFAULT_SHARE" ]; then
+                read -rp "> Export path [${DEFAULT_SHARE}]: " NAS_SHARE
+                NAS_SHARE="${NAS_SHARE:-$DEFAULT_SHARE}"
+            else
+                read -rp "> Export path: " NAS_SHARE
+            fi
         fi
     else
-        read -rp "> Export path: " NAS_SHARE
+        if [ -n "$DEFAULT_SHARE" ]; then
+            read -rp "> Export path [${DEFAULT_SHARE}]: " NAS_SHARE
+            NAS_SHARE="${NAS_SHARE:-$DEFAULT_SHARE}"
+        else
+            read -rp "> Export path: " NAS_SHARE
+        fi
     fi
 
     if [ -z "$NAS_SHARE" ]; then
@@ -170,7 +194,12 @@ else
         fi
     fi
 
-    read -rp "> Share name: " NAS_SHARE
+    if [ -n "$DEFAULT_SHARE" ]; then
+        read -rp "> Share name [${DEFAULT_SHARE}]: " NAS_SHARE
+        NAS_SHARE="${NAS_SHARE:-$DEFAULT_SHARE}"
+    else
+        read -rp "> Share name: " NAS_SHARE
+    fi
     if [ -z "$NAS_SHARE" ]; then
         echo -e "${RED}Share name is required.${NC}"
         exit 1

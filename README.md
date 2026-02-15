@@ -9,6 +9,7 @@ Self-hosted homelab running Docker on Linux. Services are organized into stacks,
 - **Docker Engine** with Docker Compose v2 plugin
 - **Git** — to clone and manage this repo
 - **NAS mount** — media storage mounted at a local path (e.g., `/mnt/unas/media`)
+- **Optional backup NAS mount** — container backup storage (e.g., `/mnt/unas/container-backups`)
 - **sops** — secrets encryption ([install](https://github.com/getsops/sops/releases))
 - **age** — encryption backend (`sudo apt install age` or [releases](https://github.com/FiloSottile/age/releases))
 
@@ -73,11 +74,46 @@ These are used by all `compose.yml` files via `${VARIABLE}` interpolation. Docke
 
 Re-running `scripts/init.sh` is safe — it replaces the existing block in `~/.zshenv`.
 
+## Container Backups (Seerr)
+
+Set up a dedicated NAS mount for backups:
+
+```bash
+./scripts/setup-container-backups-mount.sh
+```
+
+This is a preset wrapper around `scripts/setup-nas-mount.sh` with:
+- mount point default: `/mnt/unas/container-backups`
+- share default: `ContainerBackups`
+
+Create a backup manually:
+
+```bash
+./scripts/backup-seerr.sh
+```
+
+Defaults:
+- backup target: `/mnt/unas/container-backups/seerr`
+- retention: `30` days
+
+Override defaults when needed:
+
+```bash
+BACKUP_MOUNT_PATH=/mnt/unas/container-backups BACKUP_RETENTION_DAYS=14 ./scripts/backup-seerr.sh
+```
+
+Automated backups run via GitHub Actions workflow `.github/workflows/backup-seerr.yml` every 3 days.
+You can override the remote backup path and retention with repository variables:
+- `HOMELAB_BACKUP_PATH`
+- `HOMELAB_BACKUP_RETENTION_DAYS`
+
+`./scripts/backup-overseerr.sh` is kept as a compatibility wrapper.
+
 ## Service Stacks
 
 | Directory | Services | Description |
 |-----------|----------|-------------|
-| `media-server/` | Plex, Sonarr, Radarr, Prowlarr, qBittorrent, Overseerr, Bazarr, Tautulli, FlareSolverr | Media management and streaming |
+| `media-server/` | Plex, Sonarr, Radarr, Prowlarr, qBittorrent, Seerr, Bazarr, Tautulli, FlareSolverr | Media management and streaming |
 | `cloudflare-tunnel/` | Cloudflared + watchdog | Zero Trust tunnel for external access |
 | `homepage/` | Homepage dashboard | Service dashboard with widgets |
 | `home-assistant/` | Home Assistant | Smart home automation |
@@ -138,7 +174,7 @@ cp home-assistant/secrets.yaml.example home-assistant/secrets.yaml
 
 ## Plex Integration Setup
 
-For the fully automatic media pipeline to work (request → download → import → Plex library update → Overseerr status update), three pieces of integration must be configured in the service web UIs.
+For the fully automatic media pipeline to work (request → download → import → Plex library update → Seerr status update), three pieces of integration must be configured in the service web UIs.
 
 ### 1. Sonarr / Radarr → Plex (Library Scan on Import)
 
@@ -162,34 +198,34 @@ Configure in **each** of Sonarr (`localhost:8989`), Sonarr Anime (`localhost:899
 > grep -oP 'PlexOnlineToken="\K[^"]+' "$DOCKER_DATA/plex/config/Library/Application Support/Plex Media Server/Preferences.xml"
 > ```
 
-### 2. Overseerr → Sonarr / Radarr (Sync Scan)
+### 2. Seerr → Sonarr / Radarr (Sync Scan)
 
-Overseerr needs **Enable Scan** turned on for each Sonarr and Radarr server so it can poll their state and transition requests from "Requested" to "Available".
+Seerr needs **Enable Scan** turned on for each Sonarr and Radarr server so it can poll their state and transition requests from "Requested" to "Available".
 
 1. Go to **Settings → Services → Radarr Servers** → edit the `radarr` server entry
    - Toggle **Enable Scan** on → Save
 2. Go to **Settings → Services → Sonarr Servers** → edit each server (`sonarr`, `Sonarr Anime`)
    - Toggle **Enable Scan** on → Save
 
-Without this, Overseerr's periodic Radarr/Sonarr scan jobs will log `Sync not enabled. Skipping...` and requests will stay stuck as "Requested" forever.
+Without this, Seerr's periodic Radarr/Sonarr scan jobs will log `Sync not enabled. Skipping...` and requests will stay stuck as "Requested" forever.
 
-### 3. Overseerr → Plex (Recently Added Scan)
+### 3. Seerr → Plex (Recently Added Scan)
 
-This should already be configured if Overseerr was set up with Plex as the media server. Verify under **Settings → Plex** that your Plex server is connected and libraries (Movies, TV Shows, Anime) are all enabled for scanning.
+This should already be configured if Seerr was set up with Plex as the media server. Verify under **Settings → Plex** that your Plex server is connected and libraries (Movies, TV Shows, Anime) are all enabled for scanning.
 
 The **Plex Recently Added Scan** job runs every 5 minutes by default and detects newly added content. If content was missed (e.g., after re-enabling sync), use **Run Full Scan** from Settings → Plex to re-index everything.
 
 ### End-to-End Flow
 
 ```
-User requests media in Overseerr
-  → Overseerr sends request to Sonarr/Radarr
+User requests media in Seerr
+  → Seerr sends request to Sonarr/Radarr
     → Sonarr/Radarr searches via Prowlarr and sends to qBittorrent
       → qBittorrent downloads, Sonarr/Radarr imports to media folder
         → Sonarr/Radarr notifies Plex via Connect (step 1)
           → Plex scans library and picks up new file
-            → Overseerr's Plex Recently Added Scan detects it (step 3)
-              → Overseerr's Sonarr/Radarr Scan confirms download status (step 2)
+            → Seerr's Plex Recently Added Scan detects it (step 3)
+              → Seerr's Sonarr/Radarr Scan confirms download status (step 2)
                 → Request status updates to "Available"
 ```
 
