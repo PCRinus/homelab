@@ -24,6 +24,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 MARKER_START="# --- Homelab paths (managed by init.sh) ---"
 MARKER_END="# --- End homelab paths ---"
+TF_MARKER_START="# --- Homelab Cloudflare/Terraform env (managed by init.sh) ---"
+TF_MARKER_END="# --- End Homelab Cloudflare/Terraform env ---"
 
 echo -e "${BLUE}${BOLD}========================================${NC}"
 echo -e "${BLUE}${BOLD}  Homelab Environment Setup${NC}"
@@ -186,6 +188,49 @@ echo -e "${GREEN}Wrote ${TRUSTED_PROXIES_FILE}${NC}"
 echo
 
 # ===========================================
+# 7. Optional: Cloudflare/Terraform credentials
+# ===========================================
+CONFIGURE_TF_ENV=false
+TF_CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN:-}"
+TF_AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-}"
+TF_AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-}"
+
+echo -e "${BOLD}Cloudflare/Terraform local credentials (optional)${NC}"
+echo "Needed only if you run terraform locally in cloudflare-tunnel/."
+echo "Google OAuth values are read from cloudflare-tunnel/terraform.tfvars."
+echo "These values are written to ~/.zshenv and loaded in new shells."
+read -rp "Configure these now? [y/N]: " SETUP_TF_ENV
+if [[ "${SETUP_TF_ENV,,}" == "y" ]]; then
+    CONFIGURE_TF_ENV=true
+
+    if [ -n "$TF_CLOUDFLARE_API_TOKEN" ]; then
+        read -rp "> CLOUDFLARE_API_TOKEN [keep existing]: " INPUT
+        TF_CLOUDFLARE_API_TOKEN="${INPUT:-$TF_CLOUDFLARE_API_TOKEN}"
+    else
+        read -rp "> CLOUDFLARE_API_TOKEN [leave empty to skip]: " TF_CLOUDFLARE_API_TOKEN
+    fi
+
+    if [ -n "$TF_AWS_ACCESS_KEY_ID" ]; then
+        read -rp "> CLOUDFLARE_R2_ACCESS_KEY_ID -> AWS_ACCESS_KEY_ID [keep existing]: " INPUT
+        TF_AWS_ACCESS_KEY_ID="${INPUT:-$TF_AWS_ACCESS_KEY_ID}"
+    else
+        read -rp "> CLOUDFLARE_R2_ACCESS_KEY_ID -> AWS_ACCESS_KEY_ID [leave empty to skip]: " TF_AWS_ACCESS_KEY_ID
+    fi
+
+    if [ -n "$TF_AWS_SECRET_ACCESS_KEY" ]; then
+        read -rsp "> CLOUDFLARE_R2_SECRET_ACCESS_KEY -> AWS_SECRET_ACCESS_KEY [keep existing]: " INPUT
+        echo
+        TF_AWS_SECRET_ACCESS_KEY="${INPUT:-$TF_AWS_SECRET_ACCESS_KEY}"
+    else
+        read -rsp "> CLOUDFLARE_R2_SECRET_ACCESS_KEY -> AWS_SECRET_ACCESS_KEY [leave empty to skip]: " TF_AWS_SECRET_ACCESS_KEY
+        echo
+    fi
+
+    echo -e "${GREEN}Cloudflare/Terraform credentials captured.${NC}"
+fi
+echo
+
+# ===========================================
 # Summary & confirmation
 # ===========================================
 echo -e "${BOLD}Summary:${NC}"
@@ -201,6 +246,16 @@ if [ -n "$RENDER_GID" ]; then
     echo -e "  RENDER_GID  = ${GREEN}${RENDER_GID}${NC}"
 else
     echo -e "  RENDER_GID  = ${YELLOW}(not set — no GPU transcoding)${NC}"
+fi
+if $CONFIGURE_TF_ENV; then
+    [ -n "$TF_CLOUDFLARE_API_TOKEN" ] && TF_TOKEN_STATUS="set" || TF_TOKEN_STATUS="not set"
+    [ -n "$TF_AWS_ACCESS_KEY_ID" ] && TF_R2_ID_STATUS="set" || TF_R2_ID_STATUS="not set"
+    [ -n "$TF_AWS_SECRET_ACCESS_KEY" ] && TF_R2_SECRET_STATUS="set" || TF_R2_SECRET_STATUS="not set"
+    echo -e "  Terraform local env: ${GREEN}update requested${NC}"
+    echo -e "    CLOUDFLARE_API_TOKEN          = ${GREEN}${TF_TOKEN_STATUS}${NC}"
+    echo -e "    AWS_ACCESS_KEY_ID             = ${GREEN}${TF_R2_ID_STATUS}${NC}"
+    echo -e "    AWS_SECRET_ACCESS_KEY         = ${GREEN}${TF_R2_SECRET_STATUS}${NC}"
+    echo -e "    TF_VAR_google_oauth_*         = ${YELLOW}from terraform.tfvars${NC}"
 fi
 echo
 read -rp "Write these to ${ZSHENV}? [Y/n]: " CONFIRM
@@ -225,6 +280,15 @@ if [ -f "$ZSHENV" ]; then
     mv "${ZSHENV}.tmp" "$ZSHENV"
 fi
 
+if $CONFIGURE_TF_ENV && [ -f "$ZSHENV" ]; then
+    grep -v "$TF_MARKER_START" "$ZSHENV" | \
+    grep -v "$TF_MARKER_END" | \
+    grep -v "^export CLOUDFLARE_API_TOKEN=" | \
+    grep -v "^export AWS_ACCESS_KEY_ID=" | \
+    grep -v "^export AWS_SECRET_ACCESS_KEY=" > "${ZSHENV}.tmp" || true
+    mv "${ZSHENV}.tmp" "$ZSHENV"
+fi
+
 cat >> "$ZSHENV" << EOF
 ${MARKER_START}
 export DOCKER_DATA="${DOCKER_DATA}"
@@ -236,6 +300,17 @@ ${MARKER_END}
 EOF
 
 echo -e "${GREEN}Wrote to ${ZSHENV}${NC}"
+
+if $CONFIGURE_TF_ENV; then
+cat >> "$ZSHENV" << EOF
+${TF_MARKER_START}
+export CLOUDFLARE_API_TOKEN="${TF_CLOUDFLARE_API_TOKEN}"
+export AWS_ACCESS_KEY_ID="${TF_AWS_ACCESS_KEY_ID}"
+export AWS_SECRET_ACCESS_KEY="${TF_AWS_SECRET_ACCESS_KEY}"
+${TF_MARKER_END}
+EOF
+echo -e "${GREEN}Wrote Cloudflare/Terraform env block to ${ZSHENV}${NC}"
+fi
 
 # ===========================================
 # Decrypt secrets (if encrypted files exist)
@@ -294,6 +369,9 @@ echo -e "${GREEN}${BOLD}Setup complete!${NC}"
 echo
 echo -e "Next steps:"
 echo -e "  1. Run ${YELLOW}source ~/.zshenv${NC} or open a new terminal"
+if $CONFIGURE_TF_ENV; then
+    echo -e "  1b. Local Terraform is ready to use in ${YELLOW}cloudflare-tunnel/${NC}"
+fi
 echo -e "  2. If secrets were not decrypted above:"
 echo -e "     a. Copy your age key to ${YELLOW}~/.config/sops/age/keys.txt${NC}"
 echo -e "     b. Run ${YELLOW}./scripts/secrets.sh decrypt${NC}"
