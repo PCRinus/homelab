@@ -17,6 +17,7 @@ services:
       - ./scripts.yaml:/config/scripts.yaml
       - ./scenes.yaml:/config/scenes.yaml
       - ./secrets.yaml:/config/secrets.yaml
+      - ./trusted_proxies.yaml:/config/trusted_proxies.yaml
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8123/manifest.json"]
