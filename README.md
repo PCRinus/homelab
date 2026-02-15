@@ -5,7 +5,7 @@ Self-hosted homelab running Docker on Linux. Services are organized into stacks,
 ## Prerequisites
 
 - **Linux server** (tested on Ubuntu)
-- **zsh** — shell environment (the init script writes to `~/.zshenv`)
+- **zsh** — required shell environment (the init script writes to `~/.zshenv` and this repo’s VS Code workspace defaults integrated terminals to zsh)
 - **Docker Engine** with Docker Compose v2 plugin
 - **Git** — to clone and manage this repo
 - **NAS mount** — media storage mounted at a local path (e.g., `/mnt/unas/media`)
