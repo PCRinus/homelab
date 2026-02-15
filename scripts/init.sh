@@ -39,9 +39,13 @@ DEFAULT_DOCKER_DATA="$HOME/docker"
 echo -e "${BOLD}Container data directory${NC}"
 echo "Where persistent container data (configs, databases, cache) is stored."
 echo "Each service gets a subdirectory (e.g., sonarr/, plex/, etc.)"
-echo -e "Default: ${GREEN}${DEFAULT_DOCKER_DATA}${NC}"
-read -rp "> Path [${DEFAULT_DOCKER_DATA}]: " INPUT_DOCKER_DATA
-DOCKER_DATA="${INPUT_DOCKER_DATA:-$DEFAULT_DOCKER_DATA}"
+if [ -n "${DOCKER_DATA:-}" ]; then
+    echo -e "Using existing DOCKER_DATA from environment: ${GREEN}${DOCKER_DATA}${NC}"
+else
+    echo -e "Default: ${GREEN}${DEFAULT_DOCKER_DATA}${NC}"
+    read -rp "> Path [${DEFAULT_DOCKER_DATA}]: " INPUT_DOCKER_DATA
+    DOCKER_DATA="${INPUT_DOCKER_DATA:-$DEFAULT_DOCKER_DATA}"
+fi
 
 if [ ! -d "$DOCKER_DATA" ]; then
     echo -e "${YELLOW}Directory does not exist: ${DOCKER_DATA}${NC}"
@@ -60,9 +64,13 @@ DEFAULT_MEDIA_PATH="/mnt/unas/media"
 echo -e "${BOLD}Media storage path (NAS mount)${NC}"
 echo "Where media files live (torrents, movies, TV shows)."
 echo "This should be a mounted NAS share (NFS/SMB/etc.)"
-echo -e "Default: ${GREEN}${DEFAULT_MEDIA_PATH}${NC}"
-read -rp "> Path [${DEFAULT_MEDIA_PATH}]: " INPUT_MEDIA_PATH
-MEDIA_PATH="${INPUT_MEDIA_PATH:-$DEFAULT_MEDIA_PATH}"
+if [ -n "${MEDIA_PATH:-}" ]; then
+    echo -e "Using existing MEDIA_PATH from environment: ${GREEN}${MEDIA_PATH}${NC}"
+else
+    echo -e "Default: ${GREEN}${DEFAULT_MEDIA_PATH}${NC}"
+    read -rp "> Path [${DEFAULT_MEDIA_PATH}]: " INPUT_MEDIA_PATH
+    MEDIA_PATH="${INPUT_MEDIA_PATH:-$DEFAULT_MEDIA_PATH}"
+fi
 
 if [ ! -d "$MEDIA_PATH" ]; then
     echo -e "${YELLOW}Directory does not exist: ${MEDIA_PATH}${NC}"
@@ -92,7 +100,22 @@ echo
 echo -e "${BOLD}Docker socket${NC}"
 DETECTED_SOCK="/run/user/$(id -u)/docker.sock"
 
-if [ -S "$DETECTED_SOCK" ]; then
+if [ -n "${DOCKER_SOCK:-}" ]; then
+    if [ -S "$DOCKER_SOCK" ]; then
+        echo -e "Using existing DOCKER_SOCK from environment: ${GREEN}${DOCKER_SOCK}${NC}"
+    else
+        echo -e "${YELLOW}Existing DOCKER_SOCK does not exist: ${DOCKER_SOCK}${NC}"
+        if [ -S "$DETECTED_SOCK" ]; then
+            DOCKER_SOCK="$DETECTED_SOCK"
+            echo -e "Falling back to detected rootless Docker socket: ${GREEN}${DOCKER_SOCK}${NC}"
+        elif [ -S "/var/run/docker.sock" ]; then
+            DOCKER_SOCK="/var/run/docker.sock"
+            echo -e "Falling back to detected standard Docker socket: ${GREEN}${DOCKER_SOCK}${NC}"
+        else
+            echo "Is Docker installed and running?"
+        fi
+    fi
+elif [ -S "$DETECTED_SOCK" ]; then
     DOCKER_SOCK="$DETECTED_SOCK"
     echo -e "Detected rootless Docker socket: ${GREEN}${DOCKER_SOCK}${NC}"
 elif [ -S "/var/run/docker.sock" ]; then
@@ -111,21 +134,25 @@ echo
 echo -e "${BOLD}Docker socket group${NC}"
 echo "GID of the Docker socket — used by Homepage to access Docker as non-root."
 
-if [ -S "$DOCKER_SOCK" ]; then
-    DETECTED_DOCKER_GID=$(stat -c '%g' "$DOCKER_SOCK")
-    echo -e "Detected Docker socket GID: ${GREEN}${DETECTED_DOCKER_GID}${NC}"
-elif getent group docker > /dev/null 2>&1; then
-    DETECTED_DOCKER_GID=$(getent group docker | cut -d: -f3)
-    echo -e "Detected docker group GID: ${GREEN}${DETECTED_DOCKER_GID}${NC}"
+if [ -n "${DOCKER_GID:-}" ]; then
+    echo -e "Using existing DOCKER_GID from environment: ${GREEN}${DOCKER_GID}${NC}"
 else
-    DETECTED_DOCKER_GID=""
-    echo -e "${YELLOW}Could not detect Docker GID — Homepage may not be able to access Docker socket${NC}"
-fi
+    if [ -S "$DOCKER_SOCK" ]; then
+        DETECTED_DOCKER_GID=$(stat -c '%g' "$DOCKER_SOCK")
+        echo -e "Detected Docker socket GID: ${GREEN}${DETECTED_DOCKER_GID}${NC}"
+    elif getent group docker > /dev/null 2>&1; then
+        DETECTED_DOCKER_GID=$(getent group docker | cut -d: -f3)
+        echo -e "Detected docker group GID: ${GREEN}${DETECTED_DOCKER_GID}${NC}"
+    else
+        DETECTED_DOCKER_GID=""
+        echo -e "${YELLOW}Could not detect Docker GID — Homepage may not be able to access Docker socket${NC}"
+    fi
 
-if [ -n "$DETECTED_DOCKER_GID" ]; then
-    DOCKER_GID="$DETECTED_DOCKER_GID"
-else
-    read -rp "> GID (leave empty to skip): " DOCKER_GID
+    if [ -n "$DETECTED_DOCKER_GID" ]; then
+        DOCKER_GID="$DETECTED_DOCKER_GID"
+    else
+        read -rp "> GID (leave empty to skip): " DOCKER_GID
+    fi
 fi
 echo
 
@@ -135,22 +162,26 @@ echo
 echo -e "${BOLD}GPU render group${NC}"
 echo "Used by Plex for hardware-accelerated transcoding."
 
-if getent group render > /dev/null 2>&1; then
-    DETECTED_GID=$(getent group render | cut -d: -f3)
-    echo -e "Detected render group GID: ${GREEN}${DETECTED_GID}${NC}"
-elif getent group video > /dev/null 2>&1; then
-    DETECTED_GID=$(getent group video | cut -d: -f3)
-    echo -e "No render group found. Detected video group GID: ${GREEN}${DETECTED_GID}${NC}"
+if [ -n "${RENDER_GID:-}" ]; then
+    echo -e "Using existing RENDER_GID from environment: ${GREEN}${RENDER_GID}${NC}"
 else
-    DETECTED_GID=""
-    echo -e "${YELLOW}No render or video group found — GPU transcoding may not be available${NC}"
-fi
+    if getent group render > /dev/null 2>&1; then
+        DETECTED_GID=$(getent group render | cut -d: -f3)
+        echo -e "Detected render group GID: ${GREEN}${DETECTED_GID}${NC}"
+    elif getent group video > /dev/null 2>&1; then
+        DETECTED_GID=$(getent group video | cut -d: -f3)
+        echo -e "No render group found. Detected video group GID: ${GREEN}${DETECTED_GID}${NC}"
+    else
+        DETECTED_GID=""
+        echo -e "${YELLOW}No render or video group found — GPU transcoding may not be available${NC}"
+    fi
 
-if [ -n "$DETECTED_GID" ]; then
-    read -rp "> GID [${DETECTED_GID}]: " INPUT_RENDER_GID
-    RENDER_GID="${INPUT_RENDER_GID:-$DETECTED_GID}"
-else
-    read -rp "> GID (leave empty to skip): " RENDER_GID
+    if [ -n "$DETECTED_GID" ]; then
+        read -rp "> GID [${DETECTED_GID}]: " INPUT_RENDER_GID
+        RENDER_GID="${INPUT_RENDER_GID:-$DETECTED_GID}"
+    else
+        read -rp "> GID (leave empty to skip): " RENDER_GID
+    fi
 fi
 echo
 
