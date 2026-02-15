@@ -1,6 +1,7 @@
 balm
 waystones
 crops-love-rain
+modmenu
 forge-config-api-port
 appleskin
 leaf-me-alone

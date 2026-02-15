@@ -81,22 +81,86 @@ dedupe_list() {
   awk '!seen[$0]++'
 }
 
-resolve_mod() {
-  local project_slug="$1"
-  local response version_id
+declare -A RESOLVED_BY_SLUG=()
+declare -A SLUG_BY_PROJECT_ID=()
 
-  response="$(curl --silent --show-error --fail --get \
+fetch_versions_for_project() {
+  local project_ref="$1"
+
+  curl --silent --show-error --fail --get \
     --data-urlencode "loaders=[\"${LOADER}\"]" \
     --data-urlencode "game_versions=[\"${MC_VERSION}\"]" \
-    "https://api.modrinth.com/v2/project/${project_slug}/version")"
+    "https://api.modrinth.com/v2/project/${project_ref}/version"
+}
 
-  version_id="$(jq -r '.[0].id // empty' <<<"${response}")"
+get_slug_for_project_id() {
+  local project_id="$1"
+
+  if [[ -n "${SLUG_BY_PROJECT_ID[${project_id}]:-}" ]]; then
+    printf '%s\n' "${SLUG_BY_PROJECT_ID[${project_id}]}"
+    return 0
+  fi
+
+  local project_response slug
+  project_response="$(curl --silent --show-error --fail "https://api.modrinth.com/v2/project/${project_id}")"
+  slug="$(jq -r '.slug // empty' <<<"${project_response}")"
+
+  if [[ -z "${slug}" ]]; then
+    return 1
+  fi
+
+  SLUG_BY_PROJECT_ID["${project_id}"]="${slug}"
+  printf '%s\n' "${slug}"
+}
+
+resolve_mod() {
+  local project_slug="$1"
+
+  if [[ -n "${RESOLVED_BY_SLUG[${project_slug}]:-}" ]]; then
+    return 0
+  fi
+
+  local versions_response version_json version_id
+  versions_response="$(fetch_versions_for_project "${project_slug}")"
+  version_json="$(jq -c '.[0] // empty' <<<"${versions_response}")"
+  version_id="$(jq -r '.id // empty' <<<"${version_json}")"
 
   if [[ -z "${version_id}" ]]; then
     return 1
   fi
 
-  printf '%s:%s\n' "${project_slug}" "${version_id}"
+  RESOLVED_BY_SLUG["${project_slug}"]="${version_id}"
+
+  local dep_project_id dep_slug dep_type dep_version_id dep_versions_response dep_version_json
+  while IFS=$'\t' read -r dep_project_id dep_type dep_version_id; do
+    [[ -n "${dep_project_id}" ]] || continue
+
+    if [[ "${dep_type}" != "required" ]]; then
+      continue
+    fi
+
+    dep_slug="$(get_slug_for_project_id "${dep_project_id}")" || continue
+
+    if [[ -n "${dep_version_id}" ]]; then
+      dep_versions_response="$(fetch_versions_for_project "${dep_slug}")"
+      dep_version_json="$(jq -c --arg id "${dep_version_id}" 'map(select(.id == $id)) | .[0] // empty' <<<"${dep_versions_response}")"
+
+      if [[ -n "${dep_version_json}" ]]; then
+        RESOLVED_BY_SLUG["${dep_slug}"]="${dep_version_id}"
+      fi
+    fi
+
+    resolve_mod "${dep_slug}" || true
+  done < <(jq -r '.dependencies[]? | [.project_id, .dependency_type, (.version_id // "")] | @tsv' <<<"${version_json}")
+
+  return 0
+}
+
+print_resolved_list() {
+  local key
+  for key in "${!RESOLVED_BY_SLUG[@]}"; do
+    printf '%s:%s\n' "${key}" "${RESOLVED_BY_SLUG[${key}]}"
+  done | sort
 }
 
 resolve_group() {
@@ -117,14 +181,15 @@ resolve_group() {
 
   mapfile -t mods < <(printf '%s\n' "${raw_mods[@]:-}" | sed '/^$/d' | dedupe_list)
 
-  local resolved=()
   local unresolved=()
   local mod
 
+  RESOLVED_BY_SLUG=()
+  SLUG_BY_PROJECT_ID=()
+
   echo "🔎 Resolving ${name} mods for Minecraft ${MC_VERSION} (${LOADER})..." >&2
   for mod in "${mods[@]}"; do
-    if resolved_ref="$(resolve_mod "${mod}")"; then
-      resolved+=("${resolved_ref}")
+    if resolve_mod "${mod}"; then
       echo "  ✅ ${mod}" >&2
     else
       unresolved+=("${mod}")
@@ -140,6 +205,7 @@ resolve_group() {
   fi
 
   local joined
+  mapfile -t resolved < <(print_resolved_list)
   joined="$(printf '%s,' "${resolved[@]}")"
   joined="${joined%,}"
 
