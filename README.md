@@ -107,8 +107,6 @@ You can override the remote backup path and retention with repository variables:
 - `HOMELAB_BACKUP_PATH`
 - `HOMELAB_BACKUP_RETENTION_DAYS`
 
-`./scripts/backup-overseerr.sh` is kept as a compatibility wrapper.
-
 ## Service Stacks
 
 | Directory | Services | Description |

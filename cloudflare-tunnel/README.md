@@ -59,14 +59,27 @@ export AWS_SECRET_ACCESS_KEY="your-r2-secret-key"
 ```
 
 ### API Token Permissions
-Your Cloudflare API token needs:
-- **Zone:Read** - View zone information
-- **DNS:Edit** - Manage DNS records  
-- **Account:Read** - View account information
-- **Cloudflare Tunnel:Edit** - Manage tunnels
-- **Zone Settings:Edit** - Modify zone settings (TLS, SSL, etc.)
-- **Access: Organizations, Identity Providers, and Groups:Edit** - Manage Zero Trust identity providers and groups
-- **Access: Apps and Policies:Edit** - Manage Zero Trust access applications and policies
+For this stack, use least privilege and scope resources to:
+- **Account Resources**: `Include -> Techsly SRL`
+- **Zone Resources**: `Include -> home-server.me`
+
+You can use either one token for all operations, or two tokens:
+- **Plan token** (read-only) for `terraform plan`
+- **Apply token** (edit) for `terraform apply` and CI deploys
+
+Required permission groups (same list for both tokens):
+- **Zone -> Zone -> Read/Edit**
+- **Zone -> DNS -> Read/Edit**
+- **Zone -> Zone Settings -> Read/Edit**
+- **Zone -> Zone WAF -> Read/Edit**
+- **Zone -> Cache Rules (Rulesets) -> Read/Edit**
+- **Account -> Cloudflare One Networks -> Read/Edit**
+- **Account -> Cloudflare One Connector: cloudflared -> Read/Edit**
+- **Account -> Access: Organizations, Identity Providers, and Groups -> Read/Edit**
+- **Account -> Access: Apps and Policies -> Read/Edit**
+- **Account -> Workers R2 Storage -> Read/Edit**
+
+> Use **Read** for plan-only tokens and **Edit** for apply/deploy tokens.
 
 ## 🚀 Terraform Usage
 
@@ -550,8 +563,15 @@ Zone settings (TLS 1.3, SSL, HTTPS rewrites) cannot be destroyed via Terraform. 
 4. Ensure credentials file exists: `ls -la *.json`
 
 ### Terraform Permission Errors
-- Verify API token has all required permissions
+- Verify API token has all required permissions and correct resource scoping
 - Update token in environment: `export CLOUDFLARE_API_TOKEN="new-token"`
+- Re-source your shell profile after token rotation: `source ~/.zshenv`
+
+Common 403 mappings:
+- `cloudflare_ruleset.*` 403 on `/zones/.../rulesets/...` -> missing **Zone Cache Rules (Rulesets)** permission
+- `cloudflare_zero_trust_*` 401/403 -> missing **Cloudflare One** and/or **Access** account permissions
+- `cloudflare_zone_setting.*` 403 -> missing **Zone Settings** permission
+- `cloudflare_dns_record.*` 403 -> missing **DNS** permission
 
 ### DNS Not Resolving
 - Verify DNS records in Cloudflare dashboard
