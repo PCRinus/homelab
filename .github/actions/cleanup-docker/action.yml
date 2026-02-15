@@ -18,6 +18,10 @@ inputs:
   ssh_user:
     description: 'SSH username'
     required: true
+  ssh_host:
+    description: 'SSH host for the homeserver server'
+    required: false
+    default: homeserver
 
 runs:
   using: composite
@@ -33,10 +37,14 @@ runs:
     - name: Cleanup Docker Resources
       uses: appleboy/ssh-action@v1
       with:
-        host: homelab
+        host: ${{ inputs.ssh_host }}
         username: ${{ inputs.ssh_user }}
         key: ${{ inputs.ssh_private_key }}
+        timeout: 5m
+        command_timeout: 20m
+        script_stop: true
         script: |
+          set -euo pipefail
           echo "🧹 Starting Docker cleanup (mode: ${{ inputs.cleanup_mode }})"
           
           case "${{ inputs.cleanup_mode }}" in
