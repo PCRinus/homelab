@@ -24,7 +24,7 @@ jobs:
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ vars.HOMELAB_SSH_HOST || 'homeserver' }}
-          username: ${{ secrets.SSH_USER }}
+          username: ${{ vars.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 15m
           script_stop: true
