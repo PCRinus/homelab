@@ -1,44 +1,46 @@
 {
-    "terminal.integrated.profiles.linux": {
-        "zsh": {
-            "path": "/usr/bin/zsh",
-            "args": [
-                "-l"
-            ]
-        }
-    },
-    "terminal.integrated.defaultProfile.linux": "zsh",
-    "cSpell.words": [
-      "bazarr",
-      "Bluray",
-      "buildarr",
-      "cfargotunnel",
-      "cloudflared",
-      "Configarr",
-      "Dozzle",
-      "flaresolverr",
-      "gatus",
-      "HEALTHCHECK",
-      "homeassistant",
-      "homeserver",
-      "hotio",
-      "lscr",
-      "mircea",
-      "overseerr",
-      "PGID",
-      "prowlarr",
-      "PUID",
-      "qbittorrent",
-      "radarr",
-      "sonarr",
-      "sysctls",
-      "tautulli",
-      "unas"
-    ],
-    "chat.tools.terminal.autoApprove": {
-        "sops": true,
-        "age": true,
-        "mkdir": true,
-        "docker exec": true
+  "editor.accessibilitySupport": "off",
+  "chat.agent.maxRequests": 100,
+  "terminal.integrated.profiles.linux": {
+    "zsh": {
+      "path": "/usr/bin/zsh",
+      "args": [
+        "-l"
+      ]
     }
+  },
+  "terminal.integrated.defaultProfile.linux": "zsh",
+  "cSpell.words": [
+    "bazarr",
+    "Bluray",
+    "buildarr",
+    "cfargotunnel",
+    "cloudflared",
+    "Configarr",
+    "Dozzle",
+    "flaresolverr",
+    "gatus",
+    "HEALTHCHECK",
+    "homeassistant",
+    "homeserver",
+    "hotio",
+    "lscr",
+    "mircea",
+    "overseerr",
+    "PGID",
+    "prowlarr",
+    "PUID",
+    "qbittorrent",
+    "radarr",
+    "sonarr",
+    "sysctls",
+    "tautulli",
+    "unas"
+  ],
+  "chat.tools.terminal.autoApprove": {
+    "sops": true,
+    "age": true,
+    "mkdir": true,
+    "docker exec": true
+  }
 }
