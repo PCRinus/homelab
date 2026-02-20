@@ -33,3 +33,6 @@ minecraft-servers/.generated-modrinth.env
 
 # ProtonVPN WireGuard config
 wg0.conf
+
+# Node modules
+node_modules/

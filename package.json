@@ -1,0 +1,17 @@
+{
+  "name": "homeserver-local-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "run": "tsx minecraft-servers/client-modpacks/generate_survival_client_mrpack.ts"
+  },
+  "dependencies": {
+    "adm-zip": "0.5.16"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "0.5.7",
+    "@types/node": "24.3.0",
+    "tsx": "4.20.5",
+    "typescript": "5.9.2"
+  }
+}

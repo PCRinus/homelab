@@ -1,0 +1,6 @@
+[tools]
+node = "24"
+
+[tasks.run]
+description = "Run Modrinth client pack generator"
+run = "npm run run"
