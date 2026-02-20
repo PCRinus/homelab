@@ -86,6 +86,28 @@ MC_VERSION=1.21.11 ./start.sh
 
 If `.generated-modrinth.env` already matches the target `MC_VERSION`, `start.sh` reuses it and skips re-resolving mods.
 
+## Generate Client Modpack (TypeScript)
+
+The client modpack generator is now implemented in TypeScript:
+
+- [client-modpacks/generate_survival_client_mrpack.ts](client-modpacks/generate_survival_client_mrpack.ts)
+
+Run from repo root (`/home/mircea/homeserver`):
+
+```bash
+# 1) Resolve compatible mod versions into the input file expected by the TS generator
+./minecraft-servers/resolve-modrinth-mods.sh --mc-version 1.21.11 --output /tmp/survival-mods.env
+
+# 2) Generate modrinth index + .mrpack + excluded list
+mise run run
+```
+
+Generated files:
+
+- `minecraft-servers/client-modpacks/survival-island-client.modrinth.index.json`
+- `minecraft-servers/client-modpacks/survival-island-client-<mc-version>.mrpack`
+- `minecraft-servers/client-modpacks/survival-island-client-<mc-version>.excluded-server-only.txt`
+
 ## Creating a New Server
 
 1. **Copy an existing server file:**
