@@ -350,6 +350,18 @@ services:
     # No restart policy - this is a one-shot job, not a daemon
     # Run manually or via cron: docker compose run --rm configarr
 
+  # Pangolin Newt - WireGuard tunnel connector to VPS
+  # Creates an outbound tunnel from this server to the Pangolin VPS,
+  # enabling remote access to Plex (and other services) bypassing CGNAT
+  newt:
+    image: fosrl/newt:1.9.0
+    container_name: newt
+    env_file:
+      - ../.env
+    networks:
+      - media-net
+    restart: unless-stopped
+
 networks:
   media-net:
     name: media-net # Named network allows other compose stacks (e.g., homepage) to join for inter-container communication
