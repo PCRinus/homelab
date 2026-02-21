@@ -130,6 +130,24 @@
         showStats: true
 
 - Infrastructure:
+    - Pangolin:
+        icon: pangolin.png
+        href: https://pangolin.home-server.me
+        description: VPS Reverse Proxy (Tunnel)
+        widget:
+          type: pangolin
+          url: https://api.pangolin.home-server.me
+          key: {{HOMEPAGE_VAR_PANGOLIN_API_KEY}}
+          org: homeserver-vps
+          fields: ["sites", "resources", "targets"]
+    - Newt:
+        icon: pangolin.png
+        href: https://pangolin.home-server.me
+        description: Pangolin Tunnel Connector
+        server: my-docker
+        container: newt
+        showStats: true
+
     - Dozzle:
         icon: dozzle.png
         href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8081

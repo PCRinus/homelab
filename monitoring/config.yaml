@@ -172,6 +172,30 @@ endpoints:
         description: "Cloudflare Tunnel is down - external access may be unavailable"
         failure-threshold: 5
 
+  - name: Pangolin
+    group: Infrastructure
+    url: "https://pangolin.home-server.me"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 3000"
+    alerts:
+      - type: discord
+        description: "Pangolin VPS reverse proxy is down or not responding"
+        failure-threshold: 5
+
+  - name: Plex Stream (Pangolin)
+    group: Infrastructure
+    url: "https://stream.home-server.me/identity"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 3000"
+    alerts:
+      - type: discord
+        description: "Plex streaming via Pangolin tunnel is down"
+        failure-threshold: 5
+
   - name: Dozzle
     group: Infrastructure
     url: "http://dozzle:8080"

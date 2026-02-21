@@ -180,3 +180,13 @@ resource "cloudflare_dns_record" "stream" {
   comment = "Plex direct streaming via Pangolin VPS (bypasses CGNAT)"
 }
 
+
+resource "cloudflare_dns_record" "pangolin_api" {
+  content = "194.102.107.75"
+  name    = "api.pangolin"
+  proxied = false # DNS-only — Pangolin handles TLS via Let's Encrypt
+  ttl     = 300
+  type    = "A"
+  zone_id = var.zone_id
+  comment = "Pangolin Integration API for Homepage widget"
+}
