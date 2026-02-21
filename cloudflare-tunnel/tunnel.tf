@@ -16,9 +16,21 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       originRequest = {}
       service       = "http://homepage:3000"
       }, {
-      hostname      = "plex.home-server.me"
-      originRequest = {}
-      service       = "http://plex:32400"
+      hostname = "plex.home-server.me"
+      originRequest = {
+        # Keep connections alive longer for sustained video streaming (default: 90s)
+        keepAliveTimeout = "600s"
+        # Allow more concurrent keep-alive connections per stream (default: 100)
+        keepAliveConnections = 256
+        # Generous connect timeout for initial connection setup (default: 30s)
+        connectTimeout = "30s"
+        # Disable chunked encoding to improve streaming throughput
+        # Plex sends known content lengths; chunked encoding adds overhead
+        disableChunkedEncoding = true
+        # Plex origin is HTTP, no TLS to verify
+        noTLSVerify = false
+      }
+      service = "http://plex:32400"
       }, {
       hostname      = "seerr.home-server.me"
       originRequest = {}
