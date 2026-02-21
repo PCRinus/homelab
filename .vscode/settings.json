@@ -1,6 +1,14 @@
 {
   "editor.accessibilitySupport": "off",
   "chat.agent.maxRequests": 100,
+  "remote.extensionKind": {
+    "github.copilot": [
+      "ui"
+    ],
+    "github.copilot-chat": [
+      "ui"
+    ]
+  },
   "terminal.integrated.profiles.linux": {
     "zsh": {
       "path": "/usr/bin/zsh",
