@@ -1,7 +1,7 @@
 # Copilot Instructions for Homelab Repository
 
 ## Architecture Overview
-Self-hosted homelab running Docker in **rootfull mode** on Linux Server. Services are organized in separate directories, each with its own `compose.yml`. All services connect via the `media-net` Docker network for internal communication.
+Self-hosted homelab running Docker in **rootful mode** on Linux Server. Services are organized in separate directories, each with its own `compose.yml`. All services connect via the `media-net` Docker network for internal communication.
 
 **Key paths:**
 - Compose files: `/home/mircea/homeserver/<service>/`
@@ -55,9 +55,9 @@ networks:
     external: true
 ```
 
-**Rootless Docker specifics:**
-- Docker socket at `/run/user/1000/docker.sock` (not `/var/run/docker.sock`)
-- No privileged mode or host networking (except Home Assistant which uses `network_mode: host`)
+**Docker host specifics (rootful):**
+- Docker socket at `/var/run/docker.sock`
+- Host networking and privileged mode are available; use only when required by the service
 - Use `extra_hosts: ["host.docker.internal:host-gateway"]` to reach host services
 
 ## File Conventions

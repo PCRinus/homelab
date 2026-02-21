@@ -31,7 +31,7 @@ services:
       - 1.1.1.1
       - 8.8.8.8
     networks:
-      - media-net # Required for widget API calls to reach services by container name (rootless Docker can't route via host ports)
+      - media-net
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
       interval: 30s

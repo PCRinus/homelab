@@ -41,9 +41,9 @@ df -h | grep unas
 # Should show: 192.168.1.30:/var/nfs/shared/Media mounted at /mnt/unas/media
 ```
 
-### Host Setup (Rootless Docker)
+### Host Setup (Rootful Docker)
 
-Rootless Docker requires the render device to be world-readable since GID mapping doesn't preserve group permissions inside containers.
+For reliable GPU access in Plex hardware transcoding, keep render device permissions configured on the host.
 
 **Udev rule** (already applied at `/etc/udev/rules.d/99-render-device.rules`):
 ```
@@ -387,7 +387,7 @@ After connecting Bazarr to Plex via OAuth, manually update the server URL in the
 # Stop Bazarr
 cd /home/mircea/homeserver/media-server && docker compose stop bazarr
 
-# Edit config (use container for rootless Docker permissions)
+# Edit config
 docker run --rm -v /home/mircea/docker/bazarr/config:/config alpine \
   sed -i 's|server_url: https://.*plex.direct:32400|server_url: http://plex:32400|' /config/config.yaml
 

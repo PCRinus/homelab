@@ -16,7 +16,7 @@ Self-hosted homelab running Docker on Linux. Services are organized into stacks,
 ### Installing Docker
 
 ```bash
-# Install Docker Engine (standard, non-rootless)
+# Install Docker Engine (standard, rootful mode)
 # https://docs.docker.com/engine/install/ubuntu/
 curl -fsSL https://get.docker.com | sh
 
