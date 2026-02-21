@@ -80,6 +80,52 @@ group_add:
 watch -n 1 cat /sys/class/drm/card0/device/gpu_busy_percent
 ```
 
+## Tautulli: Plex Log Viewer Setup
+
+Tautulli can read Plex log files directly, but only if the Plex logs directory is mounted into the Tautulli container.
+
+### 1) Mount Plex logs into Tautulli
+
+In `compose.yml`, the `tautulli` service should include this read-only bind mount:
+
+```yaml
+tautulli:
+  volumes:
+    - ${DOCKER_DATA}/tautulli:/config
+    - type: bind
+      source: "${DOCKER_DATA}/plex/config/Library/Application Support/Plex Media Server/Logs"
+      target: /plex-logs
+      read_only: true
+```
+
+Apply changes:
+
+```bash
+cd /home/mircea/homeserver/media-server
+docker compose up -d tautulli
+```
+
+### 2) Configure Tautulli log folder
+
+In Tautulli UI:
+
+1. Go to **Settings → Logs**
+2. Set **Plex Logs Folder** to:
+
+   ```
+   /plex-logs
+   ```
+
+3. Save and refresh the Logs page
+
+### 3) Verify
+
+- Open **Logs → Plex Media Server Logs**
+- Select `Plex Media Server.log` from the dropdown
+- Set a refresh rate to watch entries in near real time
+
+If you set `/config/logs`, Tautulli will only read its own logs and Plex logs will appear empty.
+
 ## VPN Setup (Hotio qBittorrent + ProtonVPN)
 
 The Hotio qBittorrent image includes built-in WireGuard VPN support with automatic port forwarding for ProtonVPN.

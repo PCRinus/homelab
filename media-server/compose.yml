@@ -246,6 +246,10 @@ services:
       - ../.env
     volumes:
       - ${DOCKER_DATA}/tautulli:/config
+      - type: bind
+        source: "${DOCKER_DATA}/plex/config/Library/Application Support/Plex Media Server/Logs"
+        target: /plex-logs
+        read_only: true
     ports:
       - "8181:8181"
     dns:
