@@ -156,3 +156,27 @@ resource "cloudflare_dns_record" "flaresolverr" {
   comment = "FlareSolverr Cloudflare bypass"
 }
 
+# =============================================================================
+# Pangolin VPS - Direct streaming (bypasses Cloudflare Tunnel for high-bandwidth)
+# =============================================================================
+
+resource "cloudflare_dns_record" "pangolin" {
+  content = "194.102.107.75"
+  name    = "pangolin"
+  proxied = false # DNS-only — Pangolin handles TLS via Let's Encrypt
+  ttl     = 300
+  type    = "A"
+  zone_id = var.zone_id
+  comment = "Pangolin VPS dashboard"
+}
+
+resource "cloudflare_dns_record" "stream" {
+  content = "194.102.107.75"
+  name    = "stream"
+  proxied = false # DNS-only — Pangolin handles TLS via Let's Encrypt
+  ttl     = 300
+  type    = "A"
+  zone_id = var.zone_id
+  comment = "Plex direct streaming via Pangolin VPS (bypasses CGNAT)"
+}
+
