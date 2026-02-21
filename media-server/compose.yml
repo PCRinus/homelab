@@ -266,6 +266,60 @@ services:
       retries: 3
       start_period: 30s
 
+  plex-log-media-server:
+    image: alpine:3.22
+    container_name: plex-log-media-server
+    command:
+      - /bin/sh
+      - -c
+      - tail -n 0 -F /plex-logs/Plex\ Media\ Server.log /plex-logs/Plex\ Media\ Server.[1-5].log
+    volumes:
+      - type: bind
+        source: "${DOCKER_DATA}/plex/config/Library/Application Support/Plex Media Server/Logs"
+        target: /plex-logs
+        read_only: true
+    networks:
+      - media-net
+    restart: unless-stopped
+    labels:
+      - "dozzle.enable=true"
+
+  plex-log-transcoder-statistics:
+    image: alpine:3.22
+    container_name: plex-log-transcoder-statistics
+    command:
+      - /bin/sh
+      - -c
+      - tail -n 0 -F /plex-logs/Plex\ Transcoder\ Statistics.log /plex-logs/Plex\ Transcoder\ Statistics.[1-5].log
+    volumes:
+      - type: bind
+        source: "${DOCKER_DATA}/plex/config/Library/Application Support/Plex Media Server/Logs"
+        target: /plex-logs
+        read_only: true
+    networks:
+      - media-net
+    restart: unless-stopped
+    labels:
+      - "dozzle.enable=true"
+
+  plex-log-scanner-matcher:
+    image: alpine:3.22
+    container_name: plex-log-scanner-matcher
+    command:
+      - /bin/sh
+      - -c
+      - tail -n 0 -F /plex-logs/Plex\ Media\ Scanner\ Matcher.log /plex-logs/Plex\ Media\ Scanner\ Matcher.[1-5].log
+    volumes:
+      - type: bind
+        source: "${DOCKER_DATA}/plex/config/Library/Application Support/Plex Media Server/Logs"
+        target: /plex-logs
+        read_only: true
+    networks:
+      - media-net
+    restart: unless-stopped
+    labels:
+      - "dozzle.enable=true"
+
   buildarr:
     image: callum027/buildarr:0.7.8
     container_name: buildarr
