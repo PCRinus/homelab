@@ -1,13 +1,13 @@
-zone_id    =ENC[AES256_GCM,data:xa5klyEfq9pcfueeo0YStdT6bnH67TVxX3nkd+/DVK9Yqfk=,iv:dcTIgYg6Wxx6ApRnjDBjgmo3xcxv36pzxMD8wkCmD9k=,tag:9CGh6AjP7n5sWHcy5O+QNQ==,type:str]
-account_id =ENC[AES256_GCM,data:aakTMTirOXmrMUMSH/dTh25zBBVrwUuZ7hiSCabDa/iRVUE=,iv:5FycTaNnC8U/9GWvzUDjVLh2rS6KUNGd8KJR5QVODQs=,tag:M27zFMAUNJEeS3EtyNBlPA==,type:str]
-domain     =ENC[AES256_GCM,data:QDcphqqvviPd/6I4mmUeXus=,iv:7LkvRzRsk9KFjJboLCOvPa8OSaTFBGjkUtYTjypvD98=,tag:2MnWcDkYXDTwZy5BkDdohg==,type:str]
-#ENC[AES256_GCM,data:MS92dSH4gBBsLF1U+FrYEayp9g0XVyqx0Kz9U9o/EEttE8ToL3n+3U3SrZegWWw=,iv:CnxgRO66xQsGeCTPGBqk0Rem6v0IrtkwmHVZd4xKREs=,tag:aSFbxZihZCUZH91a5N/mMw==,type:comment]
-#ENC[AES256_GCM,data:aKfbdqr36pMuqCic/bgMb8UIxoAfl9++pI6otyLC1MMJvtux+wInr9DIO2GtZhDyYzFAn6yefRXbsBxTaCD7f5tht3VBtyI82aC+EIZzMdLZPesdYmqp,iv:dlWwCCGonLyXKzPGv4+4dU8PIgiBQZbCdXTpU3JaOSU=,tag:YLPp2lutlnxLLjAmn+Pq3g==,type:comment]
-google_oauth_client_id     =ENC[AES256_GCM,data:2J7MgjGFZcFUNyvbhMzZo3csKJ0KmtW/MtHl7fZsD9Z474UMUHVevX5Y51wE8hTdkuyGDzeKRb68pDWUt6j1WyhVBLQ6iNq/c6Yd,iv:wZF+5ptRrbQ85NLcYBXCOQtCrVAc8tBZmIdeNA5lEtE=,tag:tPzK0DP+zCBV3H9wK7BQAg==,type:str]
-google_oauth_client_secret =ENC[AES256_GCM,data:1c1YqbYJEg4Pal9r4X/YJXrBSwkSp8XYUiZwJnpzwZYQA8U76D4=,iv:HVksYSPSuylCgMFMYj1p902Q3ZBujYTGEZj1ST9chkM=,tag:0ztPY27faKaDmeuXqCo2YA==,type:str]
-sops_age__list_0__map_enc=-----BEGIN AGE ENCRYPTED FILE-----\nYWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBnZW5zK21aTU9BSTZOTVAx\nQVRjUW1VM1l5WVduTVBHSkVwcWVVNkIxa1RrCm1MdkxkanVnRFB1U3Q5blloTjN3\nSjd6cVJxWWNpakNNUUxsVksyRnZRUU0KLS0tIFQ4a0wxTGpiZm9VQXBIWjYzdUVU\nUjA4emF0cjhwUEE5NGFXWEM4WFRzTVEKYLWUYCvkdMddBRlzd6O5cmAliV6q+ML5\nn/WRrO7S0gAO+BvIzCuapH1/2NxC7R2i+KjMM0F26YsX1iwY91GDOQ==\n-----END AGE ENCRYPTED FILE-----\n
+zone_id    =ENC[AES256_GCM,data:1NZFOUeY1xUfKT5Y9gCNOEEmB5e8CjMTu/fD/kXMGnAGOpo=,iv:1lfd+qmZAp9wvb47sdQtn7rjdxKzYjkY5SXqQW2sRdM=,tag:ZBw9wfaW2/XiQikguc7lVQ==,type:str]
+account_id =ENC[AES256_GCM,data:PD+2MmCT/d8s1TTWJeF5MMdn0Q14/cSCivwQIU5fdMSJiRc=,iv:yrz1W1gbJfM35mEPmMaTb/zws9lvczalY/hxoaiOLwE=,tag:5ugj3kHAoreaQ1FqAEagmw==,type:str]
+domain     =ENC[AES256_GCM,data:N4bNHA0JhZHNo1R6stZPK98=,iv:im0ci4Q7djs6SGET+REZaeis16mf+2X4rE5zAepYXwo=,tag:bdXxpohTfChvy7a4+eORyw==,type:str]
+#ENC[AES256_GCM,data:lmvfyosJeT2cw17wfuCC4LYxerDbcoAFVAGIw+7DF3FxR+YEpx5lkOdsulWJeGM=,iv:S8QFLmWwTGMuZgbtp36/Kw/ebgK2pyU6ogc4rxPnerc=,tag:KFi6EEnHQEvtarjXXTuOEA==,type:comment]
+#ENC[AES256_GCM,data:HOaRNt07p8gcyRtU95rWkMhdK99P6yZGBpUqnrNGKWhgoGRJGw3+2ro8u805IAorqZ5CXkpSaBx4TqGDScuMU1JTVkzs2Do7eeDtQk5hY2bxxvkRdDO5,iv:YJXLAQKYoD/AQ351STt2rzmtEhsgbWEqbyUlj5W/1ac=,tag:Y1DyJPA0j7HexG/j8XmGsg==,type:comment]
+google_oauth_client_id     =ENC[AES256_GCM,data:qbyfeqEKIvjMA6L1jPK/xP0L50guPhFPqbpuCAsYbEzO7D0vHfDbCwZPOSTNSaUQi4yH/PpuyCjskK4/EeMsczzc2Lk6PpIXTzwR,iv:k+ELnJiFHpLFBbqsVvdSX5PMbZDodJh0H1BPeLJa1lM=,tag:3eI4hUpSkdfk9Oo+i5+9AA==,type:str]
+google_oauth_client_secret =ENC[AES256_GCM,data:prR6n6jh3tQDSoAZfOnD+P6p5OwNEJo/91L2JsMvOM1rdqUd0Gs=,iv:d9gvdxEOE8jLvgTRoEOJmitlUeRqAyDFDePP/zhtyjE=,tag:ngouLENDMiAJcBlMFJut4A==,type:str]
+sops_age__list_0__map_enc=-----BEGIN AGE ENCRYPTED FILE-----\nYWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBzK1N0dU9tQ21mQnZOaXl4\ndXNoQ2NkQUV1NDM3MzFweTZ5TVd2dzh3QXlZClQrdHVDb1VRTDBBRWl2a05OOG9r\nWHVKTlRicjZweXJFOTkxZ01QcjBiOXMKLS0tIFhqVlMyYVRpZUpPOXo1Mms1VnM3\nM0tyVm8vNlllTDh0VVZVbThpTnd5a3cKMNknihdylixRQvtDwUzkEdyq9UhrQZ4v\nrldaQbsXpC+2KIesujymjExCyZkBOZyk7AK4V/fFCvBr9Z5iZNC69w==\n-----END AGE ENCRYPTED FILE-----\n
 sops_age__list_0__map_recipient=age13przqengtm203ntnckywpztfh7h700pglqn44ggukjpw98usd9ws4vks4c
-sops_lastmodified=2026-02-20T21:17:41Z
-sops_mac=ENC[AES256_GCM,data:bkvxNubyvzMs4HTaVt9ZBIaKF9I1xnhXcAO4kC2Ll/n83TLLM5Lo2F/R8QNgsfpxfy7aJrUkDlVohdNAUme9bfElUoCWuKthgTze9huUEW7j9+mg0u6enKpLLWxyX8n7jZQbJN7eMv1Gdv7eVcWNRIJoUf8MPUC4rMsadHOsN34=,iv:7Q1K5bg4KCQGLDjAhOBukG7xrDmtuwQTnvWmrG26o0I=,tag:u0icjU5mlArXXDZ36TctMQ==,type:str]
+sops_lastmodified=2026-02-21T21:30:55Z
+sops_mac=ENC[AES256_GCM,data:6Om78g9dVnbMaRj5WlXwrhyHnOqCgTY4SCDlVzl2u+KPGhNoV+X5zoaHCoR4Qxi+luNmVYyFJMppce0pmF34vwz3gFrPrN/AAs791lrLvunz+MohgdW5yWriBa8avNHluNZy0LkFQj6YzWC8Moy8Zr8+OYAmSGr9qKNbEe3GPCc=,iv:tufHt75XSau2oiigTJELhCWPTxPlbgd53oKkwNxJN/c=,tag:uFy2Jq8pHI2lLtO+sKa3Ew==,type:str]
 sops_unencrypted_suffix=_unencrypted
 sops_version=3.11.0
