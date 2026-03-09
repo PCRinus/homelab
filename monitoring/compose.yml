@@ -1,7 +1,7 @@
 services:
   dozzle:
     container_name: dozzle
-    image: ghcr.io/amir20/dozzle:v10.0.2
+    image: ghcr.io/amir20/dozzle:v10.1.0
     volumes:
       - ${DOCKER_SOCK}:/var/run/docker.sock
     ports:
@@ -15,7 +15,7 @@ services:
       start_period: 30s
 
   gatus:
-    image: ghcr.io/twin/gatus:v5.34.0
+    image: ghcr.io/twin/gatus:v5.35.0
     container_name: gatus
     ports:
       - 8082:8080

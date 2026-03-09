@@ -154,7 +154,7 @@ services:
       start_period: 30s
 
   seerr:
-    image: ghcr.io/seerr-team/seerr:v3.0.1
+    image: ghcr.io/seerr-team/seerr:v3.1.0
     container_name: seerr
     env_file:
       - ../.env
@@ -267,7 +267,7 @@ services:
       start_period: 30s
 
   plex-log-media-server:
-    image: alpine:3.22
+    image: alpine:3.23
     container_name: plex-log-media-server
     command:
       - /bin/sh
@@ -285,7 +285,7 @@ services:
       - "dozzle.enable=true"
 
   plex-log-transcoder-statistics:
-    image: alpine:3.22
+    image: alpine:3.23
     container_name: plex-log-transcoder-statistics
     command:
       - /bin/sh
@@ -303,7 +303,7 @@ services:
       - "dozzle.enable=true"
 
   plex-log-scanner-matcher:
-    image: alpine:3.22
+    image: alpine:3.23
     container_name: plex-log-scanner-matcher
     command:
       - /bin/sh
@@ -338,7 +338,7 @@ services:
   # Run manually: docker compose run --rm configarr
   # Or scheduled via cron on host
   configarr:
-    image: ghcr.io/raydak-labs/configarr:1.21.0
+    image: ghcr.io/raydak-labs/configarr:1.24.0
     container_name: configarr
     env_file:
       - ../.env
@@ -354,7 +354,7 @@ services:
   # Creates an outbound tunnel from this server to the Pangolin VPS,
   # enabling remote access to Plex (and other services) bypassing CGNAT
   newt:
-    image: fosrl/newt:1.9.0
+    image: fosrl/newt:1.10.2
     container_name: newt
     env_file:
       - ../.env
