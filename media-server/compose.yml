@@ -354,7 +354,7 @@ services:
   # Creates an outbound tunnel from this server to the Pangolin VPS,
   # enabling remote access to Plex (and other services) bypassing CGNAT
   newt:
-    image: fosrl/newt:1.10.2
+    image: fosrl/newt:1.10.3
     container_name: newt
     env_file:
       - ../.env
