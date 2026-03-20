@@ -19,6 +19,7 @@
   },
   "terminal.integrated.defaultProfile.linux": "zsh",
   "cSpell.words": [
+    "adguardhome",
     "bazarr",
     "Bluray",
     "buildarr",

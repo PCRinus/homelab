@@ -193,3 +193,18 @@ After starting the container, access `http://192.168.1.166:3001`:
 4. **False positives** — Ad blocking will occasionally break login flows, captchas, payment processors, or streaming services. AdGuard's query log makes it easy to spot and whitelist domains. Expect some day-1 tuning.
 
 5. **DNS-over-HTTPS bypass** — Some browsers (Chrome, Firefox) and apps use built-in DoH that bypasses system DNS entirely. Safari on iOS (the main use case) respects system DNS. If needed later, AdGuard can block DoH endpoints (e.g., `dns.google`) to force fallback.
+---
+
+## Known Caveats
+
+### Config file location requires explicit `--config` flag
+
+AdGuard Home's Docker image writes its config to `/opt/adguardhome/AdGuardHome.yaml` by default. However, when you use `--web-addr` (to override the listen port), it does **not** automatically write to the mounted `conf/` volume — it writes to the parent `/opt/adguardhome/` directory, which is ephemeral and lost on container recreation.
+
+**Fix in compose.yml:** The `command` must include explicit `--config` and `--work-dir` flags:
+
+```yaml
+command: ["--web-addr", "0.0.0.0:3001", "--config", "/opt/adguardhome/conf/AdGuardHome.yaml", "--work-dir", "/opt/adguardhome/work", "--no-check-update"]
+```
+
+Without these flags, every `docker compose up -d` that recreates the container will lose the AdGuard configuration and re-trigger the setup wizard.

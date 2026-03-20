@@ -2,7 +2,7 @@ services:
   adguard:
     image: adguard/adguardhome:v0.107.55
     container_name: adguard
-    command: ["--web-addr", "0.0.0.0:3001", "--no-check-update"]
+    command: ["--web-addr", "0.0.0.0:3001", "--config", "/opt/adguardhome/conf/AdGuardHome.yaml", "--work-dir", "/opt/adguardhome/work", "--no-check-update"]
     env_file:
       - ../.env
     volumes:
