@@ -1,0 +1,28 @@
+name: Deploy AdGuard Home
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'adguard/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Deploy AdGuard Home
+        uses: ./.github/actions/deploy-service
+        with:
+          service_name: AdGuard Home
+          service_path: adguard
+          repo_dir: ${{ vars.HOMELAB_REPO_DIR || '/home/mircea/homeserver' }}
+          ssh_host: ${{ vars.HOMELAB_SSH_HOST || 'homeserver' }}
+          ts_oauth_client_id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          ts_oauth_secret: ${{ secrets.TS_OAUTH_SECRET }}
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_user: ${{ vars.SSH_USER }}

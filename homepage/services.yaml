@@ -130,6 +130,20 @@
         showStats: true
 
 - Infrastructure:
+    - AdGuard Home:
+        icon: adguard-home.png
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:3001
+        description: Network-Wide Ad Blocker
+        server: my-docker
+        container: adguard
+        showStats: true
+        widget:
+          type: adguard
+          url: http://adguard:3000
+          username: {{HOMEPAGE_VAR_ADGUARD_USER}}
+          password: {{HOMEPAGE_VAR_ADGUARD_PASS}}
+          fields: ["queries", "blocked", "filtered"]
+
     - Pangolin:
         icon: pangolin.png
         href: https://pangolin.home-server.me

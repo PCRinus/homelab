@@ -17,6 +17,7 @@ Self-hosted homelab running Docker in **rootful mode** on Linux Server. Services
 | `homepage/` | Dashboard aggregating all services | Config yamls mounted read-only |
 | `home-assistant/` | Smart home automation | Configs mounted from repo |
 | `minecraft-servers/` | Fabric servers with shared mods via YAML anchors | `common.compose.yml` + per-server files |
+| `adguard/` | AdGuard Home network-wide DNS ad blocker | `compose.yml` |
 | `monitoring/` | Dozzle (logs) + Gatus (uptime) | `config.yaml` for Gatus |
 
 ## Docker Compose Patterns

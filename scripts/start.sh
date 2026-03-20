@@ -105,6 +105,7 @@ fi
 # Then services that depend on media-net
 STACKS=(
     "media-server"
+    "adguard"
     "monitoring"
     "homepage"
     "home-assistant"
