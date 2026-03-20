@@ -18,6 +18,7 @@
       // Infrastructure
       '8081': 'dozzle.home-server.me',
       '8082': 'gatus.home-server.me',
+      '3001': 'adguard.home-server.me',
       '3000': 'home-server.me',
       // Home Automation
       '8123': 'ha.home-server.me'

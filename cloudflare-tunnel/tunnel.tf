@@ -80,6 +80,10 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       originRequest = {}
       service       = "http://gatus:8080"
       }, {
+      hostname      = "adguard.home-server.me"
+      originRequest = {}
+      service       = "http://adguard:3001"
+      }, {
       originRequest = {}
       service       = "http_status:404"
     }]
