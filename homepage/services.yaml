@@ -139,7 +139,7 @@
         showStats: true
         widget:
           type: adguard
-          url: http://adguard:3000
+          url: http://adguard:3001
           username: {{HOMEPAGE_VAR_ADGUARD_USER}}
           password: {{HOMEPAGE_VAR_ADGUARD_PASS}}
           fields: ["queries", "blocked", "filtered"]

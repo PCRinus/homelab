@@ -162,7 +162,7 @@ endpoints:
   # Infrastructure
   - name: AdGuard Home
     group: Infrastructure
-    url: "http://adguard:3000"
+    url: "http://adguard:3001"
     interval: 30s
     conditions:
       - "[STATUS] == 200"
