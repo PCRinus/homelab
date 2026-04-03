@@ -1,0 +1,60 @@
+lang: "en-us"
+checkrr:
+  checkpath:
+    - "/data/media/anime/"
+    - "/data/media/tv/"
+    - "/data/media/movies/"
+  database: /checkrr.db
+  debug: false
+  cron: "@daily"
+  ignorehidden: true
+  requireaudio: true
+  ffprobe: true
+  ffmpeg-full: false          # full decode is too slow for background runs
+  ffmpeg-quick: true          # decode first N seconds per file
+  ffmpeg-quick-seconds: 900   # 15 min - covers mid-episode corruption
+  ignoreexts:
+    - .txt
+    - .nfo
+    - .srt
+    - .ass
+    - .jpg
+    - .jpeg
+    - .png
+    - .sub
+    - .idx
+logs:
+  stdout:
+    out: stdout
+    formatter: default
+arr:
+  sonarr-tv:
+    process: false   # set true once detection is verified working
+    service: sonarr
+    address: sonarr
+    apikey: "YOUR_SONARR_API_KEY"
+    baseurl: /
+    port: 8989
+    ssl: false
+  sonarr-anime:
+    process: false
+    service: sonarr
+    address: sonarr-anime
+    apikey: "YOUR_SONARR_ANIME_API_KEY"
+    baseurl: /
+    port: 8989   # internal container port (host maps to 8990)
+    ssl: false
+  radarr:
+    process: false
+    service: radarr
+    address: radarr
+    apikey: "YOUR_RADARR_API_KEY"
+    baseurl: /
+    port: 7878
+    ssl: false
+webserver:
+  port: 8585
+  tls: false
+  baseurl: "/"
+  trustedproxies:
+    - 127.0.0.1

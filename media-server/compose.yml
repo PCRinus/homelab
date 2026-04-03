@@ -362,6 +362,25 @@ services:
       - media-net
     restart: unless-stopped
 
+  checkrr:
+    image: aetaric/checkrr:3.6.1
+    container_name: checkrr
+    volumes:
+      - ./checkrr/checkrr.yaml:/etc/checkrr.yaml:ro
+      - ${DOCKER_DATA}/checkrr/checkrr.db:/checkrr.db
+      - ${MEDIA_PATH}:/data:ro
+    ports:
+      - "8585:8585"     # checkrr web UI
+    networks:
+      - media-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8585/"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
 networks:
   media-net:
     name: media-net # Named network allows other compose stacks (e.g., homepage) to join for inter-container communication

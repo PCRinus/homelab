@@ -36,3 +36,5 @@ wg0.conf
 
 # Node modules
 node_modules/
+# Checkrr config (contains API keys)
+media-server/checkrr/checkrr.yaml
