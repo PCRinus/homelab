@@ -84,6 +84,10 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       originRequest = {}
       service       = "http://adguard:3001"
       }, {
+      hostname      = "checkrr.home-server.me"
+      originRequest = {}
+      service       = "http://checkrr:8585"
+      }, {
       originRequest = {}
       service       = "http_status:404"
     }]

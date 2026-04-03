@@ -12,6 +12,7 @@
       '7878': 'radarr.home-server.me',
       '9696': 'prowlarr.home-server.me',
       '8080': 'qbittorrent.home-server.me',
+      '8585': 'checkrr.home-server.me',
       '6767': 'bazarr.home-server.me',
       '8181': 'tautulli.home-server.me',
       '8191': 'flaresolverr.home-server.me',

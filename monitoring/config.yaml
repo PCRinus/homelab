@@ -137,6 +137,17 @@ endpoints:
       - type: discord
         description: "Bazarr is down or not responding"
 
+  - name: Checkrr
+    group: Media Server
+    url: "http://checkrr:8585/api/stats/current"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 2000"
+    alerts:
+      - type: discord
+        description: "Checkrr is down or not responding"
+
   - name: Plex
     group: Media Server
     url: "http://plex:32400/web"

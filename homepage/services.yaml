@@ -121,6 +121,28 @@
           key: {{HOMEPAGE_VAR_TAUTULLI_API_KEY}}
           fields: ["watching", "stream_count", "total_plays"]
 
+    - Checkrr:
+        icon: https://raw.githubusercontent.com/aetaric/checkrr/refs/heads/main/webserver/build/favicon.ico
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8585
+        description: Media File Integrity Checker
+        server: my-docker
+        container: checkrr
+        showStats: true
+        widget:
+          type: customapi
+          url: http://checkrr:8585/api/stats/current
+          refreshInterval: 60000
+          mappings:
+            - field: filesChecked
+              label: Files Checked
+              format: number
+            - field: hashMismatches
+              label: Bad Files
+              format: number
+            - field: running
+              label: Running
+              format: text
+
     - FlareSolverr:
         icon: flaresolverr.png
         href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8191

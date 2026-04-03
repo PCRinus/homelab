@@ -156,6 +156,17 @@ resource "cloudflare_dns_record" "flaresolverr" {
   comment = "FlareSolverr Cloudflare bypass"
 }
 
+
+resource "cloudflare_dns_record" "checkrr" {
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
+  name    = "checkrr"
+  proxied = true
+  ttl     = 1
+  type    = "CNAME"
+  zone_id = var.zone_id
+  comment = "Checkrr media file integrity checker"
+}
+
 # =============================================================================
 # Pangolin VPS - Direct streaming (bypasses Cloudflare Tunnel for high-bandwidth)
 # =============================================================================
