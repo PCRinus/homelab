@@ -21,6 +21,7 @@ checkrr:
     - .jpg
     - .jpeg
     - .png
+    - .svg
     - .sub
     - .idx
 logs:
