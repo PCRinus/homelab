@@ -76,6 +76,16 @@ resource "cloudflare_dns_record" "seerr" {
   comment = "Seerr media request service"
 }
 
+resource "cloudflare_dns_record" "pulsarr" {
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
+  name    = "pulsarr"
+  proxied = true
+  ttl     = 1
+  type    = "CNAME"
+  zone_id = var.zone_id
+  comment = "Pulsarr media watchlist automation"
+}
+
 resource "cloudflare_dns_record" "tautulli" {
   content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
   name    = "tautulli"

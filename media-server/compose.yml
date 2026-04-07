@@ -179,6 +179,37 @@ services:
       retries: 3
       start_period: 30s
 
+  pulsarr:
+    image: lakker/pulsarr:latest
+    container_name: pulsarr
+    env_file:
+      - ../.env
+    environment:
+      - baseUrl=http://pulsarr
+      - port=3003
+      - listenPort=3003
+      - dbPath=./data/db/pulsarr.db
+      - cookieSecured=false
+      - logLevel=info
+      - enableConsoleOutput=true
+    ports:
+      - "3003:3003"
+    volumes:
+      - ${DOCKER_DATA}/pulsarr:/app/data
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
+    networks:
+      - media-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "bun", "-e", "const res = await fetch('http://127.0.0.1:3003/'); process.exit(res.ok ? 0 : 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   plex:
     image: lscr.io/linuxserver/plex:1.43.0
     container_name: plex

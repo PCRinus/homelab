@@ -124,6 +124,17 @@ endpoints:
       - type: discord
         description: "Seerr is down or not responding"
 
+  - name: Pulsarr
+    group: Media Server
+    url: "http://pulsarr:3003/"
+    interval: 60s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 1000"
+    alerts:
+      - type: discord
+        description: "Pulsarr is down or not responding"
+
   - name: Bazarr
     group: Media Server
     url: "http://bazarr:6767/api/system/status"

@@ -36,6 +36,10 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       originRequest = {}
       service       = "http://seerr:5055"
       }, {
+      hostname      = "pulsarr.home-server.me"
+      originRequest = {}
+      service       = "http://pulsarr:3003"
+      }, {
       hostname      = "sonarr.home-server.me"
       originRequest = {}
       service       = "http://sonarr:8989"
@@ -94,4 +98,3 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
     warp-routing = {}
   }
 }
-

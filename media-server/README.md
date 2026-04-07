@@ -12,6 +12,7 @@ This directory contains the Docker Compose configuration for the media server st
 | Prowlarr | 9696 | Indexer manager |
 | Bazarr | 6767 | Subtitle management |
 | Seerr | 5055 | Media request system |
+| Pulsarr | 3003 | Plex watchlist automation and routing |
 | Plex | 32400 | Media server |
 | FlareSolverr | 8191 | Cloudflare bypass for indexers |
 | Configarr | - | Quality profiles & custom formats via TRaSH-Guides |
@@ -222,8 +223,8 @@ The Hotio qBittorrent image uses a different directory layout than linuxserver:
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────────────┐
-│   Seerr     │────▶│ Sonarr/     │────▶│    qBittorrent      │
-│  (request)  │     │ Radarr      │     │    (download)       │
+│  Pulsarr    │────▶│ Sonarr/     │────▶│    qBittorrent      │
+│ (watchlist) │     │ Radarr      │     │    (download)       │
 └─────────────┘     └─────────────┘     └──────────┬──────────┘
                                                    │
                            ┌───────────────────────┘
@@ -494,6 +495,69 @@ All services are accessible via Cloudflare Tunnel:
 - `radarr.home-server.me`
 - `prowlarr.home-server.me`
 - `seerr.home-server.me`
+- `pulsarr.home-server.me`
 - `plex.home-server.me`
 
 Or locally via `http://homelab:<port>`.
+
+## Pulsarr Setup
+
+Pulsarr is deployed in parallel with Seerr and is intended to become the primary Plex watchlist automation service after validation.
+
+### Runtime Configuration
+
+The container runtime is configured in `compose.yml` with environment variables:
+
+- `baseUrl=http://pulsarr`
+- `port=3003`
+- `listenPort=3003`
+- `dbPath=./data/db/pulsarr.db`
+- `cookieSecured=false`
+
+This is intentionally only the runtime layer. Pulsarr uses a hybrid model where the app state is configured in the web UI and persisted under `${DOCKER_DATA}/pulsarr`.
+
+### URLs
+
+- Local UI: `http://homelab:3003`
+- Public UI: `https://pulsarr.home-server.me`
+- API docs: `http://homelab:3003/api/docs`
+
+### One-Time UI Bootstrap
+
+1. Open Pulsarr and create the initial admin account.
+2. Connect Plex and enable user sync for the Plex users you want to process.
+3. Add Sonarr and Radarr instances using Docker network URLs:
+   - `http://radarr:7878`
+   - `http://sonarr:8989`
+   - `http://sonarr-anime:8989`
+4. Configure Pulsarr approval defaults to auto-approve for the synced users in the initial rollout.
+5. Start the main watchlist workflow from the Pulsarr dashboard and enable auto-start.
+
+### Routing Rules
+
+Configure the following initial routes:
+
+1. Sonarr fallback/default route → `sonarr`
+2. Higher-priority anime route → `sonarr-anime`
+3. Radarr fallback/default route → `radarr`
+
+The anime route should be placed above the fallback Sonarr route so anime watchlist additions land in the Anime Sonarr instance instead of the general TV instance.
+
+### Seerr Cutover Step
+
+Seerr remains installed during validation for request history and status tracking, but it must not continue creating watchlist requests in parallel.
+
+After Pulsarr is fully configured:
+
+1. Open Seerr
+2. Go to the Plex watchlist auto-request permissions/settings for the relevant users
+3. Disable Seerr watchlist auto-request
+4. Keep Seerr service integrations and scans enabled so existing request status tracking still works during the transition
+
+### Validation Checklist
+
+- Add one normal TV show to a Plex watchlist and confirm it lands in `sonarr`
+- Add one anime series and confirm it lands in `sonarr-anime`
+- Add one movie and confirm it lands in `radarr`
+- Confirm the request is auto-approved and executed immediately
+- Confirm Seerr does not create a duplicate watchlist request after its auto-request setting is disabled

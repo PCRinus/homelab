@@ -74,7 +74,7 @@ These are used by all `compose.yml` files via `${VARIABLE}` interpolation. Docke
 
 Re-running `scripts/init.sh` is safe — it replaces the existing block in `~/.zshenv`.
 
-## Container Backups (Seerr)
+## Container Backups (Seerr / Pulsarr)
 
 Set up a dedicated NAS mount for backups:
 
@@ -90,19 +90,22 @@ Create a backup manually:
 
 ```bash
 ./scripts/backup-seerr.sh
+./scripts/backup-pulsarr.sh
 ```
 
 Defaults:
-- backup target: `/mnt/unas/container-backups/seerr`
+- Seerr backup target: `/mnt/unas/container-backups/seerr`
+- Pulsarr backup target: `/mnt/unas/container-backups/pulsarr`
 - retention: `30` days
 
 Override defaults when needed:
 
 ```bash
 BACKUP_MOUNT_PATH=/mnt/unas/container-backups BACKUP_RETENTION_DAYS=14 ./scripts/backup-seerr.sh
+BACKUP_MOUNT_PATH=/mnt/unas/container-backups BACKUP_RETENTION_DAYS=14 ./scripts/backup-pulsarr.sh
 ```
 
-Automated backups run via GitHub Actions workflow `.github/workflows/backup-seerr.yml` every 3 days.
+Automated backups run via GitHub Actions workflows `.github/workflows/backup-seerr.yml` and `.github/workflows/backup-pulsarr.yml` every 3 days.
 You can override the remote backup path and retention with repository variables:
 - `HOMELAB_BACKUP_PATH`
 - `HOMELAB_BACKUP_RETENTION_DAYS`
@@ -111,7 +114,7 @@ You can override the remote backup path and retention with repository variables:
 
 | Directory | Services | Description |
 |-----------|----------|-------------|
-| `media-server/` | Plex, Sonarr, Radarr, Prowlarr, qBittorrent, Seerr, Bazarr, Tautulli, FlareSolverr | Media management and streaming |
+| `media-server/` | Plex, Sonarr, Radarr, Prowlarr, qBittorrent, Seerr, Pulsarr, Bazarr, Tautulli, FlareSolverr | Media management and streaming |
 | `cloudflare-tunnel/` | Cloudflared + watchdog | Zero Trust tunnel for external access |
 | `homepage/` | Homepage dashboard | Service dashboard with widgets |
 | `home-assistant/` | Home Assistant | Smart home automation |
@@ -170,7 +173,7 @@ cp home-assistant/secrets.yaml.example home-assistant/secrets.yaml
 
 ## Plex Integration Setup
 
-For the fully automatic media pipeline to work (request → download → import → Plex library update → Seerr status update), three pieces of integration must be configured in the service web UIs.
+For the fully automatic media pipeline to work (watchlist request → download → import → Plex library update → request status update), the service web UIs need a small amount of post-deploy configuration.
 
 ### 1. Sonarr / Radarr → Plex (Library Scan on Import)
 
@@ -211,11 +214,36 @@ This should already be configured if Seerr was set up with Plex as the media ser
 
 The **Plex Recently Added Scan** job runs every 5 minutes by default and detects newly added content. If content was missed (e.g., after re-enabling sync), use **Run Full Scan** from Settings → Plex to re-index everything.
 
+### 4. Pulsarr Parallel Rollout
+
+Pulsarr now runs alongside Seerr and is intended to become the watchlist-driven request path. During the validation phase:
+
+1. Finish the Pulsarr bootstrap in the web UI:
+   - local URL: `http://homelab:3003`
+   - public URL: `https://pulsarr.home-server.me`
+2. In Pulsarr, create the admin account and configure:
+   - **Plex** user sync
+   - **Radarr** at `http://radarr:7878`
+   - **Sonarr TV** at `http://sonarr:8989`
+   - **Sonarr Anime** at `http://sonarr-anime:8989`
+3. Configure routing rules:
+   - Sonarr fallback/default route → `sonarr`
+   - Anime route with higher priority → `sonarr-anime`
+   - Radarr fallback/default route → `radarr`
+4. Set Pulsarr's default approval behavior to auto-approve for the synced users used in the initial rollout.
+5. After Pulsarr is ready, disable Seerr's Plex watchlist auto-request permissions so both services do not react to the same watchlist additions.
+
+Pulsarr uses a hybrid configuration model:
+- container/runtime settings are file-driven through Docker Compose environment variables
+- application state such as Plex, Sonarr, Radarr, routing, and approvals is configured in the Pulsarr UI and persisted in `/app/data`
+- if stronger automation is needed later, Pulsarr also exposes a REST API at `/api/docs`
+
 ### End-to-End Flow
 
 ```
-User requests media in Seerr
-  → Seerr sends request to Sonarr/Radarr
+User adds media to a Plex watchlist
+  → Pulsarr syncs the watchlist and applies routing rules
+    → Pulsarr sends request to Sonarr/Radarr
     → Sonarr/Radarr searches via Prowlarr and sends to qBittorrent
       → qBittorrent downloads, Sonarr/Radarr imports to media folder
         → Sonarr/Radarr notifies Plex via Connect (step 1)

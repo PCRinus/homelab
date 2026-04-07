@@ -29,6 +29,14 @@
           key: {{HOMEPAGE_VAR_OVERSEERR_API_KEY}}
           fields: ["pending", "approved", "available"]
 
+    - Pulsarr:
+        icon: mdi-playlist-star
+        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:3003
+        description: Plex Watchlist Automation
+        server: my-docker
+        container: pulsarr
+        showStats: true
+
     - Sonarr:
         icon: sonarr.png
         href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8989
