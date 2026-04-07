@@ -204,7 +204,7 @@ services:
       - media-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "bun", "-e", "const res = await fetch('http://127.0.0.1:3003/'); process.exit(res.ok ? 0 : 1)"]
+      test: ["CMD", "/app/docker-healthcheck.sh"]
       interval: 30s
       timeout: 10s
       retries: 3
