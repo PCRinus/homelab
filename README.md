@@ -127,7 +127,6 @@ Secrets are encrypted in the repo using [sops](https://github.com/getsops/sops) 
 | `.env` | `.env.enc` | sops |
 | `cloudflare-tunnel/terraform.tfvars` | `...tfvars.enc` | sops |
 | `home-assistant/secrets.yaml` | `...yaml.enc` | sops |
-| `media-server/buildarr/buildarr-secrets.yml` | `...yml.enc` | sops |
 | `media-server/configarr/secrets.yml` | `...yml.enc` | sops |
 | `cloudflare-tunnel/tunnel-token` | `...token.enc` | age |
 | `media-server/wg0.conf` | `...conf.enc` | age |
@@ -161,7 +160,6 @@ Generate an age keypair and create secrets from examples:
 ```bash
 age-keygen -o ~/.config/sops/age/keys.txt
 cp .env.example .env
-cp media-server/buildarr/buildarr-secrets.yml.example media-server/buildarr/buildarr-secrets.yml
 cp media-server/configarr/secrets.yml.example media-server/configarr/secrets.yml
 cp home-assistant/secrets.yaml.example home-assistant/secrets.yaml
 # Fill in values, then encrypt:

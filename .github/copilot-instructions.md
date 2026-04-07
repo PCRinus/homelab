@@ -12,7 +12,7 @@ Self-hosted homelab running Docker in **rootful mode** on Linux Server. Services
 
 | Stack | Purpose | Key Files |
 |-------|---------|-----------|
-| `media-server/` | Plex, Sonarr, Radarr, Prowlarr, qBittorrent, Overseerr, FlareSolverr | `compose.yml`, `buildarr/buildarr.yml` |
+| `media-server/` | Plex, Sonarr, Radarr, Prowlarr, qBittorrent, Overseerr, FlareSolverr | `compose.yml` |
 | `cloudflare-tunnel/` | Zero Trust tunnel + Terraform for DNS/R2 | `compose.yml`, `*.tf` |
 | `homepage/` | Dashboard aggregating all services | Config yamls mounted read-only |
 | `home-assistant/` | Smart home automation | Configs mounted from repo |
@@ -80,13 +80,6 @@ cd /home/mircea/homeserver && ./scripts/start.sh
 # Minecraft (specify the server file)
 docker compose -f survival-island.compose.yml up -d
 ```
-
-## Buildarr (Configuration as Code)
-Manages Sonarr/Prowlarr settings declaratively. Runs daily at 3 AM.
-- Config: `media-server/buildarr/buildarr.yml`
-- Secrets: `buildarr-secrets.yml` (gitignored)
-- Test changes: `docker compose run --rm buildarr test-config`
-- Dump current: `docker compose run --rm buildarr sonarr dump-config http://sonarr:8989`
 
 ## Terraform (Cloudflare)
 Manages DNS, tunnel ingress rules, R2 storage. State stored in R2.

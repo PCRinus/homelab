@@ -22,8 +22,5 @@ creation_rules:
   - path_regex: ^home-assistant/secrets\.yaml$
     age: age13przqengtm203ntnckywpztfh7h700pglqn44ggukjpw98usd9ws4vks4c
 
-  - path_regex: ^media-server/buildarr/buildarr-secrets\.yml$
-    age: age13przqengtm203ntnckywpztfh7h700pglqn44ggukjpw98usd9ws4vks4c
-
   - path_regex: ^media-server/configarr/secrets\.yml$
     age: age13przqengtm203ntnckywpztfh7h700pglqn44ggukjpw98usd9ws4vks4c

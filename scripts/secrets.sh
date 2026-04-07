@@ -44,7 +44,6 @@ SOPS_FILES=(
     ".env:dotenv"
     "cloudflare-tunnel/terraform.tfvars:dotenv"
     "home-assistant/secrets.yaml:yaml"
-    "media-server/buildarr/buildarr-secrets.yml:yaml"
     "media-server/configarr/secrets.yml:yaml"
 )
 

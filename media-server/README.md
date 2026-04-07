@@ -14,7 +14,6 @@ This directory contains the Docker Compose configuration for the media server st
 | Seerr | 5055 | Media request system |
 | Plex | 32400 | Media server |
 | FlareSolverr | 8191 | Cloudflare bypass for indexers |
-| Buildarr | - | Configuration management for *arr stack (basic settings) |
 | Configarr | - | Quality profiles & custom formats via TRaSH-Guides |
 
 ### NAS Mount (NFS)
@@ -400,12 +399,6 @@ docker compose start bazarr
 ```
 
 This changes the connection from `https://*.plex.direct:32400` (external, can timeout) to `http://plex:32400` (internal Docker network, fast and reliable).
-
-## Buildarr
-
-Buildarr manages configuration for Sonarr and Prowlarr. See `buildarr/README.md` for details.
-
-**Note:** Download client configuration is managed manually in Sonarr/Radarr due to Buildarr plugin limitations with password serialization.
 
 ## Configarr (Quality Profiles & Custom Formats)
 

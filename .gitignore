@@ -1,9 +1,6 @@
 .env
 *.env
 
-# Buildarr secrets
-buildarr-secrets.yml
-
 # Configarr secrets
 media-server/configarr/secrets.yml
 

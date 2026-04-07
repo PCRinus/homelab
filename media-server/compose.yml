@@ -320,20 +320,6 @@ services:
     labels:
       - "dozzle.enable=true"
 
-  buildarr:
-    image: callum027/buildarr:0.7.8
-    container_name: buildarr
-    env_file:
-      - ../.env
-    volumes:
-      - type: bind
-        source: ./buildarr
-        target: /config
-        read_only: true
-    networks:
-      - media-net
-    restart: unless-stopped
-
   # Quality profile and custom format management via TRaSH-Guides
   # Run manually: docker compose run --rm configarr
   # Or scheduled via cron on host
