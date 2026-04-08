@@ -23,6 +23,7 @@ services:
     volumes:
       - ${DOCKER_DATA}/qbittorrent:/config
       - ${MEDIA_PATH}:/data
+      - ${QBITTORRENT_INCOMPLETE_PATH}:/data/incomplete
     ports:
       - "8080:8080"      # qBittorrent WebUI
     networks:

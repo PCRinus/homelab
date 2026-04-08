@@ -95,7 +95,45 @@ fi
 echo
 
 # ===========================================
-# 3. DOCKER_SOCK - Docker socket path
+# 3. QBITTORRENT_INCOMPLETE_PATH - local staging for active downloads
+# ===========================================
+DEFAULT_QBITTORRENT_INCOMPLETE_PATH="${DOCKER_DATA}/qbittorrent/incomplete"
+echo -e "${BOLD}qBittorrent incomplete download path${NC}"
+echo "Where active qBittorrent downloads are written before completion."
+echo "Use a local disk path here, not the NAS mount, to avoid surfacing NFS hiccups as torrent I/O errors."
+if [ -n "${QBITTORRENT_INCOMPLETE_PATH:-}" ]; then
+    echo -e "Using existing QBITTORRENT_INCOMPLETE_PATH from environment: ${GREEN}${QBITTORRENT_INCOMPLETE_PATH}${NC}"
+else
+    echo -e "Default: ${GREEN}${DEFAULT_QBITTORRENT_INCOMPLETE_PATH}${NC}"
+    read -rp "> Path [${DEFAULT_QBITTORRENT_INCOMPLETE_PATH}]: " INPUT_QBITTORRENT_INCOMPLETE_PATH
+    QBITTORRENT_INCOMPLETE_PATH="${INPUT_QBITTORRENT_INCOMPLETE_PATH:-$DEFAULT_QBITTORRENT_INCOMPLETE_PATH}"
+fi
+
+if [ ! -d "$QBITTORRENT_INCOMPLETE_PATH" ]; then
+    echo -e "${YELLOW}Directory does not exist: ${QBITTORRENT_INCOMPLETE_PATH}${NC}"
+    read -rp "Create it? [Y/n]: " CREATE_DIR
+    if [[ "${CREATE_DIR,,}" != "n" ]]; then
+        mkdir -p "$QBITTORRENT_INCOMPLETE_PATH"
+        echo -e "${GREEN}Created ${QBITTORRENT_INCOMPLETE_PATH}${NC}"
+    fi
+fi
+
+if [[ "$QBITTORRENT_INCOMPLETE_PATH" == "$MEDIA_PATH" || "$QBITTORRENT_INCOMPLETE_PATH" == "$MEDIA_PATH/"* ]]; then
+    echo -e "${YELLOW}WARNING: QBITTORRENT_INCOMPLETE_PATH is inside MEDIA_PATH.${NC}"
+    echo "Active torrent writes will still hit the NAS and can fail on NFS stalls."
+elif [ -d "$QBITTORRENT_INCOMPLETE_PATH" ]; then
+    FS_TYPE=$(stat -f -c '%T' "$QBITTORRENT_INCOMPLETE_PATH" 2>/dev/null || true)
+    case "$FS_TYPE" in
+        nfs|nfs4|cifs|smb2|smb3|fuseblk)
+            echo -e "${YELLOW}WARNING: ${QBITTORRENT_INCOMPLETE_PATH} is on ${FS_TYPE}.${NC}"
+            echo "For best results, keep active qBittorrent downloads on a local filesystem."
+            ;;
+    esac
+fi
+echo
+
+# ===========================================
+# 4. DOCKER_SOCK - Docker socket path
 # ===========================================
 echo -e "${BOLD}Docker socket${NC}"
 DETECTED_SOCK="/run/user/$(id -u)/docker.sock"
@@ -129,7 +167,7 @@ fi
 echo
 
 # ===========================================
-# 4. DOCKER_GID - Docker socket group
+# 5. DOCKER_GID - Docker socket group
 # ===========================================
 echo -e "${BOLD}Docker socket group${NC}"
 echo "GID of the Docker socket — used by Homepage to access Docker as non-root."
@@ -157,7 +195,7 @@ fi
 echo
 
 # ===========================================
-# 5. RENDER_GID - GPU render group for HW transcoding
+# 6. RENDER_GID - GPU render group for HW transcoding
 # ===========================================
 echo -e "${BOLD}GPU render group${NC}"
 echo "Used by Plex for hardware-accelerated transcoding."
@@ -186,7 +224,7 @@ fi
 echo
 
 # ===========================================
-# 6. Home Assistant trusted proxies
+# 7. Home Assistant trusted proxies
 # ===========================================
 echo -e "${BOLD}Home Assistant trusted proxies${NC}"
 echo "IPs/CIDRs that Home Assistant should trust for X-Forwarded-For."
@@ -219,7 +257,7 @@ echo -e "${GREEN}Wrote ${TRUSTED_PROXIES_FILE}${NC}"
 echo
 
 # ===========================================
-# 7. Optional: Cloudflare/Terraform credentials
+# 8. Optional: Cloudflare/Terraform credentials
 # ===========================================
 CONFIGURE_TF_ENV=false
 TF_CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN:-}"
@@ -267,6 +305,7 @@ echo
 echo -e "${BOLD}Summary:${NC}"
 echo -e "  DOCKER_DATA = ${GREEN}${DOCKER_DATA}${NC}"
 echo -e "  MEDIA_PATH  = ${GREEN}${MEDIA_PATH}${NC}"
+echo -e "  QBITTORRENT_INCOMPLETE_PATH = ${GREEN}${QBITTORRENT_INCOMPLETE_PATH}${NC}"
 echo -e "  DOCKER_SOCK = ${GREEN}${DOCKER_SOCK}${NC}"
 if [ -n "$DOCKER_GID" ]; then
     echo -e "  DOCKER_GID  = ${GREEN}${DOCKER_GID}${NC}"
@@ -305,6 +344,7 @@ if [ -f "$ZSHENV" ]; then
     grep -v "$MARKER_END" | \
     grep -v "^export DOCKER_DATA=" | \
     grep -v "^export MEDIA_PATH=" | \
+    grep -v "^export QBITTORRENT_INCOMPLETE_PATH=" | \
     grep -v "^export DOCKER_SOCK=" | \
     grep -v "^export DOCKER_GID=" | \
     grep -v "^export RENDER_GID=" > "${ZSHENV}.tmp" || true
@@ -324,6 +364,7 @@ cat >> "$ZSHENV" << EOF
 ${MARKER_START}
 export DOCKER_DATA="${DOCKER_DATA}"
 export MEDIA_PATH="${MEDIA_PATH}"
+export QBITTORRENT_INCOMPLETE_PATH="${QBITTORRENT_INCOMPLETE_PATH}"
 export DOCKER_SOCK="${DOCKER_SOCK}"
 export DOCKER_GID="${DOCKER_GID}"
 export RENDER_GID="${RENDER_GID}"

@@ -28,8 +28,8 @@ if [[ "$1" == "--all" ]]; then
 fi
 
 # --- Preflight checks ---
-if [ -z "$DOCKER_DATA" ] || [ -z "$MEDIA_PATH" ] || [ -z "$DOCKER_SOCK" ]; then
-    echo -e "${RED}Environment variables not set (DOCKER_DATA, MEDIA_PATH, DOCKER_SOCK)${NC}"
+if [ -z "$DOCKER_DATA" ] || [ -z "$MEDIA_PATH" ] || [ -z "${QBITTORRENT_INCOMPLETE_PATH:-}" ] || [ -z "$DOCKER_SOCK" ]; then
+    echo -e "${RED}Environment variables not set (DOCKER_DATA, MEDIA_PATH, QBITTORRENT_INCOMPLETE_PATH, DOCKER_SOCK)${NC}"
     echo -e "Run ${YELLOW}./scripts/init.sh${NC} first, then ${YELLOW}source ~/.zshenv${NC}"
     exit 1
 fi
@@ -88,7 +88,7 @@ if [ -n "$MEDIA_PATH" ]; then
         # automount, so we need to access the path to wake it up.
         if ! mountpoint -q "$MEDIA_PATH" 2>/dev/null; then
             echo -e "${YELLOW}Activating NAS mount at ${MEDIA_PATH}...${NC}"
-            if ls "$MEDIA_PATH" > /dev/null 2>&1 && mountpoint -q "$MEDIA_PATH" 2>/dev/null; then
+            if timeout 10 ls "$MEDIA_PATH" > /dev/null 2>&1 && mountpoint -q "$MEDIA_PATH" 2>/dev/null; then
                 echo -e "${GREEN}NAS mount active${NC}"
             else
                 echo -e "${RED}WARNING: ${MEDIA_PATH} is not a mount point${NC}"
@@ -98,6 +98,25 @@ if [ -n "$MEDIA_PATH" ]; then
             fi
         fi
     fi
+fi
+
+# --- Check local qBittorrent staging path ---
+if [ ! -d "$QBITTORRENT_INCOMPLETE_PATH" ]; then
+    echo -e "${YELLOW}Creating qBittorrent incomplete path at ${QBITTORRENT_INCOMPLETE_PATH}${NC}"
+    mkdir -p "$QBITTORRENT_INCOMPLETE_PATH"
+fi
+
+if [[ "$QBITTORRENT_INCOMPLETE_PATH" == "$MEDIA_PATH" || "$QBITTORRENT_INCOMPLETE_PATH" == "$MEDIA_PATH/"* ]]; then
+    echo -e "${YELLOW}WARNING: QBITTORRENT_INCOMPLETE_PATH is inside MEDIA_PATH${NC}"
+    echo -e "Active torrent writes will still hit the NAS."
+else
+    FS_TYPE=$(stat -f -c '%T' "$QBITTORRENT_INCOMPLETE_PATH" 2>/dev/null || true)
+    case "$FS_TYPE" in
+        nfs|nfs4|cifs|smb2|smb3|fuseblk)
+            echo -e "${YELLOW}WARNING: QBITTORRENT_INCOMPLETE_PATH is on a network filesystem (${FS_TYPE})${NC}"
+            echo -e "Use a local path to avoid qBittorrent I/O errors during NAS stalls."
+            ;;
+    esac
 fi
 
 # --- Start stacks in order ---

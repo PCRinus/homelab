@@ -68,9 +68,11 @@ The setup script interactively configures machine-specific paths and writes them
 |----------|---------|---------|
 | `DOCKER_DATA` | Container persistent data (configs, databases) | `~/docker` |
 | `MEDIA_PATH` | NAS media storage mount point | `/mnt/unas/media` |
+| `QBITTORRENT_INCOMPLETE_PATH` | Local staging path for active qBittorrent downloads | `~/docker/qbittorrent/incomplete` |
 | `DOCKER_SOCK` | Docker socket path (auto-detected) | `/var/run/docker.sock` |
 
 These are used by all `compose.yml` files via `${VARIABLE}` interpolation. Docker Compose reads them from the shell environment automatically.
+`QBITTORRENT_INCOMPLETE_PATH` is intentionally local so active torrent writes do not fail when the NAS mount stalls.
 
 Re-running `scripts/init.sh` is safe — it replaces the existing block in `~/.zshenv`.
 

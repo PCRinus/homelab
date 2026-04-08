@@ -23,9 +23,10 @@ The media stack requires `/mnt/unas/media` to be mounted from the NAS before sta
 
 **fstab entry** (`/etc/fstab`):
 ```
-192.168.1.30:/var/nfs/shared/Media  /mnt/unas/media  nfs  defaults,_netdev,x-systemd.automount,x-systemd.mount-timeout=30,rw,hard  0  0
+192.168.1.30:/var/nfs/shared/Media  /mnt/unas/media  nfs  rw,hard,tcp,timeo=600,retrans=2,_netdev,nofail,x-systemd.automount,x-systemd.mount-timeout=30  0  0
 ```
 
+Use a `hard` NFS mount here. Avoid `soft` mounts for qBittorrent and other write-heavy services, because they can turn short NAS hiccups into application-level `I/O error` failures.
 The `x-systemd.automount` option creates an automount unit that mounts the NFS share on first access, avoiding race conditions with network initialization at boot time.
 
 **Manual mount** (if needed after reboot):
@@ -169,9 +170,11 @@ qBittorrent stores its configuration in `/home/mircea/docker/qbittorrent/`. Sett
 
 **Key settings:**
 - Download directory: `/data/torrents`
-- Incomplete directory: `/data/torrents/incomplete`
+- Incomplete directory: `/data/incomplete`
 - WebUI port: 8080
 - Peer port: (automatically configured by VPN_AUTO_PORT_FORWARD)
+
+`/data` stays mapped to the NAS for completed torrents and media, while `/data/incomplete` is overlaid from the local host path `${QBITTORRENT_INCOMPLETE_PATH}`. This keeps active torrent piece writes off NFS.
 
 ### Starting the Stack
 
@@ -230,10 +233,15 @@ The Hotio qBittorrent image uses a different directory layout than linuxserver:
                            ┌───────────────────────┘
                            ▼
               ┌────────────────────────┐
+              │  /data/incomplete/     │  ◀── Active downloads (local disk)
+              └────────────┬───────────┘
+                           │
+                           │ qBittorrent move on completion
+                           ▼
+              ┌────────────────────────┐
               │  /data/torrents/       │
-              │  ├── incomplete/       │  ◀── Active downloads
-              │  ├── movies/           │  ◀── Completed (seeding)
-              │  └── tv/               │  ◀── Completed (seeding)
+              │  ├── movies/           │  ◀── Completed (seeding, NAS)
+              │  └── tv/               │  ◀── Completed (seeding, NAS)
               └────────────┬───────────┘
                            │
                            │ Sonarr/Radarr import
@@ -255,11 +263,12 @@ The Hotio qBittorrent image uses a different directory layout than linuxserver:
 ### Directory Structure
 
 ```
+${QBITTORRENT_INCOMPLETE_PATH}/  # Local host path (mounted at /data/incomplete in qBittorrent)
+├── radarr/                      # Active movie downloads
+├── tv-sonarr/                   # Active TV downloads
+└── anime-sonarr/                # Active anime downloads
+
 /mnt/unas/media/                 # NAS mount (mapped to /data in containers)
-├── incomplete/                  # Active downloads (qBittorrent temp dir)
-│   ├── radarr/                  # Active movie downloads
-│   ├── tv-sonarr/               # Active TV downloads
-│   └── anime-sonarr/            # Active anime downloads
 ├── torrents/                    # Completed downloads (seeding)
 │   ├── movies/                  # Completed movie torrents
 │   ├── tv/                      # Completed TV torrents
@@ -282,7 +291,7 @@ qBittorrent uses **categories** to organize downloads. Configure categories in S
 
 ### Hardlinks
 
-Since `/data/torrents` and `/data/media` are on the same filesystem (NAS), Sonarr/Radarr use **hardlinks** when importing. This means:
+Since `/data/torrents` and `/data/media` are on the same filesystem (NAS), Sonarr/Radarr use **hardlinks** when importing. The local `/data/incomplete` staging path does not change that. This means:
 - Instant "moves" (no copying)
 - Files exist in both locations but use disk space only once
 - qBittorrent keeps seeding from `torrents/` while Plex serves from `media/`

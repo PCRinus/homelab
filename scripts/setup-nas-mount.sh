@@ -227,14 +227,26 @@ if [ "$PROTOCOL" = "nfs" ]; then
     FSTAB_TYPE="nfs"
 
     echo -e "${BOLD}NFS mount options${NC}"
-    DEFAULT_NFS_OPTS="rw,soft,intr,timeo=150,retrans=3,_netdev,nofail,x-systemd.automount,x-systemd.mount-timeout=30"
+    DEFAULT_NFS_OPTS="rw,hard,tcp,timeo=600,retrans=2,_netdev,nofail,x-systemd.automount,x-systemd.mount-timeout=30"
     echo -e "Default: ${GREEN}${DEFAULT_NFS_OPTS}${NC}"
     echo "  rw             — Read/write access"
-    echo "  soft,intr      — Don't hang if NAS is unreachable"
+    echo "  hard,tcp       — Retry cleanly through NAS hiccups instead of returning application-level I/O errors"
+    echo "  timeo/retrans  — Fewer, longer retries to reduce false write failures on transient latency"
     echo "  _netdev,nofail — Wait for network, don't block boot if unavailable"
     echo "  x-systemd.*    — Systemd automount (mount on first access)"
     read -rp "> Options [accept defaults]: " CUSTOM_OPTS
     MOUNT_OPTS="${CUSTOM_OPTS:-$DEFAULT_NFS_OPTS}"
+
+    if echo "$MOUNT_OPTS" | grep -Eq '(^|,)soft(,|$)'; then
+        echo
+        echo -e "${YELLOW}WARNING: soft NFS mounts can surface transient NAS/network issues as application I/O errors.${NC}"
+        echo "This is a bad fit for qBittorrent, databases, and other write-heavy services."
+        read -rp "Keep the soft mount anyway? [y/N]: " KEEP_SOFT
+        if [[ "${KEEP_SOFT,,}" != "y" ]]; then
+            echo -e "${GREEN}Using hardened defaults instead.${NC}"
+            MOUNT_OPTS="$DEFAULT_NFS_OPTS"
+        fi
+    fi
 
 else
     # Check CIFS client tools
@@ -376,7 +388,7 @@ if echo "$MOUNT_OPTS" | grep -q "x-systemd.automount"; then
                 echo -e "${GREEN}Mount verified!${NC}"
                 df -h "$MOUNT_POINT" | tail -1
             else
-                echo -e "${YELLOW}NAS reachable but mount timed out — it may need a moment.${NC}"
+                echo -e "${YELLOW}NAS reachable but mount timed out — the export may be slow or unhealthy.${NC}"
                 echo -e "Try: ${YELLOW}ls ${MOUNT_POINT}${NC}"
             fi
         else
