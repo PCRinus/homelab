@@ -24,6 +24,15 @@ checkrr:
     - .svg
     - .sub
     - .idx
+    - .exe
+    - .bat
+    - .cmd
+    - .com
+    - .scr
+    - .pif
+    - .lnk
+    - .url
+    - .ps1
 logs:
   stdout:
     out: stdout
