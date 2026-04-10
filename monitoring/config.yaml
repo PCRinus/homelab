@@ -240,3 +240,15 @@ endpoints:
     alerts:
       - type: discord
         description: "Dozzle (log viewer) is down or not responding"
+
+  - name: NIC Link Speed (GbE)
+    group: Infrastructure
+    url: "http://link-speed-monitor:8888/cgi-bin/speed"
+    interval: 5m
+    conditions:
+      - "[STATUS] == 200"
+      - "[BODY].speed == 1000"
+    alerts:
+      - type: discord
+        description: "Server NIC link speed dropped below 1 Gbps — possible cable issue causing slow NAS reads and Plex buffering"
+        failure-threshold: 2

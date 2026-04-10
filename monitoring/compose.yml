@@ -42,6 +42,31 @@ services:
     labels:
       - "dozzle.enable=true"
 
+  # Exposes host NIC link speed as HTTP endpoint for Gatus monitoring
+  # Alerts if link drops below GbE (e.g., cable issue causing auto-negotiation to FE)
+  link-speed-monitor:
+    image: alpine:3.23
+    container_name: link-speed-monitor
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        mkdir -p /www/cgi-bin
+        cat > /www/cgi-bin/speed <<'SCRIPT'
+        #!/bin/sh
+        SPEED=$$(cat /host-net-speed 2>/dev/null || echo "0")
+        printf 'Content-Type: application/json\r\n\r\n'
+        printf '{"speed":%s,"unit":"Mbps"}' "$$SPEED"
+        SCRIPT
+        chmod +x /www/cgi-bin/speed
+        exec httpd -f -p 8888 -h /www
+    volumes:
+      - /sys/class/net/enp46s0/speed:/host-net-speed:ro
+    networks:
+      - media-net
+    restart: unless-stopped
+    labels:
+      - "dozzle.enable=true"
+
 networks:
   media-net:
     external: true
