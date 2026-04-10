@@ -4,7 +4,7 @@ services:
     container_name: adguard
     command: ["--web-addr", "0.0.0.0:3001", "--config", "/opt/adguardhome/conf/AdGuardHome.yaml", "--work-dir", "/opt/adguardhome/work", "--no-check-update"]
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     volumes:
       - ${DOCKER_DATA}/adguard/work:/opt/adguardhome/work
       - ${DOCKER_DATA}/adguard/conf:/opt/adguardhome/conf

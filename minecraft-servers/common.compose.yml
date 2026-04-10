@@ -9,7 +9,7 @@ services:
     labels:
       - "dozzle.enable=true"
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     environment:
       EULA: "TRUE"
       TYPE: "FABRIC"

@@ -23,7 +23,7 @@ services:
       - ./config.yaml:/config/config.yaml:ro
       - ${DOCKER_DATA}/gatus/data:/data
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"

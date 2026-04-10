@@ -11,7 +11,7 @@ services:
     devices:
       - /dev/net/tun:/dev/net/tun
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     environment:
       - WEBUI_PORTS=8080/tcp,8080/udp
       - VPN_ENABLED=true
@@ -40,7 +40,7 @@ services:
     image: ghcr.io/hotio/sonarr:release-4.0.17.2952
     container_name: sonarr
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     volumes:
       - ${DOCKER_DATA}/sonarr:/config
       - ${MEDIA_PATH}:/data
@@ -64,7 +64,7 @@ services:
     image: ghcr.io/hotio/sonarr:release-4.0.17.2952
     container_name: sonarr-anime
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     volumes:
       - ${DOCKER_DATA}/sonarr-anime:/config
       - ${MEDIA_PATH}:/data
@@ -88,7 +88,7 @@ services:
     image: ghcr.io/hotio/radarr:release-6.1.1.10360
     container_name: radarr
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     volumes:
       - ${DOCKER_DATA}/radarr:/config
       - ${MEDIA_PATH}:/data
@@ -112,7 +112,7 @@ services:
     image: ghcr.io/hotio/prowlarr:release-2.3.5.5327
     container_name: prowlarr
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     environment:
       - UMASK=002
     volumes:
@@ -137,7 +137,7 @@ services:
     image: ghcr.io/flaresolverr/flaresolverr:v3.4.6
     container_name: flaresolverr
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     environment:
       - LOG_LEVEL=info
       - LOG_HTML=false
@@ -158,7 +158,7 @@ services:
     image: ghcr.io/seerr-team/seerr:v3.1.0
     container_name: seerr
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     init: true
     environment:
       - LOG_LEVEL=debug
@@ -184,7 +184,7 @@ services:
     image: lakker/pulsarr:0.15.1
     container_name: pulsarr
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     environment:
       - baseUrl=http://pulsarr
       - port=3003
@@ -215,7 +215,7 @@ services:
     image: lscr.io/linuxserver/plex:1.43.1
     container_name: plex
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     environment:
       - VERSION=docker
     devices:
@@ -251,7 +251,7 @@ services:
     image: ghcr.io/hotio/bazarr:release-1.5.3
     container_name: bazarr
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     volumes:
       - ${DOCKER_DATA}/bazarr:/config
       - ${MEDIA_PATH}:/data
@@ -275,7 +275,7 @@ services:
     image: lscr.io/linuxserver/tautulli:2.17.0
     container_name: tautulli
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     volumes:
       - ${DOCKER_DATA}/tautulli:/config
       - type: bind
@@ -359,7 +359,7 @@ services:
     image: ghcr.io/raydak-labs/configarr:1.25.0
     container_name: configarr
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     volumes:
       - ./configarr:/app/config:ro           # Config files (config.yml, secrets.yml)
       - ${DOCKER_DATA}/configarr/repos:/app/repos  # Cache for TRaSH-Guides/Recyclarr repos
@@ -375,7 +375,7 @@ services:
     image: fosrl/newt:1.11.0
     container_name: newt
     env_file:
-      - ../.env
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     networks:
       - media-net
     restart: unless-stopped
