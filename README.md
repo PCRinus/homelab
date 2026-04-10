@@ -112,6 +112,11 @@ You can override the remote backup path and retention with repository variables:
 - `HOMELAB_BACKUP_PATH`
 - `HOMELAB_BACKUP_RETENTION_DAYS`
 
+## Migration
+
+Host-to-host migration is documented as a runbook rather than an automation script.
+See [specs/migration-runbook.md](specs/migration-runbook.md) for the recommended backup/restore and `rsync`-based approaches.
+
 ## Service Stacks
 
 | Directory | Services | Description |
@@ -126,6 +131,7 @@ You can override the remote backup path and retention with repository variables:
 ## Secrets & Configuration
 
 Secrets are encrypted in the repo using [sops](https://github.com/getsops/sops) + [age](https://github.com/FiloSottile/age). Plaintext files are gitignored; encrypted `.enc` variants are tracked.
+Runtime now prefers `.env.enc` and decrypts it to a temporary file for Compose when available. Plaintext `.env` is still useful for editing and bootstrap, but it is no longer the preferred runtime source.
 
 | Plaintext (gitignored) | Encrypted (tracked) | Method |
 |------------------------|---------------------|--------|
