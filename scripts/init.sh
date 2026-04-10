@@ -385,7 +385,7 @@ echo -e "${GREEN}Wrote Cloudflare/Terraform env block to ${ZSHENV}${NC}"
 fi
 
 # ===========================================
-# Decrypt secrets (if encrypted files exist)
+# Detect encrypted secrets (runtime uses them directly)
 # ===========================================
 echo
 SECRETS_SCRIPT="${SCRIPT_DIR}/secrets.sh"
@@ -397,23 +397,24 @@ if [ -x "$SECRETS_SCRIPT" ]; then
         if command -v sops >/dev/null 2>&1 && command -v age >/dev/null 2>&1; then
             AGE_KEY="${SOPS_AGE_KEY_FILE:-$HOME/.config/sops/age/keys.txt}"
             if [ -f "$AGE_KEY" ]; then
-                echo -e "${BOLD}Found ${ENC_COUNT} encrypted secret files. Decrypting...${NC}"
-                "$SECRETS_SCRIPT" decrypt
+                echo -e "${GREEN}Found ${ENC_COUNT} encrypted secret files${NC}"
+                echo -e "Runtime will use them directly without leaving plaintext secrets in the repo."
+                echo -e "Decrypt manually only if you need to inspect or edit them:"
+                echo -e "  ${YELLOW}./scripts/secrets.sh decrypt${NC}"
             else
                 echo -e "${YELLOW}Encrypted secrets found but no age key at ${AGE_KEY}${NC}"
-                echo -e "Copy your age key from the old machine, then run:"
-                echo -e "  ${YELLOW}./scripts/secrets.sh decrypt${NC}"
+                echo -e "Copy your age key from the old machine if you want to decrypt secrets for editing."
             fi
         else
             echo -e "${YELLOW}Encrypted secrets found but sops/age not installed${NC}"
-            echo -e "Install them, then run: ${YELLOW}./scripts/secrets.sh decrypt${NC}"
+            echo -e "Install them if you want to decrypt secrets for editing."
         fi
     else
         echo -e "${YELLOW}No encrypted secret files found${NC}"
         echo -e "If this is a fresh setup, create secrets from examples or copy them manually."
     fi
 else
-    echo -e "${YELLOW}secrets.sh not found — skipping decryption${NC}"
+    echo -e "${YELLOW}secrets.sh not found — skipping secret tooling hints${NC}"
 fi
 
 # ===========================================
@@ -421,14 +422,17 @@ fi
 # ===========================================
 echo
 ENV_FILE="${REPO_DIR}/.env"
+ENCRYPTED_ENV_FILE="${ENV_FILE}.enc"
 ENV_EXAMPLE="${REPO_DIR}/.env.example"
 
-if [ ! -f "$ENV_FILE" ] && [ -f "$ENV_EXAMPLE" ]; then
+if [ ! -f "$ENV_FILE" ] && [ ! -f "$ENCRYPTED_ENV_FILE" ] && [ -f "$ENV_EXAMPLE" ]; then
     cp "$ENV_EXAMPLE" "$ENV_FILE"
     echo -e "${GREEN}Created .env from .env.example${NC}"
     echo -e "${YELLOW}Fill in your API keys and secrets in .env${NC}"
+elif [ -f "$ENCRYPTED_ENV_FILE" ]; then
+    echo -e "${GREEN}.env.enc already exists — runtime will use it directly${NC}"
 elif [ ! -f "$ENV_FILE" ]; then
-    echo -e "${YELLOW}No .env or .env.example found${NC}"
+    echo -e "${YELLOW}No .env, .env.enc, or .env.example found${NC}"
 else
     echo -e "${GREEN}.env already exists${NC}"
 fi
@@ -444,10 +448,10 @@ echo -e "  1. Run ${YELLOW}source ~/.zshenv${NC} or open a new terminal"
 if $CONFIGURE_TF_ENV; then
     echo -e "  1b. Local Terraform is ready to use in ${YELLOW}cloudflare-tunnel/${NC}"
 fi
-echo -e "  2. If secrets were not decrypted above:"
+echo -e "  2. If you need plaintext secrets for editing:"
 echo -e "     a. Copy your age key to ${YELLOW}~/.config/sops/age/keys.txt${NC}"
 echo -e "     b. Run ${YELLOW}./scripts/secrets.sh decrypt${NC}"
-echo -e "     Or manually create secrets from examples:"
+echo -e "     Fresh setup with no encrypted secrets yet:"
 echo -e "       ${YELLOW}cp media-server/configarr/secrets.yml.example media-server/configarr/secrets.yml${NC}"
 echo -e "       ${YELLOW}cp home-assistant/secrets.yaml.example home-assistant/secrets.yaml${NC}"
 echo -e "  3. Start all services:"

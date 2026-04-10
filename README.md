@@ -45,7 +45,7 @@ cd ~/homeserver
 mkdir -p ~/.config/sops/age
 cp /path/to/keys.txt ~/.config/sops/age/keys.txt
 
-# 3. Run the setup script (configures paths + decrypts secrets)
+# 3. Run the setup script (configures paths and host settings)
 ./scripts/init.sh
 
 # 4. Load the new environment
@@ -142,13 +142,13 @@ Runtime now prefers `.env.enc` and decrypts it to a temporary file for Compose w
 | `cloudflare-tunnel/tunnel-token` | `...token.enc` | age |
 | `media-server/wg0.conf` | `...conf.enc` | age |
 
-### Decrypt (after clone / on new machine)
+### Decrypt (only when you need plaintext for editing or inspection)
 
 ```bash
 ./scripts/secrets.sh decrypt
 ```
 
-`scripts/init.sh` runs this automatically if it finds your age key at `~/.config/sops/age/keys.txt`.
+Runtime does not require decrypting `.env.enc` first. The Compose wrapper decrypts it to a temporary file when needed.
 
 ### Encrypt (after editing a secret)
 
