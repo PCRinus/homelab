@@ -109,7 +109,7 @@ services:
       start_period: 30s
 
   prowlarr:
-    image: ghcr.io/hotio/prowlarr:release-2.3.0.5236
+    image: ghcr.io/hotio/prowlarr:2.3.5.5327
     container_name: prowlarr
     env_file:
       - ../.env
