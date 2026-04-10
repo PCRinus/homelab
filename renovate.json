@@ -16,6 +16,19 @@
       "matchDatasources": [
         "docker"
       ],
+      "matchPackageNames": [
+        "ghcr.io/hotio/qbittorrent",
+        "ghcr.io/hotio/sonarr",
+        "ghcr.io/hotio/radarr",
+        "ghcr.io/hotio/prowlarr",
+        "ghcr.io/hotio/bazarr"
+      ],
+      "versioning": "regex:^(?<compatibility>[^\\d]+-)?(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:\\.(?<build>\\d+))?$"
+    },
+    {
+      "matchDatasources": [
+        "docker"
+      ],
       "groupName": "Docker images",
       "automerge": false
     },
