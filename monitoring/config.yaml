@@ -16,7 +16,7 @@ alerting:
   console:
     enabled: true
   discord:
-    webhook-url: "${DISCORD_WEBHOOK_URL}"
+    webhook-url: "${GATUS_DISCORD_WEBHOOK_URL}"
     default-alert:
       description: "Service health check failed"
       send-on-resolved: true
