@@ -16,4 +16,10 @@ homelab_compose pull
 echo "🚀 Starting containers..."
 homelab_compose up -d
 
+# Gatus reads config.yaml only at startup, but docker compose up -d won't
+# restart it if only the bind-mounted config file changed. Force a restart
+# so Gatus always picks up the latest config.
+echo "🔄 Restarting Gatus to pick up config changes..."
+homelab_compose restart gatus
+
 echo "✅ Monitoring Stack started!"
