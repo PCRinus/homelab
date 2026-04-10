@@ -45,10 +45,11 @@ services:
   # Exposes host NIC link speed as HTTP endpoint for Gatus monitoring
   # Alerts if link drops below GbE (e.g., cable issue causing auto-negotiation to FE)
   link-speed-monitor:
-    image: alpine:3.23
+    image: busybox:1.37
     container_name: link-speed-monitor
-    entrypoint: ["/bin/sh", "-c"]
     command:
+      - /bin/sh
+      - -c
       - |
         mkdir -p /www/cgi-bin
         cat > /www/cgi-bin/speed <<'SCRIPT'
