@@ -4,6 +4,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../scripts/lib/compose-env.sh"
 
 echo "🏠 Starting Home Assistant..."
 
@@ -15,9 +16,9 @@ if [ ! -f "secrets.yaml" ]; then
 fi
 
 echo "📦 Pulling latest images..."
-docker compose pull
+homelab_compose pull
 
 echo "🚀 Starting containers..."
-docker compose up -d
+homelab_compose up -d
 
 echo "✅ Home Assistant started!"

@@ -15,6 +15,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
+source "${SCRIPT_DIR}/lib/compose-env.sh"
 
 # --- Colors ---
 RED='\033[0;31m'
@@ -59,7 +60,7 @@ if $INCLUDE_MINECRAFT; then
             [[ "$f" == "common.compose.yml" ]] && continue
             if [ -f "$f" ]; then
                 echo "Stopping ${f}..."
-                docker compose -f "$f" down
+                homelab_compose -f "$f" down
             fi
         done
         echo -e "✅ Minecraft servers stopped!"
@@ -75,7 +76,7 @@ for stack in "${STACKS[@]}"; do
     compose_file="${REPO_DIR}/${stack}/compose.yml"
     if [ -f "$compose_file" ]; then
         echo -e "${BOLD}━━━ ${stack} ━━━${NC}"
-        if (cd "${REPO_DIR}/${stack}" && docker compose down); then
+        if (cd "${REPO_DIR}/${stack}" && homelab_compose down); then
             echo
         else
             echo -e "${RED}Failed to stop ${stack}${NC}"

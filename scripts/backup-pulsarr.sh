@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 MEDIA_SERVER_DIR="${REPO_DIR}/media-server"
+source "${SCRIPT_DIR}/lib/compose-env.sh"
 
 if [ -f "$HOME/.zshenv" ]; then
     source "$HOME/.zshenv"
@@ -53,26 +54,26 @@ if ! docker info > /dev/null 2>&1; then
 fi
 
 cd "$MEDIA_SERVER_DIR"
-if ! docker compose config --services 2>/dev/null | grep -qx "pulsarr"; then
+if ! homelab_compose config --services 2>/dev/null | grep -qx "pulsarr"; then
     echo "Could not find pulsarr service in media-server compose."
     exit 1
 fi
 
 was_running=false
-if docker compose ps --status running --services 2>/dev/null | grep -qx "pulsarr"; then
+if homelab_compose ps --status running --services 2>/dev/null | grep -qx "pulsarr"; then
     was_running=true
 fi
 
 restore_service() {
     if [ "$was_running" = true ]; then
-        docker compose start pulsarr > /dev/null 2>&1 || true
+        homelab_compose start pulsarr > /dev/null 2>&1 || true
     fi
 }
 trap restore_service EXIT
 
 if [ "$was_running" = true ]; then
     echo "Stopping pulsarr for consistent backup..."
-    docker compose stop pulsarr
+    homelab_compose stop pulsarr
 fi
 
 echo "Creating backup archive: $ARCHIVE_PATH"

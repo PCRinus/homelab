@@ -8,6 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVERS_DIR="${SCRIPT_DIR}/servers"
 RESOLVER_SCRIPT="${SCRIPT_DIR}/resolve-modrinth-mods.sh"
 RESOLVED_ENV_FILE="${SCRIPT_DIR}/.generated-modrinth.env"
+source "${SCRIPT_DIR}/../scripts/lib/compose-env.sh"
 
 usage() {
         cat <<'EOF'
@@ -137,7 +138,7 @@ if [[ ! -s "${RESOLVED_ENV_FILE}" ]]; then
     exit 1
 fi
 
-COMPOSE_ENV_ARGS=(--env-file ../.env --env-file "${RESOLVED_ENV_FILE}")
+COMPOSE_ENV_ARGS=(--env-file "${RESOLVED_ENV_FILE}")
 
 STARTED=0
 for f in "${SELECTED_FILES[@]}"; do
@@ -145,9 +146,9 @@ for f in "${SELECTED_FILES[@]}"; do
     PROJECT_NAME="minecraft-${SERVER_NAME}"
     SERVER_COMPOSE_FILE="${SERVERS_DIR}/${f}"
     echo "📦 Pulling ${SERVER_NAME}..."
-    docker compose -p "${PROJECT_NAME}" "${COMPOSE_ENV_ARGS[@]}" -f common.compose.yml -f "${SERVER_COMPOSE_FILE}" pull
+    homelab_compose -p "${PROJECT_NAME}" "${COMPOSE_ENV_ARGS[@]}" -f common.compose.yml -f "${SERVER_COMPOSE_FILE}" pull
     echo "🚀 Starting ${SERVER_NAME}..."
-    docker compose -p "${PROJECT_NAME}" "${COMPOSE_ENV_ARGS[@]}" -f common.compose.yml -f "${SERVER_COMPOSE_FILE}" up -d
+    homelab_compose -p "${PROJECT_NAME}" "${COMPOSE_ENV_ARGS[@]}" -f common.compose.yml -f "${SERVER_COMPOSE_FILE}" up -d
     STARTED=$((STARTED + 1))
 done
 

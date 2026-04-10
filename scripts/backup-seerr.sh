@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 MEDIA_SERVER_DIR="${REPO_DIR}/media-server"
+source "${SCRIPT_DIR}/lib/compose-env.sh"
 
 if [ -f "$HOME/.zshenv" ]; then
     source "$HOME/.zshenv"
@@ -61,9 +62,9 @@ fi
 
 SERVICE_NAME=""
 cd "$MEDIA_SERVER_DIR"
-if docker compose config --services 2>/dev/null | grep -qx "seerr"; then
+if homelab_compose config --services 2>/dev/null | grep -qx "seerr"; then
     SERVICE_NAME="seerr"
-elif docker compose config --services 2>/dev/null | grep -qx "overseerr"; then
+elif homelab_compose config --services 2>/dev/null | grep -qx "overseerr"; then
     SERVICE_NAME="overseerr"
 else
     echo "Could not find seerr/overseerr service in media-server compose."
@@ -71,20 +72,20 @@ else
 fi
 
 was_running=false
-if docker compose ps --status running --services 2>/dev/null | grep -qx "$SERVICE_NAME"; then
+if homelab_compose ps --status running --services 2>/dev/null | grep -qx "$SERVICE_NAME"; then
     was_running=true
 fi
 
 restore_service() {
     if [ "$was_running" = true ]; then
-        docker compose start "$SERVICE_NAME" > /dev/null 2>&1 || true
+        homelab_compose start "$SERVICE_NAME" > /dev/null 2>&1 || true
     fi
 }
 trap restore_service EXIT
 
 if [ "$was_running" = true ]; then
     echo "Stopping ${SERVICE_NAME} for consistent backup..."
-    docker compose stop "$SERVICE_NAME"
+    homelab_compose stop "$SERVICE_NAME"
 fi
 
 echo "Creating backup archive: $ARCHIVE_PATH"

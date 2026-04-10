@@ -8,6 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVERS_DIR="${SCRIPT_DIR}/servers"
 RESOLVED_ENV_FILE="${SCRIPT_DIR}/.generated-modrinth.env"
 TEMP_ENV_FILE=""
+source "${SCRIPT_DIR}/../scripts/lib/compose-env.sh"
 
 usage() {
     cat <<'EOF'
@@ -97,9 +98,9 @@ if [[ ! -s "${RESOLVED_ENV_FILE}" ]]; then
 MODRINTH_PROJECTS_SURVIVAL_ISLAND=placeholder
 MODRINTH_PROJECTS_WORLD_GENERATION=placeholder
 EOF
-    COMPOSE_ENV_ARGS=(--env-file ../.env --env-file "${TEMP_ENV_FILE}")
+    COMPOSE_ENV_ARGS=(--env-file "${TEMP_ENV_FILE}")
 else
-    COMPOSE_ENV_ARGS=(--env-file ../.env --env-file "${RESOLVED_ENV_FILE}")
+    COMPOSE_ENV_ARGS=(--env-file "${RESOLVED_ENV_FILE}")
 fi
 
 STOPPED=0
@@ -108,7 +109,7 @@ for compose_file in "${SELECTED_FILES[@]}"; do
     PROJECT_NAME="minecraft-${SERVER_NAME}"
     SERVER_COMPOSE_FILE="${SERVERS_DIR}/${compose_file}"
     echo "🧹 Stopping ${SERVER_NAME}..."
-    docker compose -p "${PROJECT_NAME}" "${COMPOSE_ENV_ARGS[@]}" -f common.compose.yml -f "${SERVER_COMPOSE_FILE}" down
+    homelab_compose -p "${PROJECT_NAME}" "${COMPOSE_ENV_ARGS[@]}" -f common.compose.yml -f "${SERVER_COMPOSE_FILE}" down
     STOPPED=$((STOPPED + 1))
 done
 

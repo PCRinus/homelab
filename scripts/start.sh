@@ -14,6 +14,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
+source "${SCRIPT_DIR}/lib/compose-env.sh"
 
 # --- Colors ---
 RED='\033[0;31m'
@@ -34,18 +35,11 @@ if [ -z "$DOCKER_DATA" ] || [ -z "$MEDIA_PATH" ] || [ -z "${QBITTORRENT_INCOMPLE
     exit 1
 fi
 
-# --- Check secrets are decrypted ---
-if [ ! -f "${REPO_DIR}/.env" ]; then
-    # Check if encrypted version exists
-    if [ -f "${REPO_DIR}/.env.enc" ]; then
-        echo -e "${RED}Secrets not decrypted — .env.enc exists but .env does not${NC}"
-        echo -e "Run ${YELLOW}./scripts/secrets.sh decrypt${NC} first"
-        exit 1
-    else
-        echo -e "${RED}.env file not found${NC}"
-        echo -e "Run ${YELLOW}./scripts/init.sh${NC} first"
-        exit 1
-    fi
+# --- Check runtime secrets source exists ---
+if [ ! -f "${REPO_DIR}/.env" ] && [ ! -f "${REPO_DIR}/.env.enc" ]; then
+    echo -e "${RED}Neither .env nor .env.enc was found${NC}"
+    echo -e "Run ${YELLOW}./scripts/init.sh${NC} first"
+    exit 1
 fi
 
 # If DOCKER_SOCK is set but DOCKER_HOST isn't, export DOCKER_HOST so the
@@ -177,8 +171,8 @@ if $INCLUDE_MINECRAFT; then
     for f in *.compose.yml; do
         [[ "$f" == "common.compose.yml" ]] && continue
         echo "Starting ${f}..."
-        docker compose -f "$f" pull
-        docker compose -f "$f" up -d
+        homelab_compose -f "$f" pull
+        homelab_compose -f "$f" up -d
     done
     echo -e "✅ Minecraft servers started!"
     echo
