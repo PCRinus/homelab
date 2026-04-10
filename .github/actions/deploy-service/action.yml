@@ -72,4 +72,4 @@ runs:
           fi
           git merge --ff-only origin/main
           cd ${{ inputs.service_path }}
-          ${{ inputs.deploy_script }} --quiet 2>&1 | tail -20
+          ${{ inputs.deploy_script }} 2>&1 | tail -20
