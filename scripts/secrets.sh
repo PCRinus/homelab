@@ -35,6 +35,7 @@ NC='\033[0m'
 # Age public key (must match .sops.yaml)
 AGE_PUBLIC_KEY="age13przqengtm203ntnckywpztfh7h700pglqn44ggukjpw98usd9ws4vks4c"
 AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-$HOME/.config/sops/age/keys.txt}"
+export SOPS_AGE_KEY_FILE="$AGE_KEY_FILE"
 
 # --- File definitions ---
 # Structured files: encrypted by sops (value-level encryption)
