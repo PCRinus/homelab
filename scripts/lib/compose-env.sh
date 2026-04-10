@@ -6,42 +6,43 @@ PLAIN_ENV_FILE="${REPO_DIR}/.env"
 ENCRYPTED_ENV_FILE="${PLAIN_ENV_FILE}.enc"
 
 resolve_homelab_runtime_env_file() {
+    if [ -f "$ENCRYPTED_ENV_FILE" ]; then
+        if ! command -v sops > /dev/null 2>&1; then
+            echo "sops is required to decrypt ${ENCRYPTED_ENV_FILE}" >&2
+            return 1
+        fi
+
+        if ! command -v age > /dev/null 2>&1; then
+            echo "age is required to decrypt ${ENCRYPTED_ENV_FILE}" >&2
+            return 1
+        fi
+
+        local age_key_file
+        age_key_file="${SOPS_AGE_KEY_FILE:-$HOME/.config/sops/age/keys.txt}"
+        if [ ! -f "$age_key_file" ]; then
+            echo "Age private key not found at ${age_key_file}" >&2
+            return 1
+        fi
+
+        local runtime_env_file
+        runtime_env_file="$(mktemp "${TMPDIR:-/tmp}/homelab-env.XXXXXX")"
+        export SOPS_AGE_KEY_FILE="$age_key_file"
+        if ! sops --decrypt --input-type dotenv --output-type dotenv "$ENCRYPTED_ENV_FILE" > "$runtime_env_file"; then
+            rm -f "$runtime_env_file"
+            return 1
+        fi
+        chmod 600 "$runtime_env_file"
+        printf '%s\n' "$runtime_env_file"
+        return 0
+    fi
+
     if [ -f "$PLAIN_ENV_FILE" ]; then
         printf '%s\n' "$PLAIN_ENV_FILE"
         return 0
     fi
 
-    if [ ! -f "$ENCRYPTED_ENV_FILE" ]; then
-        echo "Missing ${PLAIN_ENV_FILE} and ${ENCRYPTED_ENV_FILE}" >&2
-        return 1
-    fi
-
-    if ! command -v sops > /dev/null 2>&1; then
-        echo "sops is required to decrypt ${ENCRYPTED_ENV_FILE}" >&2
-        return 1
-    fi
-
-    if ! command -v age > /dev/null 2>&1; then
-        echo "age is required to decrypt ${ENCRYPTED_ENV_FILE}" >&2
-        return 1
-    fi
-
-    local age_key_file
-    age_key_file="${SOPS_AGE_KEY_FILE:-$HOME/.config/sops/age/keys.txt}"
-    if [ ! -f "$age_key_file" ]; then
-        echo "Age private key not found at ${age_key_file}" >&2
-        return 1
-    fi
-
-    local runtime_env_file
-    runtime_env_file="$(mktemp "${TMPDIR:-/tmp}/homelab-env.XXXXXX")"
-    export SOPS_AGE_KEY_FILE="$age_key_file"
-    if ! sops --decrypt --input-type dotenv --output-type dotenv "$ENCRYPTED_ENV_FILE" > "$runtime_env_file"; then
-        rm -f "$runtime_env_file"
-        return 1
-    fi
-    chmod 600 "$runtime_env_file"
-    printf '%s\n' "$runtime_env_file"
+    echo "Missing ${PLAIN_ENV_FILE} and ${ENCRYPTED_ENV_FILE}" >&2
+    return 1
 }
 
 homelab_compose() {
