@@ -1,19 +1,19 @@
 #!/bin/bash
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
-PLAIN_ENV_FILE="${REPO_DIR}/.env"
-ENCRYPTED_ENV_FILE="${PLAIN_ENV_FILE}.enc"
+HOMELAB_COMPOSE_ENV_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+HOMELAB_COMPOSE_ENV_REPO_DIR="$(dirname "$(dirname "$HOMELAB_COMPOSE_ENV_LIB_DIR")")"
+HOMELAB_PLAIN_ENV_FILE="${HOMELAB_COMPOSE_ENV_REPO_DIR}/.env"
+HOMELAB_ENCRYPTED_ENV_FILE="${HOMELAB_PLAIN_ENV_FILE}.enc"
 
 resolve_homelab_runtime_env_file() {
-    if [ -f "$ENCRYPTED_ENV_FILE" ]; then
+    if [ -f "$HOMELAB_ENCRYPTED_ENV_FILE" ]; then
         if ! command -v sops > /dev/null 2>&1; then
-            echo "sops is required to decrypt ${ENCRYPTED_ENV_FILE}" >&2
+            echo "sops is required to decrypt ${HOMELAB_ENCRYPTED_ENV_FILE}" >&2
             return 1
         fi
 
         if ! command -v age > /dev/null 2>&1; then
-            echo "age is required to decrypt ${ENCRYPTED_ENV_FILE}" >&2
+            echo "age is required to decrypt ${HOMELAB_ENCRYPTED_ENV_FILE}" >&2
             return 1
         fi
 
@@ -27,7 +27,7 @@ resolve_homelab_runtime_env_file() {
         local runtime_env_file
         runtime_env_file="$(mktemp "${TMPDIR:-/tmp}/homelab-env.XXXXXX")"
         export SOPS_AGE_KEY_FILE="$age_key_file"
-        if ! sops --decrypt --input-type dotenv --output-type dotenv "$ENCRYPTED_ENV_FILE" > "$runtime_env_file"; then
+        if ! sops --decrypt --input-type dotenv --output-type dotenv "$HOMELAB_ENCRYPTED_ENV_FILE" > "$runtime_env_file"; then
             rm -f "$runtime_env_file"
             return 1
         fi
@@ -36,12 +36,12 @@ resolve_homelab_runtime_env_file() {
         return 0
     fi
 
-    if [ -f "$PLAIN_ENV_FILE" ]; then
-        printf '%s\n' "$PLAIN_ENV_FILE"
+    if [ -f "$HOMELAB_PLAIN_ENV_FILE" ]; then
+        printf '%s\n' "$HOMELAB_PLAIN_ENV_FILE"
         return 0
     fi
 
-    echo "Missing ${PLAIN_ENV_FILE} and ${ENCRYPTED_ENV_FILE}" >&2
+    echo "Missing ${HOMELAB_PLAIN_ENV_FILE} and ${HOMELAB_ENCRYPTED_ENV_FILE}" >&2
     return 1
 }
 
@@ -51,7 +51,7 @@ homelab_compose() {
     local status
 
     runtime_env_file="$(resolve_homelab_runtime_env_file)" || return 1
-    if [ "$runtime_env_file" != "$PLAIN_ENV_FILE" ]; then
+    if [ "$runtime_env_file" != "$HOMELAB_PLAIN_ENV_FILE" ]; then
         temp_env_file="$runtime_env_file"
     fi
 
