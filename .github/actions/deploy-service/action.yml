@@ -52,7 +52,6 @@ runs:
         key: ${{ inputs.ssh_private_key }}
         timeout: 30m
         command_timeout: 25m
-        script_stop: true
         script: |
           set -euo pipefail
           if [ ! -d "${{ inputs.repo_dir }}" ]; then
@@ -60,8 +59,17 @@ runs:
             exit 1
           fi
           cd ${{ inputs.repo_dir }}
-          git fetch --prune
-          git checkout main
-          git pull --ff-only
+          git fetch --prune origin main
+          if git show-ref --verify --quiet refs/heads/main; then
+            git checkout main
+          else
+            git checkout -b main origin/main
+          fi
+          if ! git diff --quiet || ! git diff --cached --quiet; then
+            echo "Tracked local changes detected in deployment repo; refusing to deploy over a dirty worktree."
+            git status --short
+            exit 1
+          fi
+          git merge --ff-only origin/main
           cd ${{ inputs.service_path }}
           ${{ inputs.deploy_script }} --quiet 2>&1 | tail -20
