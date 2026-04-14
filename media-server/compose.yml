@@ -155,7 +155,7 @@ services:
       start_period: 30s
 
   seerr:
-    image: ghcr.io/seerr-team/seerr:v3.1.0
+    image: ghcr.io/seerr-team/seerr:v3.1.1
     container_name: seerr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -181,7 +181,7 @@ services:
       start_period: 30s
 
   pulsarr:
-    image: lakker/pulsarr:0.15.1
+    image: lakker/pulsarr:0.15.2
     container_name: pulsarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -248,7 +248,7 @@ services:
       start_period: 120s
 
   bazarr:
-    image: ghcr.io/hotio/bazarr:release-1.5.3
+    image: ghcr.io/hotio/bazarr:release-1.5.6
     container_name: bazarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -356,7 +356,7 @@ services:
   # Run manually: docker compose run --rm configarr
   # Or scheduled via cron on host
   configarr:
-    image: ghcr.io/raydak-labs/configarr:1.25.0
+    image: ghcr.io/raydak-labs/configarr:1.26.0
     container_name: configarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
