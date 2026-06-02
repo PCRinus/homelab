@@ -1,7 +1,7 @@
 services:
   dozzle:
     container_name: dozzle
-    image: ghcr.io/amir20/dozzle:v10.5.3
+    image: ghcr.io/amir20/dozzle:v10.6.3
     volumes:
       - ${DOCKER_SOCK}:/var/run/docker.sock
     ports:
@@ -15,7 +15,7 @@ services:
       start_period: 30s
 
   gatus:
-    image: ghcr.io/twin/gatus:v5.35.0
+    image: ghcr.io/twin/gatus:v5.36.0
     container_name: gatus
     ports:
       - 8082:8080
@@ -45,7 +45,7 @@ services:
   # Exposes host NIC link speed as HTTP endpoint for Gatus monitoring
   # Alerts if link drops below GbE (e.g., cable issue causing auto-negotiation to FE)
   link-speed-monitor:
-    image: busybox:1.37
+    image: busybox:1.38
     container_name: link-speed-monitor
     command:
       - /bin/sh

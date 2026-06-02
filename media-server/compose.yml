@@ -1,6 +1,6 @@
 services:
   qbittorrent:
-    image: ghcr.io/hotio/qbittorrent:release-5.2.0
+    image: ghcr.io/hotio/qbittorrent:release-5.2.1
     container_name: qbittorrent
     hostname: qbittorrent.internal
     cap_add:
@@ -134,7 +134,7 @@ services:
       start_period: 30s
 
   flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:v3.4.6
+    image: ghcr.io/flaresolverr/flaresolverr:v3.5.0
     container_name: flaresolverr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -212,7 +212,7 @@ services:
       start_period: 30s
 
   plex:
-    image: lscr.io/linuxserver/plex:1.43.1
+    image: lscr.io/linuxserver/plex:1.43.2
     container_name: plex
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
