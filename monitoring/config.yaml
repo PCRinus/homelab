@@ -126,7 +126,7 @@ endpoints:
 
   - name: Pulsarr
     group: Media Server
-    url: "http://pulsarr:3003/"
+    url: "http://pulsarr:3003/health"
     interval: 60s
     conditions:
       - "[STATUS] == 200"
