@@ -299,7 +299,7 @@ services:
       start_period: 30s
 
   plex-log-media-server:
-    image: alpine:3.23
+    image: alpine:3.24
     container_name: plex-log-media-server
     command:
       - /bin/sh
@@ -317,7 +317,7 @@ services:
       - "dozzle.enable=true"
 
   plex-log-transcoder-statistics:
-    image: alpine:3.23
+    image: alpine:3.24
     container_name: plex-log-transcoder-statistics
     command:
       - /bin/sh
@@ -335,7 +335,7 @@ services:
       - "dozzle.enable=true"
 
   plex-log-scanner-matcher:
-    image: alpine:3.23
+    image: alpine:3.24
     container_name: plex-log-scanner-matcher
     command:
       - /bin/sh
