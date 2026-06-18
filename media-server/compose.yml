@@ -1,6 +1,6 @@
 services:
   qbittorrent:
-    image: ghcr.io/hotio/qbittorrent:release-5.2.1
+    image: ghcr.io/hotio/qbittorrent:release-5.2.2
     container_name: qbittorrent
     hostname: qbittorrent.internal
     cap_add:
@@ -85,7 +85,7 @@ services:
       start_period: 30s
 
   radarr:
-    image: ghcr.io/hotio/radarr:release-6.1.1.10360
+    image: ghcr.io/hotio/radarr:release-6.2.1.10461
     container_name: radarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -109,7 +109,7 @@ services:
       start_period: 30s
 
   prowlarr:
-    image: ghcr.io/hotio/prowlarr:release-2.3.5.5327
+    image: ghcr.io/hotio/prowlarr:release-2.4.0.5397
     container_name: prowlarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -272,7 +272,7 @@ services:
       start_period: 30s
 
   tautulli:
-    image: lscr.io/linuxserver/tautulli:2.17.1
+    image: lscr.io/linuxserver/tautulli:2.17.2
     container_name: tautulli
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -372,7 +372,7 @@ services:
   # Creates an outbound tunnel from this server to the Pangolin VPS,
   # enabling remote access to Plex (and other services) bypassing CGNAT
   newt:
-    image: fosrl/newt:1.12.5
+    image: fosrl/newt:1.13.0
     container_name: newt
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
