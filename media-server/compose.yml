@@ -25,12 +25,16 @@ services:
       - ${MEDIA_PATH}:/data
       - ${QBITTORRENT_INCOMPLETE_PATH}:/data/incomplete
     ports:
-      - "8080:8080"      # qBittorrent WebUI
+      - "8080:8080" # qBittorrent WebUI
     networks:
       - media-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8080 > /dev/null && curl -sf --max-time 10 https://ifconfig.me > /dev/null || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -sf http://localhost:8080 > /dev/null && curl -sf --max-time 10 https://ifconfig.me > /dev/null || exit 1",
+        ]
       interval: 2m
       timeout: 15s
       retries: 3
@@ -174,7 +178,8 @@ services:
       - media-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:5055/api/v1/status"]
+      test:
+        ["CMD", "wget", "-q", "--spider", "http://localhost:5055/api/v1/status"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -219,16 +224,16 @@ services:
     environment:
       - VERSION=docker
     devices:
-      - /dev/dri:/dev/dri  # GPU for VA-API hardware acceleration
+      - /dev/dri:/dev/dri # GPU for VA-API hardware acceleration
     device_cgroup_rules:
-      - 'c 226:* rwm'  # Allow access to DRI devices (no-op on rootful, required for rootless)
+      - "c 226:* rwm" # Allow access to DRI devices (no-op on rootful, required for rootless)
     group_add:
-      - "${RENDER_GID}"  # render group GID for GPU access
+      - "${RENDER_GID}" # render group GID for GPU access
     volumes:
       - ${DOCKER_DATA}/plex/config:/config
       - ${MEDIA_PATH}:/data
     ports:
-      - "32400:32400"     # Plex Web UI (required)
+      - "32400:32400" # Plex Web UI (required)
       - "32410:32410/udp" # GDM network discovery
       - "32412:32412/udp" # GDM network discovery
       - "32413:32413/udp" # GDM network discovery
@@ -361,8 +366,8 @@ services:
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     volumes:
-      - ./configarr:/app/config:ro           # Config files (config.yml, secrets.yml)
-      - ${DOCKER_DATA}/configarr/repos:/app/repos  # Cache for TRaSH-Guides/Recyclarr repos
+      - ./configarr:/app/config:ro # Config files (config.yml, secrets.yml)
+      - ${DOCKER_DATA}/configarr/repos:/app/repos # Cache for TRaSH-Guides/Recyclarr repos
     networks:
       - media-net
     # No restart policy - this is a one-shot job, not a daemon
@@ -388,7 +393,7 @@ services:
       - ${DOCKER_DATA}/checkrr/checkrr.db:/checkrr.db
       - ${MEDIA_PATH}:/data:ro
     ports:
-      - "8585:8585"     # checkrr web UI
+      - "8585:8585" # checkrr web UI
     networks:
       - media-net
     restart: unless-stopped
