@@ -186,7 +186,7 @@ services:
       start_period: 30s
 
   pulsarr:
-    image: lakker/pulsarr:0.16.0
+    image: lakker/pulsarr:1.1.6
     container_name: pulsarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
