@@ -41,7 +41,7 @@ services:
       start_period: 1m
 
   sonarr:
-    image: ghcr.io/hotio/sonarr:release-4.0.17.2952
+    image: ghcr.io/hotio/sonarr:release-4.0.19.2979
     container_name: sonarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -65,7 +65,7 @@ services:
       start_period: 30s
 
   sonarr-anime:
-    image: ghcr.io/hotio/sonarr:release-4.0.17.2952
+    image: ghcr.io/hotio/sonarr:release-4.0.19.2979
     container_name: sonarr-anime
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
