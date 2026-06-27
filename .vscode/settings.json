@@ -10,6 +10,7 @@
     ]
   },
   "git.branchProtection": [],
+  "git.branchProtectionPrompt": "alwaysCommit",
   "terminal.integrated.profiles.linux": {
     "zsh": {
       "path": "/usr/bin/zsh",
