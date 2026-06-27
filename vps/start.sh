@@ -20,7 +20,15 @@ echo "Starting Tailscale..."
 docker compose "${COMPOSE_ENV_ARGS[@]}" -f compose.yml up -d tailscale
 
 if [ "${DOZZLE_AGENT_BIND:-}" = "" ] || [ "${DOZZLE_AGENT_BIND:-}" = "127.0.0.1" ]; then
-    TAILSCALE_IP="$(docker exec tailscale tailscale ip -4 2>/dev/null | head -n1 || true)"
+    TAILSCALE_IP=""
+    for _ in {1..30}; do
+        TAILSCALE_IP="$(docker exec tailscale tailscale ip -4 2>/dev/null | head -n1 || true)"
+        if [ -n "${TAILSCALE_IP}" ]; then
+            break
+        fi
+        sleep 1
+    done
+
     if [ -n "${TAILSCALE_IP}" ]; then
         export DOZZLE_AGENT_BIND="${TAILSCALE_IP}"
         echo "Binding Dozzle agent to Tailscale IP ${DOZZLE_AGENT_BIND}"
