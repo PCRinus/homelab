@@ -17,8 +17,11 @@ echo "Pulling latest images..."
 docker compose "${COMPOSE_ENV_ARGS[@]}" -f compose.yml pull
 
 echo "Starting Tailscale..."
+mkdir -p "${TAILSCALE_STATE_DIR:-./tailscale-state}"
 TAILSCALE_UP_ARGS=(up -d)
-if [ -z "${TS_AUTHKEY:-}" ] && docker inspect tailscale > /dev/null 2>&1; then
+if [ -n "${TS_AUTHKEY:-}" ]; then
+    TAILSCALE_UP_ARGS+=(--force-recreate)
+elif docker inspect tailscale > /dev/null 2>&1; then
     if docker inspect tailscale --format '{{range .Config.Env}}{{println .}}{{end}}' | grep -q '^TS_AUTHKEY=.\+'; then
         TAILSCALE_UP_ARGS+=(--force-recreate)
         echo "Recreating Tailscale container without first-run auth key"

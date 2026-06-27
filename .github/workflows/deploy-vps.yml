@@ -40,6 +40,7 @@ jobs:
           ssh -i ~/.ssh/vps_deploy_key "${VPS_SSH_USER}@${VPS_SSH_HOST}" \
             "mkdir -p '${VPS_REPO_DIR}/vps'"
           rsync -az --delete --exclude '.env' \
+            --exclude 'tailscale-state/' \
             -e "ssh -i ~/.ssh/vps_deploy_key" \
             vps/ "${VPS_SSH_USER}@${VPS_SSH_HOST}:${VPS_REPO_DIR}/vps/"
 

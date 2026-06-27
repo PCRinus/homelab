@@ -52,7 +52,7 @@ Configure these repository settings:
 - Variable `VPS_SSH_USER`: `root`.
 - Variable `VPS_REPO_DIR`: `/opt/homelab`.
 
-The workflow preserves `/opt/homelab/vps/.env` on the VPS so host-local runtime settings such as `DOZZLE_AGENT_BIND` are not removed by deploys.
+The workflow preserves `/opt/homelab/vps/.env` and `/opt/homelab/vps/tailscale-state/` on the VPS so host-local runtime settings and the Tailscale node identity are not removed by deploys.
 
 ## Dozzle Integration
 
