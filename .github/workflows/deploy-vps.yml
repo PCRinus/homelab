@@ -44,7 +44,20 @@ jobs:
             vps/ "${VPS_SSH_USER}@${VPS_SSH_HOST}:${VPS_REPO_DIR}/vps/"
 
       - name: Deploy VPS Stack
+        env:
+          TS_AUTHKEY: ${{ secrets.TS_OAUTH_SECRET }}
+          TS_EXTRA_ARGS: --advertise-tags=tag:ci
         run: |
           set -euo pipefail
+          if [ -z "${TS_AUTHKEY}" ]; then
+            echo "Missing required secret: TS_OAUTH_SECRET"
+            exit 1
+          fi
+          if ssh -i ~/.ssh/vps_deploy_key "${VPS_SSH_USER}@${VPS_SSH_HOST}" \
+            "test -s '${VPS_REPO_DIR}/vps/tailscale-state/tailscaled.state'"; then
+            AUTH_PREFIX=""
+          else
+            printf -v AUTH_PREFIX 'TS_AUTHKEY=%q TS_EXTRA_ARGS=%q' "${TS_AUTHKEY}" "${TS_EXTRA_ARGS}"
+          fi
           ssh -i ~/.ssh/vps_deploy_key "${VPS_SSH_USER}@${VPS_SSH_HOST}" \
-            "chmod +x '${VPS_REPO_DIR}/vps/start.sh' && cd '${VPS_REPO_DIR}/vps' && ./start.sh"
+            "chmod +x '${VPS_REPO_DIR}/vps/start.sh' && cd '${VPS_REPO_DIR}/vps' && ${AUTH_PREFIX} ./start.sh"

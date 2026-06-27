@@ -28,6 +28,10 @@ minecraft-servers/.generated-modrinth.env
 # Dump files
 *dump*
 
+# Tailscale state
+tailscale-state/
+vps/tailscale-state/
+
 # ProtonVPN WireGuard config
 wg0.conf
 
