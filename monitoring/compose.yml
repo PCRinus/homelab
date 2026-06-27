@@ -2,6 +2,8 @@ services:
   dozzle:
     container_name: dozzle
     image: ghcr.io/amir20/dozzle:v10.6.6
+    environment:
+      DOZZLE_REMOTE_AGENT: ${DOZZLE_REMOTE_AGENT:-}
     volumes:
       - ${DOCKER_SOCK}:/var/run/docker.sock
     ports:

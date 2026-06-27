@@ -263,10 +263,12 @@ User adds media to a Plex watchlist
 
 ## CI/CD
 
-GitHub Actions deploy services via SSH over Tailscale when compose files change on `main`. See [.github/SETUP.md](.github/SETUP.md) for configuration.
+GitHub Actions deploy home-server services via SSH over Tailscale when compose files change on `main`. The VPS stack deploys via direct SSH to the VPS public address.
 
 Set the `HOMELAB_REPO_DIR` repository variable in GitHub to the absolute path of the repo on the server (e.g., `/home/mircea/homeserver`).
 Set the `HOMELAB_SSH_HOST` repository variable to the SSH host (or alias) of the target server.
+
+For the VPS deploy workflow, configure `VPS_SSH_HOST`, `VPS_SSH_USER`, `VPS_REPO_DIR`, and the `VPS_SSH_PRIVATE_KEY` secret. See [vps/README.md](vps/README.md).
 
 ## GPU Transcoding (Optional)
 

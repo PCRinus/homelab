@@ -1,0 +1,50 @@
+name: Deploy VPS Stack
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'vps/**'
+      - '.github/workflows/deploy-vps.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      VPS_REPO_DIR: ${{ vars.VPS_REPO_DIR || '/opt/homelab' }}
+      VPS_SSH_HOST: ${{ vars.VPS_SSH_HOST || '194.102.107.75' }}
+      VPS_SSH_USER: ${{ vars.VPS_SSH_USER || 'root' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Configure SSH
+        env:
+          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${VPS_SSH_PRIVATE_KEY}" ]; then
+            echo "Missing required secret: VPS_SSH_PRIVATE_KEY"
+            exit 1
+          fi
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${VPS_SSH_PRIVATE_KEY}" > ~/.ssh/vps_deploy_key
+          chmod 600 ~/.ssh/vps_deploy_key
+          ssh-keyscan -H "${VPS_SSH_HOST}" >> ~/.ssh/known_hosts
+
+      - name: Sync VPS files
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/vps_deploy_key "${VPS_SSH_USER}@${VPS_SSH_HOST}" \
+            "mkdir -p '${VPS_REPO_DIR}/vps'"
+          rsync -az --delete --exclude '.env' \
+            -e "ssh -i ~/.ssh/vps_deploy_key" \
+            vps/ "${VPS_SSH_USER}@${VPS_SSH_HOST}:${VPS_REPO_DIR}/vps/"
+
+      - name: Deploy VPS Stack
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/vps_deploy_key "${VPS_SSH_USER}@${VPS_SSH_HOST}" \
+            "chmod +x '${VPS_REPO_DIR}/vps/start.sh' && cd '${VPS_REPO_DIR}/vps' && ./start.sh"
