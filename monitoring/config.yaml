@@ -261,7 +261,7 @@ endpoints:
 
   - name: Memory Usage
     group: VPS
-    url: "http://${VPS_TAILSCALE_IP}:8888/cgi-bin/memory"
+    url: "http://host.docker.internal:18888/cgi-bin/memory"
     interval: 5m
     conditions:
       - "[STATUS] == 200"

@@ -44,6 +44,17 @@ services:
     labels:
       - "dozzle.enable=true"
 
+  vps-memory-proxy:
+    image: alpine/socat:1.8.0.3
+    container_name: vps-memory-proxy
+    command:
+      - "TCP-LISTEN:18888,fork,reuseaddr"
+      - "TCP:${VPS_TAILSCALE_IP}:8888"
+    network_mode: host
+    restart: unless-stopped
+    labels:
+      - "dozzle.enable=true"
+
   # Exposes host NIC link speed as HTTP endpoint for Gatus monitoring
   # Alerts if link drops below GbE (e.g., cable issue causing auto-negotiation to FE)
   link-speed-monitor:

@@ -78,6 +78,8 @@ http://<vps-tailscale-ip>:8888/cgi-bin/memory
 
 It reports memory pressure as `MemTotal - MemAvailable`, plus the largest host process by RSS. Gatus alerts when `used_mb` is at least `4096`.
 
+The home-server monitoring stack reaches this endpoint through `vps-memory-proxy`, because the Gatus container itself does not route directly over the host Tailscale interface.
+
 ## Updating Pangolin
 
 Update image tags in `vps/compose.yml`, commit the change, and push to `main`. The VPS deploy workflow will pull the new image and recreate the affected containers.
