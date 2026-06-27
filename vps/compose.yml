@@ -90,6 +90,57 @@ services:
       retries: 3
       start_period: 10s
 
+  memory-monitor:
+    image: busybox:1.38
+    container_name: vps-memory-monitor
+    command:
+      - /bin/sh
+      - -c
+      - |
+        mkdir -p /www/cgi-bin
+        cat > /www/cgi-bin/memory <<'SCRIPT'
+        #!/bin/sh
+        PROC_DIR="/host-proc"
+        eval "$$(awk '
+          /^MemTotal:/ { total=$$2 }
+          /^MemAvailable:/ { available=$$2 }
+          END {
+            used = total - available
+            printf "TOTAL_MB=%d\n", total / 1024
+            printf "AVAILABLE_MB=%d\n", available / 1024
+            printf "USED_MB=%d\n", used / 1024
+            printf "USED_PERCENT=%d\n", used * 100 / total
+          }
+        ' "$${PROC_DIR}/meminfo")"
+
+        TOP_PID=0
+        TOP_RSS_KB=0
+        TOP_NAME=unknown
+        for status in "$${PROC_DIR}"/[0-9]*/status; do
+          [ -r "$${status}" ] || continue
+          RSS_KB="$$(awk '/^VmRSS:/ { print $$2; exit }' "$${status}")"
+          [ -n "$${RSS_KB}" ] || RSS_KB=0
+          if [ "$${RSS_KB}" -gt "$${TOP_RSS_KB}" ]; then
+            TOP_RSS_KB="$${RSS_KB}"
+            TOP_PID="$$(basename "$$(dirname "$${status}")")"
+            TOP_NAME="$$(awk -F '\t' '/^Name:/ { print $$2; exit }' "$${status}" | tr -cd 'A-Za-z0-9._:-')"
+            [ -n "$${TOP_NAME}" ] || TOP_NAME=unknown
+          fi
+        done
+
+        printf 'Content-Type: application/json\r\n\r\n'
+        printf '{"used_mb":%s,"available_mb":%s,"total_mb":%s,"used_percent":%s,"threshold_mb":4096,"top_process":{"pid":%s,"name":"%s","rss_mb":%s}}\n' \
+          "$${USED_MB}" "$${AVAILABLE_MB}" "$${TOTAL_MB}" "$${USED_PERCENT}" \
+          "$${TOP_PID}" "$${TOP_NAME}" "$$((TOP_RSS_KB / 1024))"
+        SCRIPT
+        chmod +x /www/cgi-bin/memory
+        exec httpd -f -p 8888 -h /www
+    volumes:
+      - /proc:/host-proc:ro
+    ports:
+      - "${DOZZLE_AGENT_BIND:-127.0.0.1}:8888:8888"
+    restart: unless-stopped
+
 networks:
   default:
     driver: bridge

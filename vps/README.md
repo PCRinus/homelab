@@ -9,6 +9,7 @@ This directory versions the services running on the public VPS used by Pangolin 
 - `traefik`: Reverse proxy used by Pangolin, sharing Gerbil's network namespace.
 - `tailscale`: Tailscale node for private access to VPS-only services.
 - `dozzle-agent`: Remote Dozzle agent for VPS container logs.
+- `memory-monitor`: Private HTTP endpoint exposing VPS memory pressure and the largest RSS process.
 
 The Pangolin config, keys, Traefik config, Let's Encrypt data, and generated state are intentionally not committed. They remain on the VPS under `/opt/pangolin/config`.
 
@@ -66,6 +67,16 @@ DOZZLE_REMOTE_AGENT=<vps-tailscale-ipv4>:7007|homeserver-vps|VPS
 ```
 
 Then deploy the monitoring stack so the home-server Dozzle container restarts with the new remote agent.
+
+## Memory Monitoring
+
+`memory-monitor` exposes a private endpoint on the VPS Tailscale IP:
+
+```text
+http://<vps-tailscale-ip>:8888/cgi-bin/memory
+```
+
+It reports memory pressure as `MemTotal - MemAvailable`, plus the largest host process by RSS. Gatus alerts when `used_mb` is at least `4096`.
 
 ## Updating Pangolin
 

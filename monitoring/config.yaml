@@ -259,6 +259,19 @@ endpoints:
       - type: discord
         description: "Dozzle (log viewer) is down or not responding"
 
+  - name: Memory Usage
+    group: VPS
+    url: "http://${VPS_TAILSCALE_IP}:8888/cgi-bin/memory"
+    interval: 5m
+    conditions:
+      - "[STATUS] == 200"
+      - "[BODY].used_mb < 4096"
+    alerts:
+      - type: discord
+        description: "VPS memory usage exceeded 4 GB - inspect Dozzle VPS logs/stats and the memory monitor top_process field"
+        failure-threshold: 2
+        minimum-reminder-interval: 24h
+
   - name: NIC Link Speed (GbE)
     group: Infrastructure
     url: "http://link-speed-monitor:8888/cgi-bin/speed"
