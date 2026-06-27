@@ -22,7 +22,7 @@ services:
     restart: unless-stopped
 
   pangolin:
-    image: docker.io/fosrl/pangolin:1.15.4
+    image: docker.io/fosrl/pangolin:1.19.4
     container_name: pangolin
     restart: unless-stopped
     volumes:
@@ -34,7 +34,7 @@ services:
       retries: 15
 
   gerbil:
-    image: docker.io/fosrl/gerbil:1.3.0
+    image: docker.io/fosrl/gerbil:1.4.2
     container_name: gerbil
     restart: unless-stopped
     depends_on:
@@ -56,7 +56,7 @@ services:
       - 80:80
 
   traefik:
-    image: docker.io/traefik:v3.6
+    image: docker.io/traefik:v3.7.5
     container_name: traefik
     restart: unless-stopped
     network_mode: service:gerbil
@@ -91,7 +91,7 @@ services:
       start_period: 10s
 
   memory-monitor:
-    image: busybox:1.38
+    image: busybox:1.38.0
     container_name: vps-memory-monitor
     command:
       - /bin/sh

@@ -45,7 +45,7 @@ services:
       - "dozzle.enable=true"
 
   vps-memory-proxy:
-    image: alpine/socat:1.8.0.3
+    image: alpine/socat:1.8.1.3
     container_name: vps-memory-proxy
     command:
       - "TCP-LISTEN:18888,fork,reuseaddr"

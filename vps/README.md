@@ -83,3 +83,5 @@ The home-server monitoring stack reaches this endpoint through `vps-memory-proxy
 ## Updating Pangolin
 
 Update image tags in `vps/compose.yml`, commit the change, and push to `main`. The VPS deploy workflow will pull the new image and recreate the affected containers.
+
+Before major Pangolin updates, back up `/opt/pangolin/config`. Pangolin 1.19 also requires Newt `1.13.0` or newer for browser-based private resource modes; the home-server Newt connector is pinned to `1.13.0`.
