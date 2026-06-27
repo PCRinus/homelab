@@ -46,18 +46,18 @@ jobs:
 
       - name: Deploy VPS Stack
         env:
-          TS_AUTHKEY: ${{ secrets.TS_OAUTH_SECRET }}
-          TS_EXTRA_ARGS: --advertise-tags=tag:ci
+          TS_AUTHKEY: ${{ secrets.TS_VPS_AUTHKEY }}
+          TS_EXTRA_ARGS: ${{ vars.TS_VPS_EXTRA_ARGS }}
         run: |
           set -euo pipefail
-          if [ -z "${TS_AUTHKEY}" ]; then
-            echo "Missing required secret: TS_OAUTH_SECRET"
-            exit 1
-          fi
           if ssh -i ~/.ssh/vps_deploy_key "${VPS_SSH_USER}@${VPS_SSH_HOST}" \
             "test -s '${VPS_REPO_DIR}/vps/tailscale-state/tailscaled.state'"; then
             AUTH_PREFIX=""
           else
+            if [ -z "${TS_AUTHKEY}" ]; then
+              echo "Missing required secret for first Tailscale enrollment: TS_VPS_AUTHKEY"
+              exit 1
+            fi
             printf -v AUTH_PREFIX 'TS_AUTHKEY=%q TS_EXTRA_ARGS=%q' "${TS_AUTHKEY}" "${TS_EXTRA_ARGS}"
           fi
           ssh -i ~/.ssh/vps_deploy_key "${VPS_SSH_USER}@${VPS_SSH_HOST}" \

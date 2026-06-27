@@ -23,7 +23,7 @@ cd /opt/homelab/vps
 cp .env.example .env
 ```
 
-The deploy workflow authenticates Tailscale on first run with the repository's existing `TS_OAUTH_SECRET`. The Tailscale container uses host networking so the VPS gets its own tailnet IP, and persists state in `/opt/homelab/vps/tailscale-state`.
+The deploy workflow authenticates Tailscale on first run with `TS_VPS_AUTHKEY`. The Tailscale container uses host networking so the VPS gets its own tailnet IP, and persists state in `/opt/homelab/vps/tailscale-state`.
 
 The start script auto-detects the VPS Tailscale IPv4 address and binds the Dozzle agent to it. You can override that manually in `/opt/homelab/vps/.env`:
 
@@ -47,7 +47,8 @@ GitHub Actions deployment uses `.github/workflows/deploy-vps.yml` and SSHs direc
 Configure these repository settings:
 
 - Secret `VPS_SSH_PRIVATE_KEY`: private SSH key accepted by `root@194.102.107.75`.
-- Secret `TS_OAUTH_SECRET`: existing Tailscale OAuth secret used for first-run Tailscale auth.
+- Secret `TS_VPS_AUTHKEY`: non-ephemeral, pre-approved Tailscale auth key used for first-run VPS enrollment.
+- Optional variable `TS_VPS_EXTRA_ARGS`: extra `tailscale up` args, for example `--advertise-tags=tag:vps` if the auth key is not already tagged.
 - Variable `VPS_SSH_HOST`: `194.102.107.75`.
 - Variable `VPS_SSH_USER`: `root`.
 - Variable `VPS_REPO_DIR`: `/opt/homelab`.
