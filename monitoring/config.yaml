@@ -181,9 +181,9 @@ endpoints:
       - type: discord
         description: "Home Assistant is down or not responding"
 
-  # Infrastructure
-  - name: AdGuard Home
-    group: Infrastructure
+  # AdGuard Home
+  - name: Dashboard
+    group: AdGuard
     url: "http://adguard:3001"
     interval: 30s
     conditions:
@@ -194,6 +194,24 @@ endpoints:
         description: "AdGuard Home (DNS ad blocker) is down — network DNS may be affected"
         failure-threshold: 2
 
+  - name: DNS Blocking
+    group: AdGuard
+    url: "adguard:53"
+    interval: 30s
+    dns:
+      query-name: "doubleclick.net"
+      query-type: "A"
+    conditions:
+      - "[CONNECTED] == true"
+      - "[DNS_RCODE] == NOERROR"
+      - "[BODY] == 0.0.0.0"
+      - "[RESPONSE_TIME] < 500"
+    alerts:
+      - type: discord
+        description: "AdGuard DNS is not blocking doubleclick.net — clients may be resolving ads normally"
+        failure-threshold: 2
+
+  # Infrastructure
   - name: Cloudflare Tunnel
     group: Infrastructure
     url: "http://cloudflared:20241/metrics"
