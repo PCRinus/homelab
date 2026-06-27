@@ -17,7 +17,15 @@ echo "Pulling latest images..."
 docker compose "${COMPOSE_ENV_ARGS[@]}" -f compose.yml pull
 
 echo "Starting Tailscale..."
-docker compose "${COMPOSE_ENV_ARGS[@]}" -f compose.yml up -d tailscale
+TAILSCALE_UP_ARGS=(up -d)
+if [ -z "${TS_AUTHKEY:-}" ] && docker inspect tailscale > /dev/null 2>&1; then
+    if docker inspect tailscale --format '{{range .Config.Env}}{{println .}}{{end}}' | grep -q '^TS_AUTHKEY=.\+'; then
+        TAILSCALE_UP_ARGS+=(--force-recreate)
+        echo "Recreating Tailscale container without first-run auth key"
+    fi
+fi
+TAILSCALE_UP_ARGS+=(tailscale)
+docker compose "${COMPOSE_ENV_ARGS[@]}" -f compose.yml "${TAILSCALE_UP_ARGS[@]}"
 
 if [ "${DOZZLE_AGENT_BIND:-}" = "" ] || [ "${DOZZLE_AGENT_BIND:-}" = "127.0.0.1" ]; then
     TAILSCALE_IP=""
