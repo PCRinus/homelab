@@ -65,9 +65,9 @@ runs:
           else
             git checkout -b main origin/main
           fi
-          if ! git diff --quiet || ! git diff --cached --quiet; then
-            echo "Tracked local changes detected in deployment repo; refusing to deploy over a dirty worktree."
-            git status --short
+          if ! git diff --quiet -- "${{ inputs.service_path }}" || ! git diff --cached --quiet -- "${{ inputs.service_path }}"; then
+            echo "Tracked local changes detected in ${{ inputs.service_path }}; refusing to deploy over that stack."
+            git status --short -- "${{ inputs.service_path }}"
             exit 1
           fi
           git merge --ff-only origin/main
