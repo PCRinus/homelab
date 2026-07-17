@@ -1,0 +1,16 @@
+services:
+  mc:
+    container_name: minecraft-server-vanilla
+    ports:
+      - "25567:25565"
+    environment:
+      TYPE: "VANILLA"
+      MEMORY: "6144M"
+    volumes:
+      - ${DOCKER_DATA}/minecraft-server-vanilla:/data
+    healthcheck:
+      test: ["CMD", "mc-health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 180s

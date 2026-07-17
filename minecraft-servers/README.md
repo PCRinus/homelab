@@ -9,7 +9,8 @@ minecraft-servers/
 ├── common.compose.yml           # Shared configuration (base image, mods, settings)
 ├── servers/
 │   ├── world-gen-server.compose.yml
-│   └── survival-island.compose.yml
+│   ├── survival-island.compose.yml
+│   └── vanilla.compose.yml
 ├── mods/
 │   ├── performance.txt          # Shared performance mods
 │   ├── content.txt              # Shared content/gameplay mods
@@ -46,6 +47,9 @@ docker compose -f common.compose.yml -f servers/world-gen-server.compose.yml up 
 
 # Start survival island server
 docker compose -f common.compose.yml -f servers/survival-island.compose.yml up -d
+
+# Start vanilla server
+docker compose -f common.compose.yml -f servers/vanilla.compose.yml up -d
 
 # View logs
 docker compose -f common.compose.yml -f servers/world-gen-server.compose.yml logs -f
@@ -181,6 +185,7 @@ Each server needs a unique host port. Current allocations:
 
 - `25565` - world-gen-server
 - `25566` - survival-island
+- `25567` - vanilla (reachable privately over Tailscale)
 
 ## Data Persistence
 
