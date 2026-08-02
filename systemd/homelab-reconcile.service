@@ -1,0 +1,19 @@
+[Unit]
+Description=Reconcile homelab mounts and containers after boot
+Wants=network-online.target
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/homelab/homelab-reconcile.env
+ExecStart=/usr/bin/bash ${HOMELAB_REPO_DIR}/scripts/reconcile.sh
+Restart=on-failure
+RestartSec=30s
+TimeoutStartSec=10min
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

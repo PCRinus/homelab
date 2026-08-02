@@ -56,6 +56,9 @@ docker network create media-net
 
 # 6. Start all services
 ./scripts/start.sh
+
+# 7. Install boot-time mount/container recovery
+./scripts/install-systemd-units.sh
 ```
 
 For a **fresh setup** with no existing secrets, skip step 2 and create secrets manually from examples (see Secrets section).
@@ -68,6 +71,7 @@ The setup script interactively configures machine-specific paths and writes them
 |----------|---------|---------|
 | `DOCKER_DATA` | Container persistent data (configs, databases) | `~/docker` |
 | `MEDIA_PATH` | NAS media storage mount point | `/mnt/unas/media` |
+| `ADGUARD_LAN_IP` | Static host address used for AdGuard DNS port 53 | `192.168.1.166` |
 | `QBITTORRENT_INCOMPLETE_PATH` | Local staging path for active qBittorrent downloads | `~/docker/qbittorrent/incomplete` |
 | `DOCKER_SOCK` | Docker socket path (auto-detected) | `/var/run/docker.sock` |
 
@@ -75,6 +79,41 @@ These are used by all `compose.yml` files via `${VARIABLE}` interpolation. Docke
 `QBITTORRENT_INCOMPLETE_PATH` is intentionally local so active torrent writes do not fail when the NAS mount stalls.
 
 Re-running `scripts/init.sh` is safe — it replaces the existing block in `~/.zshenv`.
+
+## Boot Recovery
+
+The interactive `scripts/start.sh` command verifies that the LAN address and the
+real NAS filesystem are available before starting containers. It fails closed
+instead of letting Docker bind the empty directory underneath a failed mount.
+
+For automatic recovery after a reboot, install the tracked systemd integration:
+
+```bash
+source ~/.zshenv
+./scripts/install-systemd-units.sh
+```
+
+Run the installer as your normal homelab user (not via `sudo`); it requests
+privilege only for the files and systemd operations that need it.
+
+The installer writes only machine-specific paths to
+`/etc/homelab/homelab-reconcile.env`, installs the tracked unit/drop-in files,
+and enables `homelab-reconcile.service`. The service waits for the host LAN IP
+and Docker, recovers a failed NAS automount, selectively recreates containers
+with stale NAS bind mounts, repairs AdGuard's port/network wiring, and then
+reconciles the remaining stacks. It uses existing images and never pulls or
+upgrades containers during boot. On a transient failure, systemd retries it
+after 30 seconds. It is also rerun when `docker.service` is explicitly
+restarted, covering package upgrades that restart Docker after the machine has
+already booted.
+
+Useful commands:
+
+```bash
+sudo systemctl status homelab-reconcile.service
+sudo journalctl -u homelab-reconcile.service -f
+sudo systemctl restart homelab-reconcile.service
+```
 
 ## Container Backups (Seerr / Pulsarr)
 

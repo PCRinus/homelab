@@ -8,6 +8,9 @@
 # Usage:
 #   ./scripts/start.sh              # Start core services only
 #   ./scripts/start.sh --all        # Include Minecraft servers
+#
+# Boot recovery is handled separately by scripts/reconcile.sh. Unlike this
+# interactive deployment command, boot recovery never pulls new images.
 # ===========================================
 
 set -e
@@ -15,6 +18,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 source "${SCRIPT_DIR}/lib/compose-env.sh"
+source "${SCRIPT_DIR}/lib/host-readiness.sh"
 
 # --- Colors ---
 RED='\033[0;31m'
@@ -70,29 +74,24 @@ if ! docker info > /dev/null 2>&1; then
 fi
 
 # --- Check NAS mount ---
-if [ -n "$MEDIA_PATH" ]; then
-    if [ ! -d "$MEDIA_PATH" ]; then
-        echo -e "${YELLOW}WARNING: Media path ${MEDIA_PATH} does not exist${NC}"
-        echo -e "Services mounting this path (media-server, homepage) will fail."
-        echo -e "Set up the NAS mount first: ${YELLOW}./scripts/setup-nas-mount.sh${NC}"
-        echo
-    else
-        # With x-systemd.automount, the mount point exists but the NFS share
-        # only connects on first access. Docker bind-mounts don't trigger
-        # automount, so we need to access the path to wake it up.
-        if ! mountpoint -q "$MEDIA_PATH" 2>/dev/null; then
-            echo -e "${YELLOW}Activating NAS mount at ${MEDIA_PATH}...${NC}"
-            if timeout 10 ls "$MEDIA_PATH" > /dev/null 2>&1 && mountpoint -q "$MEDIA_PATH" 2>/dev/null; then
-                echo -e "${GREEN}NAS mount active${NC}"
-            else
-                echo -e "${RED}WARNING: ${MEDIA_PATH} is not a mount point${NC}"
-                echo -e "Services mounting this path (media-server, homepage) will fail."
-                echo -e "Check NAS connectivity: ${YELLOW}sudo mount ${MEDIA_PATH}${NC}"
-                echo
-            fi
-        fi
-    fi
+# Fail closed: starting these containers against the underlying local directory
+# creates stale bind mounts that do not become NFS mounts when the NAS recovers.
+if ! homelab_recover_media_mount "$MEDIA_PATH"; then
+    echo -e "${RED}Refusing to start services without a real network mount at ${MEDIA_PATH}${NC}"
+    echo -e "Set up or repair it with: ${YELLOW}./scripts/setup-nas-mount.sh${NC}"
+    exit 1
 fi
+
+# AdGuard binds DNS directly to this address. Docker cannot create that port
+# mapping until DHCP has assigned the address to the host.
+ADGUARD_LAN_IP="${ADGUARD_LAN_IP:-192.168.1.166}"
+export ADGUARD_LAN_IP
+echo -e "${YELLOW}Waiting for LAN address ${ADGUARD_LAN_IP}...${NC}"
+if ! homelab_wait_for_ipv4 "$ADGUARD_LAN_IP"; then
+    echo -e "${RED}Refusing to start AdGuard before its LAN address is assigned${NC}"
+    exit 1
+fi
+echo -e "${GREEN}LAN address is ready${NC}"
 
 # --- Check local qBittorrent staging path ---
 if [ ! -d "$QBITTORRENT_INCOMPLETE_PATH" ]; then
@@ -178,6 +177,17 @@ if $INCLUDE_MINECRAFT; then
     echo
 else
     echo -e "${YELLOW}Skipping Minecraft servers (use --all to include)${NC}"
+fi
+
+# Verify runtime wiring after the deployment. This selectively recreates stale
+# NAS bind mounts or a partially restored AdGuard container without pulling.
+if [ ${#FAILED[@]} -eq 0 ]; then
+    echo
+    echo -e "${BOLD}━━━ runtime reconciliation ━━━${NC}"
+    if ! "${SCRIPT_DIR}/reconcile.sh"; then
+        echo -e "${RED}Runtime reconciliation failed${NC}"
+        FAILED+=("runtime-reconciliation")
+    fi
 fi
 
 # --- Summary ---

@@ -3,7 +3,7 @@
 # Homelab Environment Setup
 # ===========================================
 # Run this on a fresh server after cloning the repo.
-# Sets up path variables in ~/.zshenv so Docker Compose
+# Sets up host variables in ~/.zshenv so Docker Compose
 # can resolve them in compose files.
 #
 # Usage: ./scripts/init.sh
@@ -95,7 +95,21 @@ fi
 echo
 
 # ===========================================
-# 3. QBITTORRENT_INCOMPLETE_PATH - local staging for active downloads
+# 3. ADGUARD_LAN_IP - address used for the DNS listener
+# ===========================================
+DEFAULT_ADGUARD_LAN_IP="192.168.1.166"
+echo -e "${BOLD}AdGuard LAN address${NC}"
+echo "Static LAN address that AdGuard should bind on port 53."
+if [ -n "${ADGUARD_LAN_IP:-}" ]; then
+    echo -e "Using existing ADGUARD_LAN_IP from environment: ${GREEN}${ADGUARD_LAN_IP}${NC}"
+else
+    read -rp "> Address [${DEFAULT_ADGUARD_LAN_IP}]: " INPUT_ADGUARD_LAN_IP
+    ADGUARD_LAN_IP="${INPUT_ADGUARD_LAN_IP:-$DEFAULT_ADGUARD_LAN_IP}"
+fi
+echo
+
+# ===========================================
+# 4. QBITTORRENT_INCOMPLETE_PATH - local staging for active downloads
 # ===========================================
 DEFAULT_QBITTORRENT_INCOMPLETE_PATH="${DOCKER_DATA}/qbittorrent/incomplete"
 echo -e "${BOLD}qBittorrent incomplete download path${NC}"
@@ -133,7 +147,7 @@ fi
 echo
 
 # ===========================================
-# 4. DOCKER_SOCK - Docker socket path
+# 5. DOCKER_SOCK - Docker socket path
 # ===========================================
 echo -e "${BOLD}Docker socket${NC}"
 DETECTED_SOCK="/run/user/$(id -u)/docker.sock"
@@ -167,7 +181,7 @@ fi
 echo
 
 # ===========================================
-# 5. DOCKER_GID - Docker socket group
+# 6. DOCKER_GID - Docker socket group
 # ===========================================
 echo -e "${BOLD}Docker socket group${NC}"
 echo "GID of the Docker socket — used by Homepage to access Docker as non-root."
@@ -195,7 +209,7 @@ fi
 echo
 
 # ===========================================
-# 6. RENDER_GID - GPU render group for HW transcoding
+# 7. RENDER_GID - GPU render group for HW transcoding
 # ===========================================
 echo -e "${BOLD}GPU render group${NC}"
 echo "Used by Plex for hardware-accelerated transcoding."
@@ -224,7 +238,7 @@ fi
 echo
 
 # ===========================================
-# 7. Home Assistant trusted proxies
+# 8. Home Assistant trusted proxies
 # ===========================================
 echo -e "${BOLD}Home Assistant trusted proxies${NC}"
 echo "IPs/CIDRs that Home Assistant should trust for X-Forwarded-For."
@@ -257,7 +271,7 @@ echo -e "${GREEN}Wrote ${TRUSTED_PROXIES_FILE}${NC}"
 echo
 
 # ===========================================
-# 8. Optional: Cloudflare/Terraform credentials
+# 9. Optional: Cloudflare/Terraform credentials
 # ===========================================
 CONFIGURE_TF_ENV=false
 TF_CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN:-}"
@@ -305,6 +319,7 @@ echo
 echo -e "${BOLD}Summary:${NC}"
 echo -e "  DOCKER_DATA = ${GREEN}${DOCKER_DATA}${NC}"
 echo -e "  MEDIA_PATH  = ${GREEN}${MEDIA_PATH}${NC}"
+echo -e "  ADGUARD_LAN_IP = ${GREEN}${ADGUARD_LAN_IP}${NC}"
 echo -e "  QBITTORRENT_INCOMPLETE_PATH = ${GREEN}${QBITTORRENT_INCOMPLETE_PATH}${NC}"
 echo -e "  DOCKER_SOCK = ${GREEN}${DOCKER_SOCK}${NC}"
 if [ -n "$DOCKER_GID" ]; then
@@ -344,6 +359,7 @@ if [ -f "$ZSHENV" ]; then
     grep -v "$MARKER_END" | \
     grep -v "^export DOCKER_DATA=" | \
     grep -v "^export MEDIA_PATH=" | \
+    grep -v "^export ADGUARD_LAN_IP=" | \
     grep -v "^export QBITTORRENT_INCOMPLETE_PATH=" | \
     grep -v "^export DOCKER_SOCK=" | \
     grep -v "^export DOCKER_GID=" | \
@@ -364,6 +380,7 @@ cat >> "$ZSHENV" << EOF
 ${MARKER_START}
 export DOCKER_DATA="${DOCKER_DATA}"
 export MEDIA_PATH="${MEDIA_PATH}"
+export ADGUARD_LAN_IP="${ADGUARD_LAN_IP}"
 export QBITTORRENT_INCOMPLETE_PATH="${QBITTORRENT_INCOMPLETE_PATH}"
 export DOCKER_SOCK="${DOCKER_SOCK}"
 export DOCKER_GID="${DOCKER_GID}"

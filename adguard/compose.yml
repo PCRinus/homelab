@@ -9,8 +9,8 @@ services:
       - ${DOCKER_DATA}/adguard/work:/opt/adguardhome/work
       - ${DOCKER_DATA}/adguard/conf:/opt/adguardhome/conf
     ports:
-      - "192.168.1.166:53:53/tcp"   # DNS (bound to LAN IP to avoid systemd-resolved conflict)
-      - "192.168.1.166:53:53/udp"   # DNS
+      - "${ADGUARD_LAN_IP:-192.168.1.166}:53:53/tcp"   # DNS (bound to LAN IP to avoid systemd-resolved conflict)
+      - "${ADGUARD_LAN_IP:-192.168.1.166}:53:53/udp"   # DNS
       - "3001:3001"                  # Admin web UI (3001 avoids conflict with Homepage on 3000)
     dns:
       - 1.1.1.1

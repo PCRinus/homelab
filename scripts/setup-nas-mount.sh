@@ -368,13 +368,20 @@ if command -v systemctl >/dev/null 2>&1; then
 fi
 
 # 5. Activate mount
-# Convert mount path to systemd unit name: /mnt/unas/media -> mnt-unas-media
-SYSTEMD_UNIT=$(echo "$MOUNT_POINT" | sed 's|^/||;s|/$||;s|/|-|g')
+# Convert the path to its correctly escaped systemd unit name.
+if command -v systemd-escape >/dev/null 2>&1; then
+    SYSTEMD_UNIT=$(systemd-escape --path "$MOUNT_POINT")
+else
+    SYSTEMD_UNIT=$(echo "$MOUNT_POINT" | sed 's|^/||;s|/$||;s|/|-|g')
+fi
 
 # If using x-systemd.automount, activate the automount unit (mounts on first access, non-blocking).
 # Otherwise fall back to a direct mount.
 if echo "$MOUNT_OPTS" | grep -q "x-systemd.automount"; then
     echo "Activating automount for ${MOUNT_POINT}..."
+    # Clear a previous boot-time failure before retrying. Without this,
+    # systemd may reject the start with mount-start-limit-hit.
+    sudo systemctl reset-failed "${SYSTEMD_UNIT}.mount" "${SYSTEMD_UNIT}.automount" 2>/dev/null || true
     if sudo systemctl start "${SYSTEMD_UNIT}.automount" 2>/dev/null; then
         echo -e "${GREEN}Automount activated!${NC}"
         echo -e "The NFS share will connect on first access (e.g., ${YELLOW}ls ${MOUNT_POINT}${NC})."
