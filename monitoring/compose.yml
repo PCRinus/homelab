@@ -1,7 +1,7 @@
 services:
   dozzle:
     container_name: dozzle
-    image: ghcr.io/amir20/dozzle:v10.7.1
+    image: ghcr.io/amir20/dozzle:v10.9.0
     environment:
       DOZZLE_REMOTE_AGENT: ${DOZZLE_REMOTE_AGENT:-}
     volumes:
