@@ -93,25 +93,35 @@ If `.generated-modrinth.env` already matches the target `MC_VERSION`, `start.sh`
 
 ## Generate Client Modpack (TypeScript)
 
-The client modpack generator is now implemented in TypeScript:
+The reusable client modpack generator is implemented in TypeScript:
 
-- [client-modpacks/generate_survival_client_mrpack.ts](client-modpacks/generate_survival_client_mrpack.ts)
+- [client-modpacks/generate_client_modpack.ts](client-modpacks/generate_client_modpack.ts)
 
 Run from repo root (`/home/mircea/homeserver`):
 
 ```bash
-# 1) Resolve compatible mod versions into the input file expected by the TS generator
-./minecraft-servers/resolve-modrinth-mods.sh --mc-version 1.21.11 --output /tmp/survival-mods.env
+# 1) Resolve compatible world-generation mod versions.
+./minecraft-servers/resolve-modrinth-mods.sh \
+  --mc-version 26.2 \
+  --output /tmp/world-generation-mods.env
 
-# 2) Generate modrinth index + .mrpack + excluded list
-mise run run
+# 2) Generate the Modrinth import pack and a ZIP containing the client JARs.
+MODRINTH_RESOLVED_ENV=/tmp/world-generation-mods.env \
+MODRINTH_PROJECTS_VARIABLE=MODRINTH_PROJECTS_WORLD_GENERATION \
+MODPACK_SLUG=modded-friends-client \
+MODPACK_NAME='Modded Friends Client Pack' \
+npm run generate:client-modpack
 ```
 
 Generated files:
 
-- `minecraft-servers/client-modpacks/survival-island-client.modrinth.index.json`
-- `minecraft-servers/client-modpacks/survival-island-client-<mc-version>.mrpack`
-- `minecraft-servers/client-modpacks/survival-island-client-<mc-version>.excluded-server-only.txt`
+- `minecraft-servers/client-modpacks/modded-friends-client-<mc-version>.mrpack`
+- `minecraft-servers/client-modpacks/modded-friends-client-<mc-version>-mods.zip`
+- `minecraft-servers/client-modpacks/modded-friends-client-<mc-version>.modrinth.index.json`
+- `minecraft-servers/client-modpacks/modded-friends-client-<mc-version>.excluded-server-only.txt`
+
+Import the `.mrpack` directly into the Modrinth App. The `-mods.zip` artifact is
+provided for launchers where the JARs need to be copied into a `mods/` folder.
 
 ## Creating a New Server
 

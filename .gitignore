@@ -1,6 +1,9 @@
 .env
 *.env
 
+# macOS metadata
+.DS_Store
+
 # Configarr secrets
 media-server/configarr/secrets.yml
 
@@ -24,6 +27,12 @@ tunnel-token
 
 # Generated Minecraft mod resolver output
 minecraft-servers/.generated-modrinth.env
+
+# Generated Minecraft client packs
+minecraft-servers/client-modpacks/*.mrpack
+minecraft-servers/client-modpacks/*-mods.zip
+minecraft-servers/client-modpacks/*.modrinth.index.json
+minecraft-servers/client-modpacks/*.excluded-server-only.txt
 
 # Dump files
 *dump*

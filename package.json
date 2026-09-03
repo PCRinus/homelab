@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "run": "tsx minecraft-servers/client-modpacks/generate_survival_client_mrpack.ts"
+    "run": "npm run generate:client-modpack",
+    "generate:client-modpack": "tsx minecraft-servers/client-modpacks/generate_client_modpack.ts"
   },
   "dependencies": {
     "adm-zip": "0.6.0"
