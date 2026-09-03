@@ -20,7 +20,8 @@ jobs:
         with:
           service_name: Minecraft Servers
           service_path: minecraft-servers
-          deploy_script: ./start.sh
+          # Keep the legacy worlds stopped and deploy only the active 26.2 server.
+          deploy_script: MC_VERSION=26.2 ./start.sh modded-26-2
           repo_dir: ${{ vars.HOMELAB_REPO_DIR || '/home/mircea/homeserver' }}
           ssh_host: ${{ vars.HOMELAB_SSH_HOST || 'homeserver' }}
           ts_oauth_client_id: ${{ secrets.TS_OAUTH_CLIENT_ID }}

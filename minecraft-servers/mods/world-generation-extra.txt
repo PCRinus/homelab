@@ -5,7 +5,6 @@ tectonic
 incendium
 chunky
 bobby
-philips-ruins
 moogs-voyager-structures
 mns-moogs-nether-structures
 moogs-structure-lib

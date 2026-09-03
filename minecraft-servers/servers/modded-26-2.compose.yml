@@ -1,0 +1,18 @@
+services:
+  mc:
+    container_name: minecraft-server-modded-26-2
+    restart: unless-stopped
+    ports:
+      - "25568:25565"
+    environment:
+      VERSION: "26.2"
+      MEMORY: "6144M"
+      MODRINTH_PROJECTS: "${MODRINTH_PROJECTS_WORLD_GENERATION:?Run resolve-modrinth-mods.sh for Minecraft 26.2}"
+    volumes:
+      - ${DOCKER_DATA}/minecraft-server-modded-26-2:/data
+    healthcheck:
+      test: ["CMD", "mc-health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 180s

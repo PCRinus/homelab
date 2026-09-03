@@ -10,6 +10,7 @@ minecraft-servers/
 ├── servers/
 │   ├── world-gen-server.compose.yml
 │   ├── survival-island.compose.yml
+│   ├── modded-26-2.compose.yml
 │   └── vanilla.compose.yml
 ├── mods/
 │   ├── performance.txt          # Shared performance mods
@@ -186,6 +187,7 @@ Each server needs a unique host port. Current allocations:
 - `25565` - world-gen-server
 - `25566` - survival-island
 - `25567` - vanilla (reachable privately over Tailscale)
+- `25568` - modded-26-2
 
 ## Data Persistence
 
