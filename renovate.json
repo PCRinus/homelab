@@ -26,6 +26,16 @@
       "versioning": "regex:^(?<compatibility>[^\\d]+-)?(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:\\.(?<build>\\d+))?$"
     },
     {
+      "description": "Ignore erroneous Pulsarr 1.1.6 Docker tag",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "lakker/pulsarr"
+      ],
+      "allowedVersions": "!/^1\\.1\\.6$/"
+    },
+    {
       "matchDatasources": [
         "docker"
       ],
