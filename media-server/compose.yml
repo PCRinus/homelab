@@ -138,7 +138,7 @@ services:
       start_period: 30s
 
   flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:v3.5.0
+    image: ghcr.io/flaresolverr/flaresolverr:v3.5.2
     container_name: flaresolverr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -186,7 +186,7 @@ services:
       start_period: 30s
 
   pulsarr:
-    image: lakker/pulsarr:0.19.0
+    image: lakker/pulsarr:0.19.2
     container_name: pulsarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -217,7 +217,7 @@ services:
       start_period: 30s
 
   plex:
-    image: lscr.io/linuxserver/plex:1.43.3
+    image: lscr.io/linuxserver/plex:1.43.4
     container_name: plex
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -253,7 +253,7 @@ services:
       start_period: 120s
 
   bazarr:
-    image: ghcr.io/hotio/bazarr:release-1.6.0
+    image: ghcr.io/hotio/bazarr:release-1.6.1
     container_name: bazarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -361,7 +361,7 @@ services:
   # Run manually: docker compose run --rm configarr
   # Or scheduled via cron on host
   configarr:
-    image: ghcr.io/raydak-labs/configarr:1.30.2
+    image: ghcr.io/raydak-labs/configarr:1.31.0
     container_name: configarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -377,7 +377,7 @@ services:
   # Creates an outbound tunnel from this server to the Pangolin VPS,
   # enabling remote access to Plex (and other services) bypassing CGNAT
   newt:
-    image: fosrl/newt:1.16.0
+    image: fosrl/newt:1.17.0
     container_name: newt
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
