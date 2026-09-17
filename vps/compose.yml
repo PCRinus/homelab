@@ -71,7 +71,7 @@ services:
       - ${PANGOLIN_CONFIG_DIR:-/opt/pangolin/config}/traefik/logs:/var/log/traefik
 
   dozzle-agent:
-    image: ghcr.io/amir20/dozzle:v10.10.0
+    image: ghcr.io/amir20/dozzle:v11.1.0
     container_name: dozzle-agent
     command: agent
     depends_on:
