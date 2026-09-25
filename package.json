@@ -7,7 +7,7 @@
     "generate:client-modpack": "tsx minecraft-servers/client-modpacks/generate_client_modpack.ts"
   },
   "dependencies": {
-    "adm-zip": "0.6.0"
+    "adm-zip": "0.6.1"
   },
   "devDependencies": {
     "@types/adm-zip": "0.5.8",
