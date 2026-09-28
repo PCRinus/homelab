@@ -59,25 +59,32 @@ if ! homelab_compose config --services 2>/dev/null | grep -qx "pulsarr"; then
     exit 1
 fi
 
-was_running=false
+STAGING_DIR="$(mktemp -d)"
+trap 'rm -rf "$STAGING_DIR"' EXIT
+mkdir -p "$STAGING_DIR/pulsarr/db"
+
+# Only the database is backed up; logs are not needed for a restore.
 if homelab_compose ps --status running --services 2>/dev/null | grep -qx "pulsarr"; then
-    was_running=true
-fi
-
-restore_service() {
-    if [ "$was_running" = true ]; then
-        homelab_compose start pulsarr > /dev/null 2>&1 || true
-    fi
-}
-trap restore_service EXIT
-
-if [ "$was_running" = true ]; then
-    echo "Stopping pulsarr for consistent backup..."
-    homelab_compose stop pulsarr
+    # Online snapshot so the watchlist workflow keeps running. The image runs
+    # Bun, so use bun:sqlite; VACUUM INTO writes a consistent, self-contained copy.
+    CONTAINER_SNAPSHOT="/tmp/pulsarr-backup.db"
+    echo "Snapshotting live pulsarr database..."
+    homelab_compose exec -T pulsarr rm -f "$CONTAINER_SNAPSHOT"
+    homelab_compose exec -T pulsarr bun -e '
+const { Database } = require("bun:sqlite");
+const db = new Database("/app/data/db/pulsarr.db", { readonly: true });
+db.run("VACUUM INTO ?", [process.argv[1]]);
+db.close();
+' "$CONTAINER_SNAPSHOT"
+    homelab_compose cp "pulsarr:${CONTAINER_SNAPSHOT}" "$STAGING_DIR/pulsarr/db/pulsarr.db" > /dev/null
+    homelab_compose exec -T pulsarr rm -f "$CONTAINER_SNAPSHOT"
+else
+    echo "pulsarr is not running; copying database files directly..."
+    cp -p "$CONFIG_DIR"/db/pulsarr.db* "$STAGING_DIR/pulsarr/db/"
 fi
 
 echo "Creating backup archive: $ARCHIVE_PATH"
-tar -C "$DOCKER_DATA_PATH" -czf "$ARCHIVE_PATH" "pulsarr"
+tar -C "$STAGING_DIR" -czf "$ARCHIVE_PATH" "pulsarr"
 sha256sum "$ARCHIVE_PATH" > "$CHECKSUM_PATH"
 
 echo "Backup created successfully."

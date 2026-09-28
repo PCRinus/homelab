@@ -23,13 +23,58 @@ sonarr:
       - template: sonarr-v4-quality-profile-web-2160p
       - template: sonarr-v4-custom-formats-web-2160p
 
-    # Custom format overrides (optional - uncomment to customize)
-    # custom_formats:
-    #   - trash_ids:
-    #       - 32b367365729d530ca1c124a0b180c64  # Bad Dual Groups
-    #     quality_profiles:
-    #       - name: WEB-1080p
-    #         score: -10000
+    # Default profile for new shows: WEB-1080p's custom formats, but also accepting
+    # HDTV/Bluray (older shows often have no WEB release) with a 720p fallback.
+    cloneQualityProfiles:
+      - from: WEB-1080p
+        to: HD-1080p (TRaSH)
+
+    quality_profiles:
+      - name: HD-1080p (TRaSH)
+        upgrade:
+          allowed: true
+          until_quality: 1080p
+          until_score: 10000
+        qualities:
+          - name: 1080p
+            qualities:
+              - WEBDL-1080p
+              - WEBRip-1080p
+              - Bluray-1080p
+              - HDTV-1080p
+          - name: 720p
+            qualities:
+              - WEBDL-720p
+              - WEBRip-720p
+              - Bluray-720p
+              - HDTV-720p
+
+    # Local custom formats for known-bad release names
+    customFormatDefinitions:
+      # The 2026 Grand Tour relaunch is released as "The Grand Tour 2026 S01", but
+      # TVDB files it as S07 of The Grand Tour (2016). Indexers tag it with the
+      # show's IMDb ID, so Sonarr grabs it when searching for the original S01 and
+      # then blocks the import ("matched to series by ID").
+      - trash_id: homelab-grand-tour-2026-relaunch
+        trash_scores:
+          default: -10000
+        name: Grand Tour 2026 Relaunch
+        includeCustomFormatWhenRenaming: false
+        specifications:
+          - name: Grand Tour 2026
+            implementation: ReleaseTitleSpecification
+            negate: false
+            required: true
+            fields:
+              value: '\bThe[ ._-]?Grand[ ._-]?Tour[ ._-]?\(?2026\)?\b'
+
+    custom_formats:
+      - trash_ids:
+          - homelab-grand-tour-2026-relaunch
+        assign_scores_to:
+          - name: WEB-1080p
+          - name: WEB-2160p
+          - name: HD-1080p (TRaSH)
 
   # Anime-dedicated Sonarr instance
   anime:
@@ -43,6 +88,12 @@ sonarr:
       # Anime quality profile and custom formats (Remux-1080p - Anime)
       - template: sonarr-v4-quality-profile-anime
       - template: sonarr-v4-custom-formats-anime
+
+    # TRaSH requires 100 (a tiered release group). 1 also accepts untiered groups
+    # as long as the release has a streaming-source or version tag.
+    quality_profiles:
+      - name: Remux-1080p - Anime
+        min_format_score: 1
 
 # ============================================================================
 # RADARR CONFIGURATION
@@ -64,6 +115,22 @@ radarr:
       # UHD Bluray + WEB profile (4K content)
       - template: radarr-quality-profile-uhd-bluray-web
       - template: radarr-custom-formats-uhd-bluray-web
+
+    # Pulsarr's default profile: prefer 4K, but grab 1080p when no acceptable 4K
+    # release exists and upgrade to 4K later.
+    quality_profiles:
+      - name: UHD Bluray + WEB
+        qualities:
+          - name: Bluray-2160p
+          - name: WEB 2160p
+            qualities:
+              - WEBDL-2160p
+              - WEBRip-2160p
+          - name: Bluray-1080p
+          - name: WEB 1080p
+            qualities:
+              - WEBDL-1080p
+              - WEBRip-1080p
 
     # Custom format overrides (optional - uncomment to customize)
     # custom_formats:
