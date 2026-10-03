@@ -11,7 +11,6 @@ This directory contains the Docker Compose configuration for the media server st
 | Radarr | 7878 | Movie management |
 | Prowlarr | 9696 | Indexer manager |
 | Bazarr | 6767 | Subtitle management |
-| Seerr | 5055 | Media request system |
 | Pulsarr | 3003 | Plex watchlist automation and routing |
 | Plex | 32400 | Media server |
 | FlareSolverr | 8191 | Cloudflare bypass for indexers |
@@ -531,7 +530,6 @@ All services are accessible via Cloudflare Tunnel:
 - `sonarr.home-server.me`
 - `radarr.home-server.me`
 - `prowlarr.home-server.me`
-- `seerr.home-server.me`
 - `pulsarr.home-server.me`
 - `plex.home-server.me`
 
@@ -539,7 +537,7 @@ Or locally via `http://homelab:<port>`.
 
 ## Pulsarr Setup
 
-Pulsarr is deployed in parallel with Seerr and is intended to become the primary Plex watchlist automation service after validation.
+Pulsarr is the Plex watchlist automation service. It routes watchlist additions to the right Sonarr/Radarr instance and quality profile.
 
 ### Runtime Configuration
 
@@ -580,21 +578,9 @@ Configure the following initial routes:
 
 The anime route should be placed above the fallback Sonarr route so anime watchlist additions land in the Anime Sonarr instance instead of the general TV instance.
 
-### Seerr Cutover Step
-
-Seerr remains installed during validation for request history and status tracking, but it must not continue creating watchlist requests in parallel.
-
-After Pulsarr is fully configured:
-
-1. Open Seerr
-2. Go to the Plex watchlist auto-request permissions/settings for the relevant users
-3. Disable Seerr watchlist auto-request
-4. Keep Seerr service integrations and scans enabled so existing request status tracking still works during the transition
-
 ### Validation Checklist
 
 - Add one normal TV show to a Plex watchlist and confirm it lands in `sonarr`
 - Add one anime series and confirm it lands in `sonarr-anime`
 - Add one movie and confirm it lands in `radarr`
 - Confirm the request is auto-approved and executed immediately
-- Confirm Seerr does not create a duplicate watchlist request after its auto-request setting is disabled

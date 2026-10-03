@@ -111,19 +111,6 @@ endpoints:
       - type: discord
         description: "FlareSolverr is down or not responding"
 
-  - name: Seerr
-    group: Media Server
-    url: "http://seerr:5055/api/v1/status"
-    interval: 60s
-    headers:
-      X-Api-Key: "${OVERSEERR_API_KEY}"
-    conditions:
-      - "[STATUS] == 200"
-      - "[RESPONSE_TIME] < 1000"
-    alerts:
-      - type: discord
-        description: "Seerr is down or not responding"
-
   - name: Pulsarr
     group: Media Server
     url: "http://pulsarr:3003/health"

@@ -32,10 +32,6 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       }
       service = "http://plex:32400"
       }, {
-      hostname      = "seerr.home-server.me"
-      originRequest = {}
-      service       = "http://seerr:5055"
-      }, {
       hostname      = "pulsarr.home-server.me"
       originRequest = {}
       service       = "http://pulsarr:3003"

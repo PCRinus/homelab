@@ -12,7 +12,7 @@ Self-hosted homelab running Docker in **rootful mode** on Linux Server. Services
 
 | Stack | Purpose | Key Files |
 |-------|---------|-----------|
-| `media-server/` | Plex, Sonarr, Radarr, Prowlarr, qBittorrent, Overseerr, FlareSolverr | `compose.yml` |
+| `media-server/` | Plex, Sonarr, Radarr, Prowlarr, qBittorrent, Pulsarr, FlareSolverr | `compose.yml` |
 | `cloudflare-tunnel/` | Zero Trust tunnel + Terraform for DNS/R2 | `compose.yml`, `*.tf` |
 | `homepage/` | Dashboard aggregating all services | Config yamls mounted read-only |
 | `home-assistant/` | Smart home automation | Configs mounted from repo |
