@@ -19,6 +19,6 @@ echo "📦 Pulling latest images..."
 homelab_compose pull
 
 echo "🚀 Starting containers..."
-homelab_compose up -d
+homelab_compose up -d --remove-orphans
 
 echo "✅ Home Assistant started!"

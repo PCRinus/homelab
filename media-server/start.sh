@@ -25,6 +25,6 @@ echo "🚀 Starting containers..."
 # from retaining the empty underlying directory after the automount recovers.
 homelab_compose up -d --force-recreate \
     qbittorrent sonarr sonarr-anime radarr plex bazarr checkrr
-homelab_compose up -d
+homelab_compose up -d --remove-orphans
 
 echo "✅ Media Server Stack started!"
