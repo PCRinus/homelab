@@ -303,21 +303,55 @@ services:
       retries: 3
       start_period: 30s
 
+  # Plex Media Server.log for Dozzle, plus a 30-day archive on disk. Plex keeps
+  # a fixed 6 x 10 MB rotation (under a day with verbose logging), so this
+  # follows the live log into one file per UTC day (gzipped hourly once past)
+  # and also prints each line, so Docker's log store gives Dozzle ~30 days.
+  # On a fresh container (recreated after an image/config change) the archive
+  # is replayed first so Dozzle history survives; replayed lines carry the
+  # replay time as their Docker timestamp, but keep Plex's own timestamp text.
   plex-log-media-server:
     image: alpine:3.24
     container_name: plex-log-media-server
+    init: true # Forward SIGTERM so `docker stop` doesn't wait for the kill timeout
+    environment:
+      - RETENTION_DAYS=30
     command:
       - /bin/sh
       - -c
-      - tail -n 0 -F /plex-logs/Plex\ Media\ Server.log /plex-logs/Plex\ Media\ Server.[1-5].log
+      - |
+        [ -p /tmp/live ] || mkfifo /tmp/live
+        while true; do
+          find /archive -name 'plex-media-server-*.log' ! -name "plex-media-server-$$(date -u +%F).log" -mmin +10 -exec gzip -f {} \;
+          find /archive -name 'plex-media-server-*.log.gz' -mtime +"$$RETENTION_DAYS" -delete
+          sleep 3600
+        done &
+        tail -n 0 -F "/plex-logs/Plex Media Server.log" 2>/dev/null | awk '{
+          day = strftime("%Y-%m-%d")
+          if (day != current) { if (current != "") close(out); current = day; out = "/archive/plex-media-server-" day ".log" }
+          print >> out; fflush(out)
+          print > "/tmp/live"; fflush("/tmp/live")
+        }' &
+        if [ ! -e /tmp/.replayed ]; then
+          for f in $$(ls /archive/plex-media-server-*.log* 2>/dev/null | sort); do
+            case "$$f" in *.gz) zcat "$$f" ;; *) cat "$$f" ;; esac
+          done
+          touch /tmp/.replayed
+        fi
+        exec cat /tmp/live
     volumes:
       - type: bind
         source: "${DOCKER_DATA}/plex/config/Library/Application Support/Plex Media Server/Logs"
         target: /plex-logs
         read_only: true
-    networks:
-      - media-net
+      - ${DOCKER_DATA}/plex/log-archive:/archive
+    network_mode: none
     restart: unless-stopped
+    logging:
+      driver: local # Compresses rotated files; 40 x 100 MB covers 30+ days of verbose logs
+      options:
+        max-size: 100m
+        max-file: "40"
     labels:
       - "dozzle.enable=true"
 

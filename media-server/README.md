@@ -127,6 +127,34 @@ In Tautulli UI:
 
 If you set `/config/logs`, Tautulli will only read its own logs and Plex logs will appear empty.
 
+### API key
+
+Tautulli lets environment variables override `config.ini`, and the container receives the shared `.env`. So the effective API key is `TAUTULLI_API_KEY` from `.env` (also used by the Homepage widget). The `api_key` line in `${DOCKER_DATA}/tautulli/config.ini` is stale and ignored. To rotate the key, change it in `.env.enc` and recreate `tautulli` and `homepage`.
+
+## Plex Log Archive (and Dozzle)
+
+Plex keeps a fixed rotation of `Plex Media Server.log` plus five numbered backups (about 10 MB each). With verbose logging that covers less than a day. The `plex-log-media-server` sidecar keeps 30 days in two places:
+
+| Where | What | Storage |
+|-------|------|---------|
+| **Dozzle** → `plex-log-media-server` | Every line printed to the container's output, kept by Docker's `local` log driver (40 x 100 MB, rotated files compressed) | Server internal disk, `/var/lib/docker` |
+| `${DOCKER_DATA}/plex/log-archive/` | `plex-media-server-YYYY-MM-DD.log` per **UTC** day, past days gzipped hourly, deleted after `RETENTION_DAYS` (default `30`) | Server internal disk, `/home/mircea/docker` (not the NAS) |
+
+The files on disk are the durable copy. Docker discards a container's logs when the container is recreated (image bump, compose change). So when a fresh container starts, it first replays the whole archive to its output, and the Dozzle history comes back. A plain `docker restart` keeps the Docker logs and skips the replay.
+
+Caveats:
+- Replayed lines carry the replay time as their Docker/Dozzle timestamp. The Plex timestamp at the start of each line is still correct; use it rather than Dozzle's time filter for older lines.
+- Lines Plex writes while the container is stopped are not captured.
+- Volume: about 90 MB/day uncompressed with verbose logging, a few hundred MB per month once compressed, in each of the two places.
+
+```bash
+cd ~/docker/plex/log-archive
+ls -lh
+zgrep -h "PlexRelay" plex-media-server-*.log*
+```
+
+See `PLEX-REMOTE-ACCESS.md` for searches related to remote stream quality.
+
 ## VPN Setup (Hotio qBittorrent + ProtonVPN)
 
 The Hotio qBittorrent image includes built-in WireGuard VPN support with automatic port forwarding for ProtonVPN.

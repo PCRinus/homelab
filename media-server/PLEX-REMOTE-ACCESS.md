@@ -1,135 +1,134 @@
-# Plex Remote Access via Cloudflare Tunnel
+# Plex Remote Access via Pangolin
 
-This guide explains how to configure Plex for direct remote connections through Cloudflare Tunnel, avoiding the low-quality Plex Relay.
+The home connection is behind CGNAT, so Plex's built-in Remote Access (port forwarding) cannot work. Remote clients reach Plex through a Pangolin VPS instead, and Plex Relay is disabled so clients never fall back to its bandwidth cap.
 
-## Why This Matters
-
-| Connection Type | Quality | Speed |
-|-----------------|---------|-------|
-| **Plex Relay** | 1 Mbps (free) / 2 Mbps (paid) | Slow, often transcodes |
-| **Direct (Cloudflare Tunnel)** | Original quality | Fast, direct play |
-
-Without proper configuration, mobile clients (Android/iOS) default to Plex Relay because they can't discover your server's custom URL.
-
-## Prerequisites
-
-- Cloudflare Tunnel already configured with Plex ingress (e.g., `plex.home-server.me`)
-- Plex accessible via the tunnel URL in a browser
-
-## Configuration Steps
-
-### 1. Access Plex Network Settings
-
-Go to your Plex server:
-- Local: `http://localhost:32400/web`
-- Or via tunnel: `https://plex.home-server.me`
-
-Navigate to: **Settings → Network → Show Advanced**
-
-### 2. Set Custom Server Access URLs
-
-In the **"Custom server access URLs"** field, enter:
+## How Clients Connect
 
 ```
-https://plex.home-server.me:443
+Plex client ──HTTPS──▶ stream.home-server.me:443 (VPS 194.102.107.75)
+                       Traefik (Let's Encrypt TLS) ─▶ Gerbil (WireGuard)
+                              │
+                              ▼  outbound WireGuard tunnel
+                       newt container (homeserver, media-net) ─▶ http://plex:32400
 ```
 
-⚠️ **Important:** The `:443` port suffix is **required** - it fixes iOS download issues and other client quirks.
+| Piece | Where it is defined |
+|-------|---------------------|
+| `stream.home-server.me` A record (DNS-only, not proxied) | `cloudflare-tunnel/dns.tf` |
+| Pangolin, Gerbil, Traefik on the VPS | `vps/compose.yml` (config lives on the VPS under `/opt/pangolin/config`) |
+| `newt` tunnel connector | `media-server/compose.yml` |
 
-This tells Plex's cloud service to direct clients to your Cloudflare tunnel URL instead of using Relay.
+Requests from remote clients arrive at Plex from the `newt` container's address on `media-net` (e.g. `172.18.0.24`) with `Host: stream.home-server.me`.
 
-### 3. Configure LAN Networks
+`plex.home-server.me` (Cloudflare Tunnel) still exists for browser access, but it is not advertised to Plex clients. Cloudflare's terms don't allow streaming video through the tunnel, so it shouldn't carry playback.
 
-In the **"LAN Networks"** field, add your local network:
+### Connection types and their limits
+
+| Connection | Limit |
+|------------|-------|
+| Direct via `stream.home-server.me` | None from Plex: original quality, direct play |
+| Plex Relay (disabled here) | 2 Mbps with Plex Pass on the server, 1 Mbps without |
+
+Shared users don't need their own Plex Pass. The server owner's Plex Pass covers remote streaming for everyone the server is shared with.
+
+## Plex Settings
+
+Configure in Plex Web → **Settings** → (server) **Network** → **Show Advanced**:
+
+| Setting | Value | Why |
+|---------|-------|-----|
+| Custom server access URLs | `https://stream.home-server.me:443` | Plex.tv advertises this URL to clients. The `:443` suffix is required (it fixes iOS downloads and other client quirks). |
+| LAN Networks | `192.168.1.0/24,100.64.0.0/10` | Home LAN and Tailscale/CGNAT addresses count as local (no remote bandwidth rules) |
+| Enable Relay | **Off** | Without this, clients that briefly can't reach `stream.` (e.g. during a Plex restart) fall back to Relay and stay capped at 2 Mbps until the app reconnects |
+| Secure connections | Preferred | TLS is terminated on the VPS |
+
+**Settings → Remote Access** stays disabled. Port mapping cannot work behind CGNAT, and the custom URL above replaces it.
+
+Save, then restart Plex so plex.tv picks up the new connection list:
+
+```bash
+cd /home/mircea/homeserver/media-server && docker restart plex
+```
+
+Clients refresh their connection list on app restart, or by signing out and back in.
+
+### Turning off Relay
+
+1. Open Plex Web and select the server in the sidebar
+2. **Settings** (wrench icon) → under the server name, **Network**
+3. Click **Show Advanced** at the top of the page
+4. Uncheck **Enable Relay**
+5. **Save Changes**
+
+The trade-off: if the VPS or the newt tunnel is down, remote playback fails instead of degrading to Relay. Gatus monitors `https://stream.home-server.me/identity` (`monitoring/config.yaml`), so that outage is visible.
+
+## Verifying
+
+### What plex.tv advertises to clients
+
+Run this on the homeserver. Expected output: a remote `stream.home-server.me` connection, a Docker-internal local address, and no `RELAY` line once Relay is disabled.
+
+```bash
+P="$HOME/docker/plex/config/Library/Application Support/Plex Media Server"
+T=$(grep -o 'PlexOnlineToken="[^"]*' "$P/Preferences.xml" | cut -d'"' -f2)
+curl -s "https://plex.tv/api/v2/resources?includeHttps=1&includeRelay=1" \
+  -H "Accept: application/json" -H "X-Plex-Token: $T" -H "X-Plex-Client-Identifier: diag-cli" |
+  python3 -c '
+import json, sys
+for r in json.load(sys.stdin):
+    if "server" in r.get("provides", ""):
+        for c in r["connections"]:
+            print(r["name"], c["uri"], "local" if c["local"] else "remote", "RELAY" if c["relay"] else "")'
+```
+
+### Per-session connection type
+
+Tautulli → **Activity** shows each stream's location (LAN/WAN), quality, and whether it is relayed. History stores the same fields per session, so you can review a user's past sessions after the fact.
+
+## Monitoring Stream Quality
+
+Tautulli has a Discord notifier named **Plex quality alert**. It fires on **Playback Start** and **Transcode Decision Change** when:
 
 ```
-192.168.1.0/24
+{1} stream_location is wan  AND  ( {2} quality_profile is not Original  OR  {3} relayed is 1 )
 ```
 
-Or if you also use Tailscale/CGNAT VPN:
+This catches:
+- remote streams that start below original quality (usually the client's quality setting)
+- Plex auto-lowering quality mid-stream ("connection too slow" on the TV); this starts a new transcode session, which triggers Transcode Decision Change
+- any Relay session
 
-```
-192.168.1.0/24,100.64.0.0/10
-```
+To change it: Tautulli → **Settings → Notification Agents → Plex quality alert**.
 
-This ensures devices on your home network are recognized as "local" and get unrestricted bandwidth.
+### Low quality without Relay is a client setting
 
-### 4. Remote Access Settings
-
-- **Enable Relay:** Leave **enabled** (acts as fallback if tunnel fails)
-- **Remote Access:** Can be left **disabled** (not needed with Cloudflare tunnel)
-
-### 5. Secure Connections
-
-Set **"Secure connections"** to **"Preferred"** (not required, since Cloudflare handles TLS).
-
-### 6. Save and Restart
-
-1. Click **Save Changes**
-2. Restart Plex:
-   ```bash
-   cd /home/mircea/homeserver/media-server && docker restart plex
-   ```
-
-### 7. Refresh Mobile Clients
-
-On Android/iOS Plex apps:
-1. **Sign out** completely
-2. **Sign back in**
-
-This forces the app to fetch the updated server connection info.
-
-## Cloudflare Configuration (Optional but Recommended)
-
-To prevent caching issues (especially iOS Direct Play seeking):
-
-### Disable Caching for Your Domain
-
-1. Go to **Cloudflare Dashboard → Websites → your domain → Caching**
-2. Set **"Caching Level"** to **"No query string"**
-3. Create a **Cache Rule**:
-   - Rule name: `Disable caching`
-   - When: Hostname **ends with** `home-server.me`
-   - Cache eligibility: **Bypass cache**
-
-## Verifying It Works
-
-### Check Connection Type
-
-1. Play media on a remote client
-2. On your Plex server, go to **Settings → Dashboard**
-3. Look at "Now Playing" - connection should show **"secure"** or **"direct"**, NOT **"relay"**
-
-### Browser DevTools
-
-1. Open `https://app.plex.tv` in browser
-2. Press F12 → Network tab
-3. Play media
-4. Requests should go to `plex.home-server.me`, NOT `*.plex.services.conductor.plex.tv`
-
-### Test from Mobile Data
-
-1. Turn off WiFi on your phone
-2. Open Plex app and play something
-3. Check Dashboard for connection type
+Most low-quality remote streams come from the client, not the connection. The app requests a bitrate cap (visible in the Plex log as `maxVideoBitrate=2000&videoQuality=60` for "2 Mbps 720p"). Ask the user to set their app's quality settings to **Original / Maximum**:
+- **Remote/Internet streaming quality**
+- **Cellular quality** (mobile apps keep a separate, lower setting for mobile data)
+- Optionally turn off **Automatically adjust quality**, if their connection can sustain the original bitrate
 
 ## Troubleshooting
 
-### Clients still using Relay
+### A stream shows as relayed
 
-- Ensure you included `:443` in the custom URL
-- Sign out and back in on the client
-- Wait a few minutes for Plex cloud to propagate the change
-
-### iOS downloads stuck on "Queued"
-
-- Verify `:443` is in the custom URL
-- Check Cloudflare caching is set to "No query string"
+- Check that **Enable Relay** is off (see above)
+- Check that `https://stream.home-server.me/identity` responds and that the `newt` container is running
+- Have the user restart the Plex app so it re-tests connections
 
 ### Local devices treated as remote
 
-- Add your subnet to "LAN Networks" (e.g., `192.168.1.0/24`)
+- Add the subnet to **LAN Networks**
 
-## Source
+### Investigating after the fact
 
-This guide is based on: [How to set up free, secure, high-quality remote access for Plex](https://mythofechelon.co.uk/blog/2024/1/7/how-to-set-up-free-secure-high-quality-remote-access-for-plex) by Ben Hooper (mythofechelon).
+Plex rotates its own logs within a day. `plex-log-media-server` keeps 30 days of `Plex Media Server.log`, both in Dozzle and as files on disk (see `README.md` → *Plex Log Archive*). In Dozzle, search the `plex-log-media-server` container. On the server:
+
+```bash
+cd ~/docker/plex/log-archive
+# Bitrate caps requested by clients, per user
+zgrep -h "Request:.*maxVideoBitrate=.*Token (" plex-media-server-*.log* |
+  sed -E 's/.*maxVideoBitrate=([0-9]+).*Token \(([^)]*)\).*/\2 \1 kbps/' | sort | uniq -c
+# Relay activity
+
+zgrep -h "startRelay\|PlexRelay" plex-media-server-*.log*
+```
