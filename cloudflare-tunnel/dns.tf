@@ -66,16 +66,6 @@ resource "cloudflare_dns_record" "gatus" {
   comment = "Gatus health monitoring"
 }
 
-resource "cloudflare_dns_record" "seerr" {
-  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
-  name    = "seerr"
-  proxied = true
-  ttl     = 1
-  type    = "CNAME"
-  zone_id = var.zone_id
-  comment = "Seerr media request service"
-}
-
 resource "cloudflare_dns_record" "pulsarr" {
   content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
   name    = "pulsarr"

@@ -6,7 +6,6 @@
     const portMappings = {
       // Media Management
       '32400': 'plex.home-server.me',
-      '5055': 'seerr.home-server.me',
       '3003': 'pulsarr.home-server.me',
       '8989': 'sonarr.home-server.me',
       '8990': 'sonarr-anime.home-server.me',

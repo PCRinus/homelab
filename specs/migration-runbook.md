@@ -51,7 +51,7 @@ Good tooling choices:
 
 - Filesystem snapshots if available
 - `restic` or similar backup tooling for `${DOCKER_DATA}`
-- Existing ad hoc stack backups for Seerr and Pulsarr are additive, not complete host migration coverage
+- Existing ad hoc stack backups for Pulsarr are additive, not complete host migration coverage
 
 ### Option 2: `rsync` Cutover
 

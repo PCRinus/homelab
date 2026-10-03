@@ -11,7 +11,7 @@ source "${SCRIPT_DIR}/lib/host-readiness.sh"
 ADGUARD_LAN_IP="${ADGUARD_LAN_IP:-192.168.1.166}"
 NAS_CONTAINERS=(qbittorrent sonarr sonarr-anime radarr plex bazarr checkrr homepage)
 MEDIA_SERVICES=(
-    qbittorrent sonarr sonarr-anime radarr prowlarr flaresolverr seerr pulsarr
+    qbittorrent sonarr sonarr-anime radarr prowlarr flaresolverr pulsarr
     plex bazarr tautulli plex-log-media-server plex-log-transcoder-statistics
     plex-log-scanner-matcher newt checkrr
 )
