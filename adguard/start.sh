@@ -21,6 +21,6 @@ echo "📦 Pulling latest images..."
 homelab_compose pull
 
 echo "🚀 Starting containers..."
-homelab_compose up -d --force-recreate
+homelab_compose up -d --force-recreate --remove-orphans
 
 echo "✅ AdGuard Home started!"
