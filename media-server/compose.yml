@@ -1,6 +1,6 @@
 services:
   qbittorrent:
-    image: ghcr.io/hotio/qbittorrent:release-5.2.3
+    image: ghcr.io/hotio/qbittorrent:release-5.2.4
     container_name: qbittorrent
     hostname: qbittorrent.internal
     cap_add:
@@ -41,7 +41,7 @@ services:
       start_period: 1m
 
   sonarr:
-    image: ghcr.io/hotio/sonarr:release-4.0.19.2979
+    image: ghcr.io/hotio/sonarr:release-4.0.20.3014
     container_name: sonarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -65,7 +65,7 @@ services:
       start_period: 30s
 
   sonarr-anime:
-    image: ghcr.io/hotio/sonarr:release-4.0.19.2979
+    image: ghcr.io/hotio/sonarr:release-4.0.20.3014
     container_name: sonarr-anime
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -89,7 +89,7 @@ services:
       start_period: 30s
 
   radarr:
-    image: ghcr.io/hotio/radarr:release-6.3.0.10514
+    image: ghcr.io/hotio/radarr:release-6.4.4.10685
     container_name: radarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -113,7 +113,7 @@ services:
       start_period: 30s
 
   prowlarr:
-    image: ghcr.io/hotio/prowlarr:release-2.5.2.5491
+    image: ghcr.io/hotio/prowlarr:release-2.6.5.5623
     container_name: prowlarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -159,7 +159,7 @@ services:
       start_period: 30s
 
   seerr:
-    image: ghcr.io/seerr-team/seerr:v3.4.1
+    image: ghcr.io/seerr-team/seerr:v3.5.0
     container_name: seerr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -186,7 +186,7 @@ services:
       start_period: 30s
 
   pulsarr:
-    image: lakker/pulsarr:0.19.3
+    image: lakker/pulsarr:0.19.4
     container_name: pulsarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -253,7 +253,7 @@ services:
       start_period: 120s
 
   bazarr:
-    image: ghcr.io/hotio/bazarr:release-1.6.1
+    image: ghcr.io/hotio/bazarr:release-1.6.2
     container_name: bazarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -277,7 +277,7 @@ services:
       start_period: 30s
 
   tautulli:
-    image: lscr.io/linuxserver/tautulli:2.18.1
+    image: lscr.io/linuxserver/tautulli:2.18.2
     container_name: tautulli
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -395,7 +395,7 @@ services:
   # Run manually: docker compose run --rm configarr
   # Or scheduled via cron on host
   configarr:
-    image: ghcr.io/raydak-labs/configarr:1.31.0
+    image: ghcr.io/raydak-labs/configarr:1.33.0
     container_name: configarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -411,7 +411,7 @@ services:
   # Creates an outbound tunnel from this server to the Pangolin VPS,
   # enabling remote access to Plex (and other services) bypassing CGNAT
   newt:
-    image: fosrl/newt:1.17.0
+    image: fosrl/newt:1.18.1
     container_name: newt
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
