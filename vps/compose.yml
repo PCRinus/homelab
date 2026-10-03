@@ -2,7 +2,7 @@ name: pangolin
 
 services:
   tailscale:
-    image: tailscale/tailscale:v1.102.3
+    image: tailscale/tailscale:v1.102.5
     container_name: tailscale
     hostname: ${TS_HOSTNAME:-homeserver-vps}
     network_mode: host
@@ -22,7 +22,7 @@ services:
     restart: unless-stopped
 
   pangolin:
-    image: docker.io/fosrl/pangolin:1.23.0
+    image: docker.io/fosrl/pangolin:1.24.0
     container_name: pangolin
     restart: unless-stopped
     volumes:
@@ -34,7 +34,7 @@ services:
       retries: 15
 
   gerbil:
-    image: docker.io/fosrl/gerbil:1.5.1
+    image: docker.io/fosrl/gerbil:1.5.2
     container_name: gerbil
     restart: unless-stopped
     depends_on:
@@ -71,7 +71,7 @@ services:
       - ${PANGOLIN_CONFIG_DIR:-/opt/pangolin/config}/traefik/logs:/var/log/traefik
 
   dozzle-agent:
-    image: ghcr.io/amir20/dozzle:v11.1.2
+    image: ghcr.io/amir20/dozzle:v11.2.0
     container_name: dozzle-agent
     command: agent
     depends_on:
