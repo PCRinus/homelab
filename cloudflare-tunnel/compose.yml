@@ -67,6 +67,27 @@ services:
     networks:
       - media-net
 
+  # Lets a Worker in another Cloudflare account reach legislatie.just.ro from
+  # this residential address; the portal refuses datacenter networks.
+  legislation-relay:
+    image: nginx:1.30.5-alpine
+    container_name: legislation-relay
+    restart: unless-stopped
+    networks:
+      - media-net
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
+    volumes:
+      - ./legislation-relay.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
 networks:
   media-net:
     external: true

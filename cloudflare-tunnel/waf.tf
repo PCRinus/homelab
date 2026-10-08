@@ -26,6 +26,28 @@ resource "cloudflare_ruleset" "waf_custom_rules" {
 
   rules = [
     # -------------------------------------------------------------------------
+    # Rule 0: Let the ssm-usor Worker reach the legislation relay
+    # -------------------------------------------------------------------------
+    # The Worker calls from Cloudflare's network, so the country allowlist,
+    # threat score, Browser Integrity Check and Security Level would reject it.
+    # Access validates the service token after this phase, so a request that
+    # only carries the header name still gets a 401.
+    # -------------------------------------------------------------------------
+    {
+      ref         = "skip_legislation_relay_service_token"
+      description = "Skip WAF for legislation-relay requests carrying an Access service token (Access still checks the secret)"
+      expression  = "(http.host eq \"legislation-relay.home-server.me\" and len(http.request.headers[\"cf-access-client-id\"]) gt 0)"
+      action      = "skip"
+      action_parameters = {
+        ruleset  = "current"
+        products = ["bic", "securityLevel"]
+      }
+      logging = {
+        enabled = true
+      }
+    },
+
+    # -------------------------------------------------------------------------
     # Rule 1: Allow traffic only from allowed countries
     # -------------------------------------------------------------------------
     # Block all traffic from countries not in the allowlist.
@@ -135,5 +157,5 @@ resource "cloudflare_ruleset" "cache_rules" {
 resource "cloudflare_zone_setting" "cache_level" {
   zone_id    = var.zone_id
   setting_id = "cache_level"
-  value      = "simplified"  # "simplified" = No Query String
+  value      = "simplified" # "simplified" = No Query String
 }

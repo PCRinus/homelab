@@ -88,6 +88,10 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       originRequest = {}
       service       = "http://checkrr:8585"
       }, {
+      hostname      = "legislation-relay.home-server.me"
+      originRequest = {}
+      service       = "http://legislation-relay:8080"
+      }, {
       originRequest = {}
       service       = "http_status:404"
     }]

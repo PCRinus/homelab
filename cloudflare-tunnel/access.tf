@@ -6,6 +6,7 @@
 #
 # Protected services require Google login (SSO across all *.home-server.me)
 # Bypassed services: Plex, Homepage, Home Assistant (use their own auth)
+# Service token only: legislation-relay (ssm-usor Worker)
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -132,3 +133,52 @@ resource "cloudflare_zero_trust_access_application" "ha_bypass" {
   }]
 }
 
+# -----------------------------------------------------------------------------
+# Legislation Relay - Service Token Only
+# -----------------------------------------------------------------------------
+# A Worker in another Cloudflare account fetches legislatie.just.ro through
+# this host. It authenticates with the service token below; no one logs in.
+resource "cloudflare_zero_trust_access_service_token" "ssm_usor_legislation" {
+  account_id = var.account_id
+  name       = "ssm-usor-legislation"
+  duration   = "8760h"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "cloudflare_zero_trust_access_application" "legislation_relay" {
+  account_id       = var.account_id
+  name             = "Legislation Relay (Service Token)"
+  domain           = "legislation-relay.home-server.me"
+  type             = "self_hosted"
+  session_duration = "24h"
+
+  allow_authenticate_via_warp = false
+  app_launcher_visible        = false
+
+  # The caller treats the portal's 302s as meaningful; a redirect to the login
+  # page on a bad token would look like one of them.
+  service_auth_401_redirect = true
+
+  policies = [{
+    name       = "Service Auth - ssm-usor Worker"
+    decision   = "non_identity"
+    precedence = 1
+    include = [{
+      service_token = {
+        token_id = cloudflare_zero_trust_access_service_token.ssm_usor_legislation.id
+      }
+    }]
+  }]
+}
+
+output "legislation_relay_client_id" {
+  value = cloudflare_zero_trust_access_service_token.ssm_usor_legislation.client_id
+}
+
+output "legislation_relay_client_secret" {
+  value     = cloudflare_zero_trust_access_service_token.ssm_usor_legislation.client_secret
+  sensitive = true
+}

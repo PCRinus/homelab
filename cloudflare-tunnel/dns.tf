@@ -211,3 +211,13 @@ resource "cloudflare_dns_record" "adguard" {
   zone_id = var.zone_id
   comment = "AdGuard Home DNS ad blocker dashboard"
 }
+
+resource "cloudflare_dns_record" "legislation_relay" {
+  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
+  name    = "legislation-relay"
+  proxied = true
+  ttl     = 1
+  type    = "CNAME"
+  zone_id = var.zone_id
+  comment = "legislatie.just.ro relay for the ssm-usor Worker"
+}

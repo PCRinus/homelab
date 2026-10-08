@@ -158,7 +158,7 @@ See [specs/migration-runbook.md](specs/migration-runbook.md) for the recommended
 | Directory | Services | Description |
 |-----------|----------|-------------|
 | `media-server/` | Plex, Sonarr, Radarr, Prowlarr, qBittorrent, Pulsarr, Bazarr, Tautulli, FlareSolverr | Media management and streaming |
-| `cloudflare-tunnel/` | Cloudflared + watchdog | Zero Trust tunnel for external access |
+| `cloudflare-tunnel/` | Cloudflared + watchdog, legislation relay | Zero Trust tunnel for external access |
 | `homepage/` | Homepage dashboard | Service dashboard with widgets |
 | `home-assistant/` | Home Assistant | Smart home automation |
 | `monitoring/` | Dozzle, Gatus | Log viewer and uptime monitoring |
