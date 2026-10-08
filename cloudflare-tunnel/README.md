@@ -7,6 +7,7 @@ This directory contains the infrastructure-as-code setup for managing Cloudflare
 ```
 cloudflare-tunnel/
 ├── compose.yml              # Docker Compose for running cloudflared
+├── legislation-relay.conf   # nginx config for the legislatie.just.ro relay
 ├── tunnel-token            # Tunnel authentication token (gitignored)
 ├── main.tf                 # Main Terraform configuration (provider, variables, zone settings)
 ├── dns.tf                  # DNS records
@@ -140,6 +141,7 @@ Current services exposed through the tunnel:
 |----------|---------|------|
 | `plex.home-server.me` | Plex Media Server | 32400 |
 | `ha.home-server.me` | Home Assistant | 8123 |
+| `legislation-relay.home-server.me` | Legislation relay (nginx) | 8080 |
 
 ### Managing the Tunnel
 
@@ -211,6 +213,7 @@ domain     = "home-server.me"
 - `home-server.me` - CNAME to tunnel
 - `plex.home-server.me` - CNAME to tunnel
 - `ha.home-server.me` - CNAME to tunnel
+- `legislation-relay.home-server.me` - CNAME to tunnel
 
 ### Cloudflare Tunnel (1)
 - Tunnel: `homeserver` (`0ba69785-f553-4e75-ae68-1f3f990e573d`)
@@ -233,6 +236,7 @@ domain     = "home-server.me"
 - **Access Group**: Homelab Authorized Users
 - **Protected Services**: `*.home-server.me` (wildcard)
 - **Bypassed Services**: Plex, Homepage, Home Assistant
+- **Service Token Only**: `legislation-relay.home-server.me`
 
 ## 🛡️ Zero Trust Access (SSO Authentication)
 
@@ -261,6 +265,7 @@ User → Cloudflare Edge → Access Check → Tunnel → Service
 | `plex.home-server.me` | **Bypass** | Uses Plex's own authentication |
 | `home-server.me` | **Bypass** | Homepage dashboard (public) |
 | `ha.home-server.me` | **Bypass** | Home Assistant (uses own auth + mobile app) |
+| `legislation-relay.home-server.me` | **Service Auth** | `ssm-usor-legislation` service token only |
 
 ### Authorized Users
 
@@ -427,6 +432,41 @@ resource "cloudflare_zero_trust_access_application" "myservice_bypass" {
 - Check Google Cloud Console for OAuth consent screen configuration
 - Ensure redirect URI matches exactly: `https://pcrinus.cloudflareaccess.com/cdn-cgi/access/callback`
 
+## 📜 Legislation Relay
+
+`legislation-relay.home-server.me` lets the ssm-usor Cloudflare Worker (in another Cloudflare account) fetch pages of `legislatie.just.ro`. The portal refuses requests from Cloudflare's and other datacenter networks, so the Worker sends them through this home server's residential address instead.
+
+- **Container**: `legislation-relay` (`nginx:1.30.5-alpine`, uses the image's own CA bundle), port 8080 on `media-net`, config in `legislation-relay.conf`
+- **What it does**: forwards every request (method, path, query, body, `User-Agent`) to `https://legislatie.just.ro` and returns the response untouched, redirects included. No caching. `/healthz` answers locally for the container healthcheck.
+- **No secrets on the server**: nothing in `.env`, nothing in the nginx config. Authentication happens at Cloudflare's edge.
+
+### How the Worker authenticates
+
+Access protects the hostname with a `non_identity` (Service Auth) policy that accepts only the `ssm-usor-legislation` service token. The Worker sends two headers on every request:
+
+```
+CF-Access-Client-Id: <client id>
+CF-Access-Client-Secret: <client secret>
+```
+
+A missing or wrong token gets a 401 from Access, never a redirect to the login page. The relay strips these headers (and Cloudflare's forwarding headers) before calling the portal.
+
+The first WAF rule skips the country allowlist, threat score, Browser Integrity Check and Security Level for this hostname when a `CF-Access-Client-Id` header is present. A forged header gains nothing: Access still checks the secret.
+
+### Reading the credentials
+
+```bash
+cd cloudflare-tunnel
+terraform output -raw legislation_relay_client_id
+terraform output -raw legislation_relay_client_secret
+```
+
+Store them as secrets of the ssm-usor Worker. The token lasts one year (`8760h`); Cloudflare lists its expiry in Zero Trust → Access → Service credentials.
+
+### Revoking
+
+Delete the `cloudflare_zero_trust_access_service_token.ssm_usor_legislation` resource (and the Access application) from `access.tf` and apply. To rotate instead, `terraform apply -replace=cloudflare_zero_trust_access_service_token.ssm_usor_legislation` creates the new token before destroying the old one; update the Worker's secrets afterwards.
+
 ## ⚠️ Important Notes
 
 ### Sensitive Files (Do NOT commit)
@@ -442,6 +482,7 @@ WAF custom rules provide an additional security layer by filtering malicious tra
 
 | Rule | Action | Description |
 |------|--------|-------------|
+| Legislation relay service token | Skip | Skip the rules below, Browser Integrity Check and Security Level for `legislation-relay` requests that carry `CF-Access-Client-Id` |
 | Allow only allowed countries | Block | Block traffic from outside RO, GR, RS, HU |
 | Challenge high threat score | Managed Challenge | Challenge IPs with threat score > 40 |
 | Block bad user agents | Block | Block scanners (sqlmap, nikto, nmap, etc.) |
