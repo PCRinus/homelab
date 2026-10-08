@@ -78,6 +78,7 @@ Required permission groups (same list for both tokens):
 - **Account -> Cloudflare One Connector: cloudflared -> Read/Edit**
 - **Account -> Access: Organizations, Identity Providers, and Groups -> Read/Edit**
 - **Account -> Access: Apps and Policies -> Read/Edit**
+- **Account -> Access: Service Tokens -> Read/Edit** (the legislation relay's token; without it the apply fails with `auth.forbidden` on `access/service_tokens`)
 - **Account -> Workers R2 Storage -> Read/Edit**
 
 > Use **Read** for plan-only tokens and **Edit** for apply/deploy tokens.
