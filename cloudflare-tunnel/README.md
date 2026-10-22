@@ -460,7 +460,7 @@ The first WAF rule skips the country allowlist, threat score, Browser Integrity 
 cd cloudflare-tunnel
 terraform output -raw legislation_relay_client_id
 terraform output -raw legislation_relay_client_secret
-terraform output legislation_relay_non_prod_client_id
+terraform output -raw legislation_relay_non_prod_client_id
 terraform output -raw legislation_relay_non_prod_client_secret
 ```
 
