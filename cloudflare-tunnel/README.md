@@ -237,7 +237,7 @@ domain     = "home-server.me"
 - **Access Group**: Homelab Authorized Users
 - **Protected Services**: `*.home-server.me` (wildcard)
 - **Bypassed Services**: Plex, Homepage, Home Assistant
-- **Service Token Only**: `legislation-relay.home-server.me`
+- **Service Tokens Only**: `legislation-relay.home-server.me`
 
 ## 🛡️ Zero Trust Access (SSO Authentication)
 
@@ -266,7 +266,7 @@ User → Cloudflare Edge → Access Check → Tunnel → Service
 | `plex.home-server.me` | **Bypass** | Uses Plex's own authentication |
 | `home-server.me` | **Bypass** | Homepage dashboard (public) |
 | `ha.home-server.me` | **Bypass** | Home Assistant (uses own auth + mobile app) |
-| `legislation-relay.home-server.me` | **Service Auth** | `ssm-usor-legislation` service token only |
+| `legislation-relay.home-server.me` | **Service Auth** | `ssm-usor-legislation` and `ssm-usor-legislation-non-prod` service tokens only |
 
 ### Authorized Users
 
@@ -435,7 +435,7 @@ resource "cloudflare_zero_trust_access_application" "myservice_bypass" {
 
 ## 📜 Legislation Relay
 
-`legislation-relay.home-server.me` lets the ssm-usor Cloudflare Worker (in another Cloudflare account) fetch pages of `legislatie.just.ro`. The portal refuses requests from Cloudflare's and other datacenter networks, so the Worker sends them through this home server's residential address instead.
+`legislation-relay.home-server.me` lets the ssm-usor Cloudflare Workers (production and non-production, in another Cloudflare account) fetch pages of `legislatie.just.ro`. The portal refuses requests from Cloudflare's and other datacenter networks, so the Worker sends them through this home server's residential address instead.
 
 - **Container**: `legislation-relay` (`nginx:1.30.5-alpine`, uses the image's own CA bundle), port 8080 on `media-net`, config in `legislation-relay.conf`
 - **What it does**: forwards every request (method, path, query, body, `User-Agent`) to `https://legislatie.just.ro` and returns the response untouched, redirects included. No caching. `/healthz` answers locally for the container healthcheck.
@@ -443,7 +443,7 @@ resource "cloudflare_zero_trust_access_application" "myservice_bypass" {
 
 ### How the Worker authenticates
 
-Access protects the hostname with a `non_identity` (Service Auth) policy that accepts only the `ssm-usor-legislation` service token. The Worker sends two headers on every request:
+Access protects the hostname with a `non_identity` (Service Auth) policy that accepts only the `ssm-usor-legislation` (production) and `ssm-usor-legislation-non-prod` service tokens, one per environment. Each Worker sends two headers on every request:
 
 ```
 CF-Access-Client-Id: <client id>
@@ -460,13 +460,15 @@ The first WAF rule skips the country allowlist, threat score, Browser Integrity 
 cd cloudflare-tunnel
 terraform output -raw legislation_relay_client_id
 terraform output -raw legislation_relay_client_secret
+terraform output legislation_relay_non_prod_client_id
+terraform output -raw legislation_relay_non_prod_client_secret
 ```
 
-Store them as secrets of the ssm-usor Worker. The token lasts one year (`8760h`); Cloudflare lists its expiry in Zero Trust → Access → Service credentials.
+The first pair is production's, the second non-production's. Store each as secrets of its own ssm-usor Worker (`LEGISLATION_RELAY_CLIENT_ID` and `LEGISLATION_RELAY_CLIENT_SECRET` in the matching GitHub environment). Each token lasts one year (`8760h`); Cloudflare lists its expiry in Zero Trust → Access → Service credentials.
 
 ### Revoking
 
-Delete the `cloudflare_zero_trust_access_service_token.ssm_usor_legislation` resource (and the Access application) from `access.tf` and apply. To rotate instead, `terraform apply -replace=cloudflare_zero_trust_access_service_token.ssm_usor_legislation` creates the new token before destroying the old one; update the Worker's secrets afterwards.
+Delete one environment's service token resource (`ssm_usor_legislation` or `ssm_usor_legislation_non_prod`), its `service_token` entry in the policy and its outputs from `access.tf` and apply; the other environment keeps working. Delete both (and the Access application) to close the relay. To rotate instead, `terraform apply -replace=cloudflare_zero_trust_access_service_token.ssm_usor_legislation` (or `..._non_prod`) creates the new token before destroying the old one; update the Worker's secrets afterwards.
 
 ## ⚠️ Important Notes
 
