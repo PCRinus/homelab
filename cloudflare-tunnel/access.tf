@@ -6,7 +6,7 @@
 #
 # Protected services require Google login (SSO across all *.home-server.me)
 # Bypassed services: Plex, Homepage, Home Assistant (use their own auth)
-# Service token only: legislation-relay (ssm-usor Worker)
+# Service tokens only: legislation-relay (ssm-usor Workers, both environments)
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -136,11 +136,23 @@ resource "cloudflare_zero_trust_access_application" "ha_bypass" {
 # -----------------------------------------------------------------------------
 # Legislation Relay - Service Token Only
 # -----------------------------------------------------------------------------
-# A Worker in another Cloudflare account fetches legislatie.just.ro through
-# this host. It authenticates with the service token below; no one logs in.
+# The ssm-usor Workers of both environments (production and non-production)
+# fetch legislatie.just.ro through this host, from another Cloudflare account.
+# Each environment has its own service token so either can be revoked alone;
+# no one logs in.
 resource "cloudflare_zero_trust_access_service_token" "ssm_usor_legislation" {
   account_id = var.account_id
   name       = "ssm-usor-legislation"
+  duration   = "8760h"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "cloudflare_zero_trust_access_service_token" "ssm_usor_legislation_non_prod" {
+  account_id = var.account_id
+  name       = "ssm-usor-legislation-non-prod"
   duration   = "8760h"
 
   lifecycle {
@@ -163,14 +175,21 @@ resource "cloudflare_zero_trust_access_application" "legislation_relay" {
   service_auth_401_redirect = true
 
   policies = [{
-    name       = "Service Auth - ssm-usor Worker"
+    name       = "Service Auth - ssm-usor Workers"
     decision   = "non_identity"
     precedence = 1
-    include = [{
-      service_token = {
-        token_id = cloudflare_zero_trust_access_service_token.ssm_usor_legislation.id
-      }
-    }]
+    include = [
+      {
+        service_token = {
+          token_id = cloudflare_zero_trust_access_service_token.ssm_usor_legislation.id
+        }
+      },
+      {
+        service_token = {
+          token_id = cloudflare_zero_trust_access_service_token.ssm_usor_legislation_non_prod.id
+        }
+      },
+    ]
   }]
 }
 
@@ -180,5 +199,14 @@ output "legislation_relay_client_id" {
 
 output "legislation_relay_client_secret" {
   value     = cloudflare_zero_trust_access_service_token.ssm_usor_legislation.client_secret
+  sensitive = true
+}
+
+output "legislation_relay_non_prod_client_id" {
+  value = cloudflare_zero_trust_access_service_token.ssm_usor_legislation_non_prod.client_id
+}
+
+output "legislation_relay_non_prod_client_secret" {
+  value     = cloudflare_zero_trust_access_service_token.ssm_usor_legislation_non_prod.client_secret
   sensitive = true
 }
