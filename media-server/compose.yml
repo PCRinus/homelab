@@ -1,6 +1,6 @@
 services:
   qbittorrent:
-    image: ghcr.io/hotio/qbittorrent:release-5.2.4
+    image: ghcr.io/hotio/qbittorrent:release-5.3.0
     container_name: qbittorrent
     hostname: qbittorrent.internal
     cap_add:
@@ -159,7 +159,7 @@ services:
       start_period: 30s
 
   pulsarr:
-    image: lakker/pulsarr:0.19.4
+    image: lakker/pulsarr:0.19.8
     container_name: pulsarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -190,7 +190,7 @@ services:
       start_period: 30s
 
   plex:
-    image: lscr.io/linuxserver/plex:1.43.4
+    image: lscr.io/linuxserver/plex:1.43.5
     container_name: plex
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -368,7 +368,7 @@ services:
   # Run manually: docker compose run --rm configarr
   # Or scheduled via cron on host
   configarr:
-    image: ghcr.io/raydak-labs/configarr:1.33.0
+    image: ghcr.io/raydak-labs/configarr:1.36.0
     container_name: configarr
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
@@ -384,7 +384,7 @@ services:
   # Creates an outbound tunnel from this server to the Pangolin VPS,
   # enabling remote access to Plex (and other services) bypassing CGNAT
   newt:
-    image: fosrl/newt:1.18.1
+    image: fosrl/newt:1.19.0
     container_name: newt
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
