@@ -81,6 +81,40 @@ services:
     labels:
       - "dozzle.enable=true"
 
+  # Plex playback watchdog: follows Plex Media Server.log and posts to Discord
+  # on client stalls, transcoder errors, GPU -> software transcode fallback and
+  # NIC link drops, with NIC / qBittorrent / Plex-session context attached.
+  # Also prints a metrics line every 30 s during playback (Dozzle history).
+  # Check detection against an archived day:
+  #   docker compose run --rm stream-watchdog --replay /archive/plex-media-server-YYYY-MM-DD.log.gz
+  stream-watchdog:
+    image: python:3.14.10-alpine3.24
+    container_name: stream-watchdog
+    init: true
+    entrypoint: ["python3", "-u", "/app/watchdog.py"]
+    env_file:
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
+    environment:
+      - NIC_NAME=enp46s0
+    volumes:
+      - ./stream-watchdog/watchdog.py:/app/watchdog.py:ro
+      - type: bind
+        source: "${DOCKER_DATA}/plex/config/Library/Application Support/Plex Media Server/Logs"
+        target: /plex-logs
+        read_only: true
+      - ${DOCKER_DATA}/plex/log-archive:/archive:ro
+      - /sys/class/net/enp46s0:/host-nic:ro
+    networks:
+      - media-net
+    restart: unless-stopped
+    logging:
+      driver: local
+      options:
+        max-size: 20m
+        max-file: "10"
+    labels:
+      - "dozzle.enable=true"
+
 networks:
   media-net:
     external: true

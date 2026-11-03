@@ -100,6 +100,28 @@ This catches:
 
 To change it: Tautulli → **Settings → Notification Agents → Plex quality alert**.
 
+### Stream watchdog (stalls, transcoder failures, NIC drops)
+
+Tautulli misses most playback problems. Its buffer notification needs 10 buffer events, sessions shorter than 2 minutes are not recorded at all, and it cannot see transcoder errors. `stream-watchdog` (`monitoring/compose.yml`, script in `monitoring/stream-watchdog/watchdog.py`) follows `Plex Media Server.log` and posts to Discord (`DISCORD_WEBHOOK_URL`, or `STREAM_WATCHDOG_DISCORD_WEBHOOK_URL` if set) when:
+
+| Alert | Trigger (defaults, env-tunable) |
+|-------|-------------------------------|
+| **Plex stall** | A client reports buffering mid-playback for 15 s (`STALL_ALERT_SECONDS`), a start or seek takes 20 s (`STARTUP_ALERT_SECONDS`), 3 rebuffers within 10 min, or the viewer stops while buffering. One alert per client per 5 min; stalls of 60 s or more always get through |
+| **Plex transcoder error** | The transcoder logs an error for a session someone is watching, e.g. the Intel VAAPI decoder failing (`Failed to sync surface ... internal decoding error`) |
+| **Plex transcoder fell back to software** | A viewer's video transcode runs with a CPU encoder (`libx264`/`libx265`), usually right after a GPU failure. 4K/HDR in software runs at about realtime here, so the picture freezes or the stream buffers |
+| **Server NIC link dropped** | `/sys/class/net/enp46s0/carrier_changes` increases. Gatus checks link speed only every 5 min, so it misses drops that last a few seconds |
+
+Each alert includes NIC throughput, qBittorrent download/upload speed and active torrents, and every Plex session with its decision (direct play / transcode hw or sw, speed, throttled). A home device that reaches Plex through the VPS (client IP = home public IP) is flagged.
+
+It also prints a `metrics` line (NIC, qBittorrent, Plex sessions) every 30 s while something is playing (every 5 min otherwise). Find it in Dozzle under `stream-watchdog`.
+
+Check detection against an archived day, without posting to Discord:
+
+```bash
+cd ~/homeserver/monitoring
+docker compose run --rm --no-deps stream-watchdog --replay /archive/plex-media-server-2026-11-02.log.gz
+```
+
 ### Low quality without Relay is a client setting
 
 Most low-quality remote streams come from the client, not the connection. The app requests a bitrate cap (visible in the Plex log as `maxVideoBitrate=2000&videoQuality=60` for "2 Mbps 720p"). Ask the user to set their app's quality settings to **Original / Maximum**:
@@ -131,4 +153,12 @@ zgrep -h "Request:.*maxVideoBitrate=.*Token (" plex-media-server-*.log* |
 # Relay activity
 
 zgrep -h "startRelay\|PlexRelay" plex-media-server-*.log*
+# What a client reported, per playback: state, position, stall seconds
+zgrep -h "GET /:/timeline" plex-media-server-2026-11-02.log.gz | grep "Token (Daniel Homan)" |
+  grep -oE "^.{24}|state=[a-z]+|[?&]time=[0-9]+|timeStalled=[0-9]+" | paste -sd' ' | sed 's/ Nov/\nNov/g'
+# GPU decode failures, and software (libx264) video transcodes
+zgrep -h "Failed to sync surface" plex-media-server-*.log* | cut -c1-24
+zgrep -h "Job running" plex-media-server-*.log* | grep -- "-codec:0 libx264" | cut -c1-24
 ```
+
+Plex writes its log timestamps in the container's local time (`TZ`, Europe/Bucharest), while the archive files are split by UTC day.
