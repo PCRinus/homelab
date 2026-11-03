@@ -1,5 +1,5 @@
 #!/bin/bash
-# Monitoring Stack startup script (Dozzle + Gatus)
+# Monitoring Stack startup script (Dozzle + Gatus + stream watchdog)
 
 set -e
 
@@ -21,5 +21,9 @@ homelab_compose up -d --remove-orphans
 # so Gatus always picks up the latest config.
 echo "🔄 Restarting Gatus to pick up config changes..."
 homelab_compose restart gatus
+
+# Same for the stream watchdog: its script is bind-mounted, not baked in.
+echo "🔄 Restarting stream-watchdog to pick up script changes..."
+homelab_compose restart stream-watchdog
 
 echo "✅ Monitoring Stack started!"

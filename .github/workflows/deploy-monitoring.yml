@@ -7,6 +7,8 @@ on:
     paths:
       - 'monitoring/compose.yml'
       - 'monitoring/config.yaml'
+      - 'monitoring/start.sh'
+      - 'monitoring/stream-watchdog/**'
   workflow_dispatch:
 
 jobs:

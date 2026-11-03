@@ -200,6 +200,13 @@ qBittorrent stores its configuration in `/home/mircea/docker/qbittorrent/`. Sett
 - Incomplete directory: `/data/incomplete`
 - WebUI port: 8080
 - Peer port: (automatically configured by VPN_AUTO_PORT_FORWARD)
+- Global download limit: **400 Mbps** (48828 KiB/s, `Session\GlobalDLSpeedLimit` in `config/qBittorrent.conf`). Global upload limit: about 180 Mbps (21972 KiB/s)
+
+The download cap leaves headroom on the 1 GbE NIC and the internet link for Plex. On 2026-11-02 an uncapped 24 GB download ran at about 800 Mbps, followed by Radarr's copy to the NAS, and a home Apple TV stream (which reaches Plex through the VPS tunnel) stalled for minutes. Set it in the WebUI (**Tools → Options → Speed**) or through the API:
+
+```bash
+curl -s -b cookie.txt --data-urlencode 'json={"dl_limit":50000000}' http://localhost:8080/api/v2/app/setPreferences  # bytes/s
+```
 
 `/data` stays mapped to the NAS for completed torrents and media, while `/data/incomplete` is overlaid from the local host path `${QBITTORRENT_INCOMPLETE_PATH}`. This keeps active torrent piece writes off NFS.
 
