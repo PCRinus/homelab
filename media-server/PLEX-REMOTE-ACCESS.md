@@ -102,7 +102,7 @@ To change it: Tautulli → **Settings → Notification Agents → Plex quality a
 
 ### Stream watchdog (stalls, transcoder failures, NIC drops)
 
-Tautulli misses most playback problems. Its buffer notification needs 10 buffer events, sessions shorter than 2 minutes are not recorded at all, and it cannot see transcoder errors. `stream-watchdog` (`monitoring/compose.yml`, script in `monitoring/stream-watchdog/watchdog.py`) follows `Plex Media Server.log` and posts to Discord (`DISCORD_WEBHOOK_URL`, or `STREAM_WATCHDOG_DISCORD_WEBHOOK_URL` if set) when:
+Tautulli misses most playback problems. Its buffer notification needs 10 buffer events, sessions shorter than 2 minutes are not recorded at all, and it cannot see transcoder errors. `stream-watchdog` (`monitoring/compose.yml`, script in `monitoring/stream-watchdog/watchdog.py`) follows `Plex Media Server.log` and posts to Discord when:
 
 | Alert | Trigger (defaults, env-tunable) |
 |-------|-------------------------------|
@@ -110,6 +110,8 @@ Tautulli misses most playback problems. Its buffer notification needs 10 buffer 
 | **Plex transcoder error** | The transcoder logs an error for a session someone is watching, e.g. the Intel VAAPI decoder failing (`Failed to sync surface ... internal decoding error`) |
 | **Plex transcoder fell back to software** | A viewer's video transcode runs with a CPU encoder (`libx264`/`libx265`), usually right after a GPU failure. 4K/HDR in software runs at about realtime here, so the picture freezes or the stream buffers |
 | **Server NIC link dropped** | `/sys/class/net/enp46s0/carrier_changes` increases. Gatus checks link speed only every 5 min, so it misses drops that last a few seconds |
+
+The webhook is the first of `STREAM_WATCHDOG_DISCORD_WEBHOOK_URL`, `GATUS_DISCORD_WEBHOOK_URL`, `DISCORD_WEBHOOK_URL` that Discord accepts. It is checked at startup, and the log says which one is used (`Discord webhook: using ...`). A deleted webhook returns 404, and alerts would otherwise be lost silently.
 
 Each alert includes NIC throughput, qBittorrent download/upload speed and active torrents, and every Plex session with its decision (direct play / transcode hw or sw, speed, throttled). A home device that reaches Plex through the VPS (client IP = home public IP) is flagged.
 
