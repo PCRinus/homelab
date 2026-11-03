@@ -161,7 +161,7 @@ See [specs/migration-runbook.md](specs/migration-runbook.md) for the recommended
 | `cloudflare-tunnel/` | Cloudflared + watchdog, legislation relay | Zero Trust tunnel for external access |
 | `homepage/` | Homepage dashboard | Service dashboard with widgets |
 | `home-assistant/` | Home Assistant | Smart home automation |
-| `monitoring/` | Dozzle, Gatus | Log viewer and uptime monitoring |
+| `monitoring/` | Dozzle, Gatus, stream-watchdog | Log viewer, uptime monitoring, Plex playback alerts |
 | `minecraft-servers/` | Fabric Minecraft servers | Game servers with shared mod configs |
 
 ## Secrets & Configuration
