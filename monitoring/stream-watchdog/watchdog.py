@@ -43,12 +43,10 @@ QBIT_USER = ENV("QBITTORRENT_USER", "")
 QBIT_PASS = ENV("QBITTORRENT_PASS", "")
 NIC_DIR = ENV("NIC_DIR", "/host-nic")
 NIC_NAME = ENV("NIC_NAME", "enp46s0")
-WEBHOOK = (
-    ENV("STREAM_WATCHDOG_DISCORD_WEBHOOK_URL")
-    or ENV("DISCORD_WEBHOOK_URL")
-    or ENV("GATUS_DISCORD_WEBHOOK_URL")
-    or ""
-)
+# Tried in order; the first one Discord recognises (GET -> 200) is used. A
+# deleted webhook returns 404, which would otherwise drop every alert silently.
+WEBHOOK_ENV_VARS = ("STREAM_WATCHDOG_DISCORD_WEBHOOK_URL", "GATUS_DISCORD_WEBHOOK_URL", "DISCORD_WEBHOOK_URL")
+WEBHOOK = ""
 MENTION = ENV("STREAM_WATCHDOG_DISCORD_MENTION", "")
 
 STALL_ALERT_SECONDS = float(ENV("STALL_ALERT_SECONDS", "15"))
@@ -201,8 +199,13 @@ class Context:
         if self.public_ip is None and self.live:
             try:
                 body = http_json(f"{PLEX_URL}/myplex/account?X-Plex-Token={PLEX_TOKEN}")
-                m = re.search(r'publicAddress="([^"]+)"', body if isinstance(body, str) else json.dumps(body))
-                self.public_ip = m.group(1) if m else ""
+                if isinstance(body, dict):  # JSON reply (we send Accept: application/json)
+                    found = (body.get("MyPlex") or body).get("publicAddress", "")
+                else:
+                    m = re.search(r'publicAddress="([^"]+)"', body)
+                    found = m.group(1) if m else ""
+                self.public_ip = found
+                return self.public_ip
             except Exception:  # noqa: BLE001
                 return ""
         return self.public_ip or ""
@@ -281,11 +284,33 @@ def snapshot_fields(snap):
 # --------------------------------------------------------------------------
 # Discord
 # --------------------------------------------------------------------------
+def pick_webhook():
+    """First configured webhook that Discord answers with 200 (a GET posts nothing)."""
+    for name in WEBHOOK_ENV_VARS:
+        url = ENV(name, "")
+        if not url.startswith("https://"):
+            continue
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "homelab-stream-watchdog"})
+            urllib.request.urlopen(req, timeout=10).read()
+            log(f"Discord webhook: using {name}")
+            return url
+        except urllib.error.HTTPError as e:
+            log(f"WARN Discord webhook {name} rejected by Discord (HTTP {e.code}), trying the next one")
+        except Exception as e:  # noqa: BLE001 - network hiccup: still use it rather than nothing
+            log(f"WARN could not verify Discord webhook {name} ({e}); using it anyway")
+            return url
+    return ""
+
+
 class Notifier:
     def __init__(self, live):
+        global WEBHOOK
+        if live:
+            WEBHOOK = pick_webhook()
         self.live = live and bool(WEBHOOK)
         if live and not WEBHOOK:
-            log("WARN no Discord webhook configured; alerts only go to stdout")
+            log(f"WARN no working Discord webhook in {', '.join(WEBHOOK_ENV_VARS)}; alerts only go to stdout")
 
     def send(self, title, description, color, fields=()):
         log(f"ALERT {title} | {description.replace(chr(10), ' | ')}")
