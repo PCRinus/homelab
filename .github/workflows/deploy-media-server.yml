@@ -8,6 +8,10 @@ on:
       - 'media-server/**'
       - '!media-server/README.md'
       - '!media-server/**/README.md'
+      # Docs and Configarr config never need a redeploy, and start.sh recreates Plex
+      # (dropping everyone who is watching). Configarr runs from sync-configarr.yml.
+      - '!media-server/**/*.md'
+      - '!media-server/configarr/**'
   workflow_dispatch:
 
 jobs:
