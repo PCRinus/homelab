@@ -79,6 +79,23 @@ fi
 echo "Starting containers..."
 docker compose "${COMPOSE_ENV_ARGS[@]}" -f compose.yml up -d --remove-orphans
 
+# When Docker restores these at boot before the Tailscale IP exists, the bind
+# fails and Docker drops the container's network attachment. A later start
+# (including compose up) brings it up with only loopback and no published port,
+# and compose considers it healthy. Recreate any that ended up without a port.
+TS_BOUND_SERVICES=(dozzle-agent memory-monitor)
+RECREATE=()
+for svc in "${TS_BOUND_SERVICES[@]}"; do
+    cid="$(docker compose "${COMPOSE_ENV_ARGS[@]}" -f compose.yml ps -q "${svc}")"
+    if [ -z "${cid}" ] || [ -z "$(docker port "${cid}" 2>/dev/null)" ]; then
+        RECREATE+=("${svc}")
+    fi
+done
+if [ "${#RECREATE[@]}" -gt 0 ]; then
+    echo "Recreating services without published ports: ${RECREATE[*]}"
+    docker compose "${COMPOSE_ENV_ARGS[@]}" -f compose.yml up -d --force-recreate --no-deps "${RECREATE[@]}"
+fi
+
 echo "Container status:"
 docker compose "${COMPOSE_ENV_ARGS[@]}" -f compose.yml ps
 
