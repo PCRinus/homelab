@@ -92,6 +92,9 @@ resource "cloudflare_zero_trust_access_application" "plex_bypass" {
   }]
 }
 
+# -----------------------------------------------------------------------------
+# Access Application - Homepage (apex, login required)
+# -----------------------------------------------------------------------------
 # Homepage - Dashboard on the apex, which the wildcard above does not cover.
 # Not a bypass: Homepage has no login of its own, and its widget proxy
 # (/api/services/proxy) returns Tautulli activity, AdGuard stats and the Sonarr
@@ -123,6 +126,10 @@ moved {
   from = cloudflare_zero_trust_access_application.homepage_bypass
   to   = cloudflare_zero_trust_access_application.homepage
 }
+
+# -----------------------------------------------------------------------------
+# Bypass Applications (continued)
+# -----------------------------------------------------------------------------
 
 # Home Assistant - Uses its own authentication (needed for mobile app)
 resource "cloudflare_zero_trust_access_application" "ha_bypass" {
