@@ -7,10 +7,14 @@ services:
     image: ghcr.io/amir20/dozzle:v11.4.0
     environment:
       DOZZLE_REMOTE_AGENT: ${DOZZLE_REMOTE_AGENT:-}
-    volumes:
-      - ${DOCKER_SOCK}:/var/run/docker.sock
+      DOCKER_HOST: tcp://dozzle-docker-proxy:2375 # no Docker socket in Dozzle itself
+    depends_on:
+      - dozzle-docker-proxy
     ports:
       - 8081:8080
+    networks:
+      - default
+      - docker-proxy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "/dozzle", "healthcheck"]
@@ -18,6 +22,20 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
+  # Read-only Docker API for Dozzle: container list/logs/stats, info and events.
+  # GET only (POST=0 is the image default), so no container actions or shell.
+  dozzle-docker-proxy:
+    image: tecnativa/docker-socket-proxy:v0.5.0
+    container_name: dozzle-docker-proxy
+    restart: unless-stopped
+    environment:
+      - CONTAINERS=1
+      - INFO=1
+    volumes:
+      - ${DOCKER_SOCK}:/var/run/docker.sock:ro
+    networks:
+      - docker-proxy
 
   gatus:
     image: ghcr.io/twin/gatus:v5.38.0
@@ -139,3 +157,5 @@ services:
 networks:
   media-net:
     external: true
+  docker-proxy:
+    internal: true # Only Dozzle reaches the proxy; anything that can reads every container's config

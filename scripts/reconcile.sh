@@ -172,7 +172,7 @@ if ! adguard_wiring_ready; then
 fi
 
 compose_up monitoring
-compose_up homepage homepage
+compose_up homepage homepage homepage-docker-proxy
 repair_homepage_mount
 compose_up home-assistant
 compose_up cloudflare-tunnel
