@@ -13,7 +13,7 @@ This directory contains the Docker Compose configuration for the media server st
 | Bazarr | 6767 | Subtitle management |
 | Pulsarr | 3003 | Plex watchlist automation and routing |
 | Plex | 32400 | Media server |
-| FlareSolverr | 8191 | Cloudflare bypass for indexers |
+| FlareSolverr | — (media-net only: `flaresolverr:8191`) | Cloudflare bypass for indexers |
 | Configarr | - | Quality profiles & custom formats via TRaSH-Guides |
 
 ### NAS Mount (NFS)

@@ -15,7 +15,6 @@
       '8585': 'checkrr.home-server.me',
       '6767': 'bazarr.home-server.me',
       '8181': 'tautulli.home-server.me',
-      '8191': 'flaresolverr.home-server.me',
       // Infrastructure
       '8081': 'dozzle.home-server.me',
       '8082': 'gatus.home-server.me',

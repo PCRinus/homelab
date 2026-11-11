@@ -162,8 +162,7 @@ services:
       - LOG_LEVEL=info
       - LOG_HTML=false
       - CAPTCHA_SOLVER=none
-    ports:
-      - "8191:8191"
+    # No published port: only Prowlarr uses it, as http://flaresolverr:8191 on media-net
     networks:
       - media-net
     restart: unless-stopped

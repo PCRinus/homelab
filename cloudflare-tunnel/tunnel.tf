@@ -48,10 +48,6 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "homeserver" {
       originRequest = {}
       service       = "http://tautulli:8181"
       }, {
-      hostname      = "flaresolverr.home-server.me"
-      originRequest = {}
-      service       = "http://flaresolverr:8191"
-      }, {
       hostname      = "ha.home-server.me"
       originRequest = {}
       service       = "http://homeassistant:8123"
