@@ -44,6 +44,14 @@ jobs:
             -e "ssh -i ~/.ssh/vps_deploy_key" \
             vps/ "${VPS_SSH_USER}@${VPS_SSH_HOST}:${VPS_REPO_DIR}/vps/"
 
+      - name: Install boot unit
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/vps_deploy_key "${VPS_SSH_USER}@${VPS_SSH_HOST}" \
+            "sed 's|@VPS_DIR@|${VPS_REPO_DIR}/vps|g' '${VPS_REPO_DIR}/vps/homelab-vps.service' > /etc/systemd/system/homelab-vps.service \
+              && systemctl daemon-reload \
+              && systemctl enable homelab-vps.service"
+
       - name: Deploy VPS Stack
         env:
           TS_AUTHKEY: ${{ secrets.TS_VPS_AUTHKEY }}

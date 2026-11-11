@@ -54,6 +54,8 @@ Configure these repository settings:
 - Variable `VPS_SSH_USER`: `root`.
 - Variable `VPS_REPO_DIR`: `/opt/homelab`.
 
+The workflow also installs and enables `homelab-vps.service`, which runs `start.sh` with `VPS_BOOT=1` after every boot and Docker restart. The service is needed because `dozzle-agent` and `memory-monitor` publish ports on the Tailscale IP. When Docker starts all containers at once, that IP doesn't exist yet, so those two fail to bind and are never retried. In boot mode the script skips the image pull, waits for the Tailscale IP on the host, and exits non-zero if the IP never appears, so systemd retries every 30 seconds.
+
 The workflow preserves `/opt/homelab/vps/.env` and `/opt/homelab/vps/tailscale-state/` on the VPS so host-local runtime settings and the Tailscale node identity are not removed by deploys.
 
 ## Dozzle Integration

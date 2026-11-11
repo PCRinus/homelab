@@ -1,0 +1,20 @@
+[Unit]
+Description=Start the VPS stack after boot (Tailscale first, then Tailscale-bound services)
+Wants=network-online.target
+After=docker.service network-online.target
+Requires=docker.service
+PartOf=docker.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+Environment=VPS_BOOT=1
+WorkingDirectory=@VPS_DIR@
+ExecStart=/usr/bin/bash @VPS_DIR@/start.sh
+Restart=on-failure
+RestartSec=30s
+TimeoutStartSec=10min
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
