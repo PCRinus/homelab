@@ -26,11 +26,17 @@ jobs:
           host: ${{ vars.HOMELAB_SSH_HOST || 'homeserver' }}
           username: ${{ vars.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          command_timeout: 15m
+          command_timeout: 30m
           script_stop: true
           script: |
             set -euo pipefail
             cd ${{ vars.HOMELAB_REPO_DIR || '/home/mircea/homeserver' }}
+            # Same lock as the deploy action: don't touch the checkout mid-deploy.
+            exec 9>.git/homelab-automation.lock
+            if ! flock --wait 900 9; then
+              echo "A deploy held the checkout lock for 15 minutes; giving up."
+              exit 1
+            fi
             git fetch --prune
             git checkout main
             git pull --ff-only
