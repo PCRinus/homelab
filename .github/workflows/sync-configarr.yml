@@ -28,9 +28,16 @@ jobs:
           host: ${{ vars.HOMELAB_SSH_HOST || 'homeserver' }}
           username: ${{ vars.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          command_timeout: 10m
+          command_timeout: 25m
           script: |
-            cd ${{ vars.HOMELAB_REPO_DIR || '/home/mircea/homeserver' }}/media-server
+            cd ${{ vars.HOMELAB_REPO_DIR || '/home/mircea/homeserver' }}
+            # Same lock as the deploy action: don't read the config mid-deploy.
+            exec 9>.git/homelab-automation.lock
+            if ! flock --wait 900 9; then
+              echo "A deploy held the checkout lock for 15 minutes; giving up."
+              exit 1
+            fi
+            cd media-server
             echo "Starting Configarr TRaSH-Guides sync..."
             docker compose run --rm configarr 2>&1 | tee /tmp/configarr-$(date +%Y%m%d).log
             echo "Configarr sync completed"

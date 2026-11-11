@@ -51,7 +51,9 @@ runs:
         username: ${{ inputs.ssh_user }}
         key: ${{ inputs.ssh_private_key }}
         timeout: 30m
-        command_timeout: 25m
+        # Up to 40 minutes queued behind other deploys (see the lock below),
+        # plus the slowest deploy seen so far (about 20 minutes).
+        command_timeout: 60m
         script: |
           set -euo pipefail
           if [ ! -d "${{ inputs.repo_dir }}" ]; then
@@ -62,10 +64,11 @@ runs:
           # One push can start several deploy workflows at once, and they all
           # share this checkout: take turns, or concurrent fetches fail with
           # "cannot lock ref 'refs/remotes/origin/main'". Held until this
-          # script exits; shared with the Pulsarr backup workflow.
+          # script and anything it started have exited; shared with the Pulsarr
+          # backup and Configarr sync workflows.
           exec 9>.git/homelab-automation.lock
-          if ! flock --wait 1200 9; then
-            echo "Another deploy or backup held the checkout lock for 20 minutes; giving up."
+          if ! flock --wait 2400 9; then
+            echo "Another deploy or backup held the checkout lock for 40 minutes; giving up."
             exit 1
           fi
           git fetch --prune origin main
