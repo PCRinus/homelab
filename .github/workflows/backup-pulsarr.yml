@@ -31,6 +31,12 @@ jobs:
           script: |
             set -euo pipefail
             cd ${{ vars.HOMELAB_REPO_DIR || '/home/mircea/homeserver' }}
+            # Same lock as the deploy action: don't touch the checkout mid-deploy.
+            exec 9>.git/homelab-automation.lock
+            if ! flock --wait 600 9; then
+              echo "A deploy held the checkout lock for 10 minutes; giving up."
+              exit 1
+            fi
             git fetch --prune
             git checkout main
             git pull --ff-only

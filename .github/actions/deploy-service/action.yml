@@ -59,6 +59,15 @@ runs:
             exit 1
           fi
           cd ${{ inputs.repo_dir }}
+          # One push can start several deploy workflows at once, and they all
+          # share this checkout: take turns, or concurrent fetches fail with
+          # "cannot lock ref 'refs/remotes/origin/main'". Held until this
+          # script exits; shared with the Pulsarr backup workflow.
+          exec 9>.git/homelab-automation.lock
+          if ! flock --wait 1200 9; then
+            echo "Another deploy or backup held the checkout lock for 20 minutes; giving up."
+            exit 1
+          fi
           git fetch --prune origin main
           if git show-ref --verify --quiet refs/heads/main; then
             git checkout main
