@@ -33,19 +33,6 @@ resource "cloudflare_dns_record" "homepage" {
   comment = "Homepage dashboard on root domain"
 }
 
-resource "cloudflare_dns_record" "terraform_managed_resource_2ed691eb805ce7bcc49600fd0424f935_3" {
-  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
-  name    = "plex.home-server.me"
-  proxied = true
-  tags    = []
-  ttl     = 1
-  type    = "CNAME"
-  zone_id = "97c1a5749e2e19a69ae4132f95f633cd"
-  settings = {
-    flatten_cname = false
-  }
-}
-
 resource "cloudflare_dns_record" "dozzle" {
   content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
   name    = "dozzle"

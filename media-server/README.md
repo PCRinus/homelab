@@ -538,7 +538,8 @@ All services are accessible via Cloudflare Tunnel:
 - `radarr.home-server.me`
 - `prowlarr.home-server.me`
 - `pulsarr.home-server.me`
-- `plex.home-server.me`
+
+Plex is not on the tunnel: remotely it is `https://stream.home-server.me/web` (Pangolin VPS, see [PLEX-REMOTE-ACCESS.md](PLEX-REMOTE-ACCESS.md)).
 
 Or locally via `http://homelab:<port>`.
 

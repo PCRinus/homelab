@@ -6,7 +6,7 @@
 #
 # Protected services require Google login (SSO across all *.home-server.me)
 # Homepage (apex home-server.me) requires the same Google login
-# Bypassed services: Plex, Home Assistant (use their own auth)
+# Bypassed services: Home Assistant (uses its own auth)
 # Service tokens only: legislation-relay (ssm-usor Workers, both environments)
 # =============================================================================
 
@@ -70,27 +70,6 @@ resource "cloudflare_zero_trust_access_application" "protected_services" {
 # -----------------------------------------------------------------------------
 # Bypass Applications - No Authentication Required
 # -----------------------------------------------------------------------------
-
-# Plex - Uses its own authentication
-resource "cloudflare_zero_trust_access_application" "plex_bypass" {
-  account_id       = var.account_id
-  name             = "Plex (Bypass)"
-  domain           = "plex.home-server.me"
-  type             = "self_hosted"
-  session_duration = "24h"
-
-  allow_authenticate_via_warp = false
-  app_launcher_visible        = false
-
-  policies = [{
-    name       = "Bypass - Allow Everyone"
-    decision   = "bypass"
-    precedence = 1
-    include = [{
-      everyone = {}
-    }]
-  }]
-}
 
 # Homepage - Dashboard on the apex, which the wildcard above does not cover.
 # Not a bypass: Homepage has no login of its own, and its widget proxy

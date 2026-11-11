@@ -140,7 +140,6 @@ Current services exposed through the tunnel:
 
 | Hostname | Service | Port |
 |----------|---------|------|
-| `plex.home-server.me` | Plex Media Server | 32400 |
 | `ha.home-server.me` | Home Assistant | 8123 |
 | `legislation-relay.home-server.me` | Legislation relay (nginx) | 8080 |
 
@@ -169,8 +168,6 @@ sudo docker compose down
 ingress:
   - hostname: new-service.home-server.me
     service: http://localhost:PORT
-  - hostname: plex.home-server.me
-    service: http://localhost:32400
   - hostname: ha.home-server.me
     service: http://localhost:8123
   - service: http_status:404
@@ -212,7 +209,6 @@ domain     = "home-server.me"
 ### DNS Records (4)
 - `www.home-server.me` - A record pointing to `203.0.113.10`
 - `home-server.me` - CNAME to tunnel
-- `plex.home-server.me` - CNAME to tunnel
 - `ha.home-server.me` - CNAME to tunnel
 - `legislation-relay.home-server.me` - CNAME to tunnel
 
@@ -237,7 +233,7 @@ domain     = "home-server.me"
 - **Access Group**: Homelab Authorized Users
 - **Protected Services**: `*.home-server.me` (wildcard)
 - **Homepage** (`home-server.me`): Google login, same group as the protected services
-- **Bypassed Services**: Plex, Home Assistant
+- **Bypassed Services**: Home Assistant
 - **Service Tokens Only**: `legislation-relay.home-server.me`
 
 ## 🛡️ Zero Trust Access (SSO Authentication)
@@ -264,7 +260,6 @@ User → Cloudflare Edge → Access Check → Tunnel → Service
 | Domain | Policy | Description |
 |--------|--------|-------------|
 | `*.home-server.me` | **Protected** | Requires Google login (7-day session) |
-| `plex.home-server.me` | **Bypass** | Uses Plex's own authentication |
 | `home-server.me` | **Protected** | Homepage dashboard; the apex is outside the wildcard, so it has its own application (7-day session) |
 | `ha.home-server.me` | **Bypass** | Home Assistant (uses own auth + mobile app) |
 | `legislation-relay.home-server.me` | **Service Auth** | `ssm-usor-legislation` and `ssm-usor-legislation-non-prod` service tokens only |
@@ -546,8 +541,8 @@ expression = "(not ip.src.country in {\"RO\" \"GR\" \"RS\" \"HU\"})"
 # Add Germany for travel
 expression = "(not ip.src.country in {\"RO\" \"GR\" \"RS\" \"HU\" \"DE\"})"
 
-# Allow specific service globally (e.g., Plex)
-expression = "(not ip.src.country in {\"RO\" \"GR\" \"RS\" \"HU\"}) and (not http.host eq \"plex.home-server.me\")"
+# Allow specific service globally (e.g., Home Assistant)
+expression = "(not ip.src.country in {\"RO\" \"GR\" \"RS\" \"HU\"}) and (not http.host eq \"ha.home-server.me\")"
 ```
 
 ### What WAF Does NOT Affect
