@@ -1,6 +1,23 @@
 # Each service gets only the variables it reads. Bare names are filled in by
 # Compose from the decrypted .env that homelab_compose passes with --env-file
 # (scripts/lib/compose-env.sh); a name missing there is left out, not set empty.
+
+# Shared blocks, referenced below with *name (YAML anchors)
+x-public-dns: &public-dns
+  - 1.1.1.1
+  - 1.0.0.1
+  - 8.8.8.8
+
+# Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
+x-plex-host-gateway: &plex-host-gateway
+  - "plex:host-gateway"
+
+x-healthcheck: &healthcheck
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
 services:
   qbittorrent:
     image: ghcr.io/hotio/qbittorrent:release-5.3.0
@@ -56,21 +73,14 @@ services:
       - ${MEDIA_PATH}:/data
     ports:
       - "8989:8989"
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-      - 8.8.8.8
+    dns: *public-dns
     networks:
       - media-net
-    extra_hosts:
-      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
+    extra_hosts: *plex-host-gateway
     restart: unless-stopped
     healthcheck:
+      <<: *healthcheck
       test: ["CMD", "curl", "-f", "http://localhost:8989/ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   sonarr-anime:
     image: ghcr.io/hotio/sonarr:release-4.0.20.3014
@@ -84,21 +94,14 @@ services:
       - ${MEDIA_PATH}:/data
     ports:
       - "8990:8989"
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-      - 8.8.8.8
+    dns: *public-dns
     networks:
       - media-net
-    extra_hosts:
-      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
+    extra_hosts: *plex-host-gateway
     restart: unless-stopped
     healthcheck:
+      <<: *healthcheck
       test: ["CMD", "curl", "-f", "http://localhost:8989/ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   radarr:
     image: ghcr.io/hotio/radarr:release-6.4.4.10685
@@ -112,21 +115,14 @@ services:
       - ${MEDIA_PATH}:/data
     ports:
       - "7878:7878"
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-      - 8.8.8.8
+    dns: *public-dns
     networks:
       - media-net
-    extra_hosts:
-      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
+    extra_hosts: *plex-host-gateway
     restart: unless-stopped
     healthcheck:
+      <<: *healthcheck
       test: ["CMD", "curl", "-f", "http://localhost:7878/ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   prowlarr:
     image: ghcr.io/hotio/prowlarr:release-2.7.0.5723
@@ -140,19 +136,13 @@ services:
       - ${DOCKER_DATA}/prowlarr:/config
     ports:
       - "9696:9696"
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-      - 8.8.8.8
+    dns: *public-dns
     networks:
       - media-net
     restart: unless-stopped
     healthcheck:
+      <<: *healthcheck
       test: ["CMD", "curl", "-f", "http://localhost:9696/ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:v3.5.2
@@ -167,11 +157,8 @@ services:
       - media-net
     restart: unless-stopped
     healthcheck:
+      <<: *healthcheck
       test: ["CMD", "curl", "-f", "http://localhost:8191/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   pulsarr:
     image: lakker/pulsarr:0.19.8
@@ -191,19 +178,13 @@ services:
       - "3003:3003"
     volumes:
       - ${DOCKER_DATA}/pulsarr:/app/data
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-      - 8.8.8.8
+    dns: *public-dns
     networks:
       - media-net
     restart: unless-stopped
     healthcheck:
+      <<: *healthcheck
       test: ["CMD", "/app/docker-healthcheck.sh"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   plex:
     image: lscr.io/linuxserver/plex:1.43.5
@@ -229,16 +210,11 @@ services:
     # Containers reach it as `plex` through an `extra_hosts: plex:host-gateway` alias.
     # See PLEX-REMOTE-ACCESS.md.
     network_mode: host
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-      - 8.8.8.8
+    dns: *public-dns
     restart: unless-stopped
     healthcheck:
+      <<: *healthcheck
       test: ["CMD", "curl", "-f", "http://localhost:32400/identity"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
       start_period: 120s
 
   bazarr:
@@ -253,21 +229,14 @@ services:
       - ${MEDIA_PATH}:/data
     ports:
       - "6767:6767"
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-      - 8.8.8.8
+    dns: *public-dns
     networks:
       - media-net
-    extra_hosts:
-      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
+    extra_hosts: *plex-host-gateway
     restart: unless-stopped
     healthcheck:
+      <<: *healthcheck
       test: ["CMD", "curl", "-f", "http://localhost:6767/ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   tautulli:
     image: lscr.io/linuxserver/tautulli:2.18.2
@@ -285,19 +254,13 @@ services:
         read_only: true
     ports:
       - "8181:8181"
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-      - 8.8.8.8
+    dns: *public-dns
     networks:
       - media-net
     restart: unless-stopped
     healthcheck:
+      <<: *healthcheck
       test: ["CMD", "curl", "-f", "http://localhost:8181/status"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   # Plex Media Server.log for Dozzle, plus a 30-day archive on disk. Plex keeps
   # a fixed 6 x 10 MB rotation (under a day with verbose logging), so this
@@ -416,8 +379,7 @@ services:
       - NEWT_SECRET
     networks:
       - media-net
-    extra_hosts:
-      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
+    extra_hosts: *plex-host-gateway
     restart: unless-stopped
 
   checkrr:
@@ -433,11 +395,9 @@ services:
       - media-net
     restart: unless-stopped
     healthcheck:
+      <<: *healthcheck
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8585/"]
       interval: 60s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
 networks:
   media-net:
