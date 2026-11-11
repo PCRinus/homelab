@@ -20,15 +20,15 @@ Plex client ──HTTPS──▶ stream.home-server.me:443 (VPS 194.102.107.75)
 
 Requests from remote clients arrive at Plex from the `newt` container's address on `media-net` (e.g. `172.18.0.24`) with `Host: stream.home-server.me`.
 
-### Devices at home skip the VPS
+### Devices at home connect directly
 
-Plex runs on a Docker bridge network, so the only local address it advertises itself is its container IP (`172.18.0.17`), which nothing on the LAN can reach. Without help, home devices (Apple TV, phones, TVs) would also stream through the VPS and back. To avoid that, the server's LAN address is a second custom URL, using Plex's own `plex.direct` certificate so the connection is still HTTPS:
+Plex runs with `network_mode: host` (`media-server/compose.yml`), so it sees the host's LAN address and advertises `https://192-168-1-166.<hash>.plex.direct:32400` to plex.tv as a **local** connection. Home devices (Apple TV, phones, TVs) use it and stream straight from the server instead of out to the VPS and back. Plex also classifies them as LAN clients, and GDM discovery (32410-32414/udp) works on the LAN.
 
-```
-https://192-168-1-166.f4edb5ca1ae84f188344f570115415c8.plex.direct:32400
-```
+With the Plex container on a Docker bridge network, Plex advertised only its unreachable container IP (`172.18.0.17`) as local, so every home device went through the VPS. A custom `plex.direct` LAN URL did not fix that: plex.tv lists custom URLs as `remote`, and the Android app went back to `stream.` for playback.
 
-`192-168-1-166.<hash>.plex.direct` resolves to `192.168.1.166` through public DNS, so it works only from inside the LAN. Remote clients can't reach it and keep using `stream.`. The hash is this server's certificate ID; it is the same one in the advertised `172-18-0-17.<hash>.plex.direct` address. plex.tv lists the URL as `remote` (custom URLs always are), so clients choose it because it answers faster than the VPS. LAN requests show up in the Plex log from `192.168.1.x` instead of the `newt` address.
+Other containers still reach Plex as `http://plex:32400`: each consumer (newt, cloudflared, Sonarr, Sonarr Anime, Radarr, Bazarr, Gatus, the stream watchdog, Homepage) has `extra_hosts: plex:host-gateway`, which resolves `plex` to the host. Their requests keep arriving from their `media-net` addresses, which Plex treats as a local subnet, so it still honours `X-Forwarded-For` from newt and remote users stay remote.
+
+`192-168-1-166.<hash>.plex.direct` resolves to `192.168.1.166` through public DNS. A DNS server with rebind protection (router or AdGuard) would block it; neither does today. The router should keep `192.168.1.166` reserved for the server.
 
 `plex.home-server.me` (Cloudflare Tunnel) still exists for browser access, but it is not advertised to Plex clients. Cloudflare's terms don't allow streaming video through the tunnel, so it shouldn't carry playback.
 
@@ -47,7 +47,7 @@ Configure in Plex Web → **Settings** → (server) **Network** → **Show Advan
 
 | Setting | Value | Why |
 |---------|-------|-----|
-| Custom server access URLs | `https://stream.home-server.me:443,https://192-168-1-166.f4edb5ca1ae84f188344f570115415c8.plex.direct:32400` | Plex.tv advertises these URLs to clients. The `:443` suffix is required (it fixes iOS downloads and other client quirks). The second URL lets home devices skip the VPS (see *Devices at home skip the VPS*). |
+| Custom server access URLs | `https://stream.home-server.me:443` | Plex.tv advertises this URL to clients. The `:443` suffix is required (it fixes iOS downloads and other client quirks). No LAN URL is needed: Plex advertises its LAN address itself (see *Devices at home connect directly*). |
 | LAN Networks | `192.168.1.0/24,100.64.0.0/10` | Home LAN and Tailscale/CGNAT addresses count as local (no remote bandwidth rules) |
 | Enable Relay | **Off** | Without this, clients that briefly can't reach `stream.` (e.g. during a Plex restart) fall back to Relay and stay capped at 2 Mbps until the app reconnects |
 | Secure connections | Preferred | TLS is terminated on the VPS |
@@ -60,7 +60,7 @@ Saving publishes the new connection list to plex.tv right away; Plex doesn't nee
 P="$HOME/docker/plex/config/Library/Application Support/Plex Media Server"
 T=$(grep -o 'PlexOnlineToken="[^"]*' "$P/Preferences.xml" | cut -d'"' -f2)
 curl -s -X PUT -H "X-Plex-Token: $T" --get \
-  --data-urlencode "customConnections=https://stream.home-server.me:443,https://192-168-1-166.f4edb5ca1ae84f188344f570115415c8.plex.direct:32400" \
+  --data-urlencode "customConnections=https://stream.home-server.me:443" \
   http://localhost:32400/:/prefs
 ```
 
@@ -80,7 +80,7 @@ The trade-off: if the VPS or the newt tunnel is down, remote playback fails inst
 
 ### What plex.tv advertises to clients
 
-Run this on the homeserver. Expected output: remote `stream.home-server.me` and `192-168-1-166...plex.direct` connections, a Docker-internal local address, and no `RELAY` line once Relay is disabled.
+Run this on the homeserver. Expected output: a remote `stream.home-server.me` connection, a local `192-168-1-166...plex.direct` connection (plus local entries for the host's Docker bridge addresses, which clients can't reach and skip), and no `RELAY` line once Relay is disabled.
 
 ```bash
 P="$HOME/docker/plex/config/Library/Application Support/Plex Media Server"
@@ -167,8 +167,8 @@ zcat -f plex-media-server-*.log* | grep -o "Request: \[[0-9.]*:" | sort | uniq -
 ```
 
 - Restart the Plex app on the device so it re-tests its connections
-- Check that the LAN URL is still advertised (see *Verifying*) and that it resolves on the device's network: `dig +short 192-168-1-166.f4edb5ca1ae84f188344f570115415c8.plex.direct` must return `192.168.1.166`. A DNS server with rebind protection (router or AdGuard) would block it; allow `plex.direct` there
-- If the server's LAN IP changes, update the URL. The router should keep `192.168.1.166` reserved for the server
+- Check that plex.tv lists `192-168-1-166...plex.direct` as `local` (see *Verifying*). If it doesn't, check that the `plex` container still has `network_mode: host`
+- Check that the name resolves on the device's network: `dig +short 192-168-1-166.f4edb5ca1ae84f188344f570115415c8.plex.direct` must return `192.168.1.166`. A DNS server with rebind protection (router or AdGuard) would block it; allow `plex.direct` there
 
 ### Investigating after the fact
 
