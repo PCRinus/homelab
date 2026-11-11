@@ -1,10 +1,13 @@
+# Each service gets only the variables it reads. Bare names are filled in by
+# Compose from the decrypted .env that homelab_compose passes with --env-file
+# (scripts/lib/compose-env.sh); a name missing there is left out, not set empty.
 services:
   adguard:
     image: adguard/adguardhome:v0.107.79
     container_name: adguard
     command: ["--web-addr", "0.0.0.0:3001", "--config", "/opt/adguardhome/conf/AdGuardHome.yaml", "--work-dir", "/opt/adguardhome/work", "--no-check-update"]
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
+    environment:
+      - TZ
     volumes:
       - ${DOCKER_DATA}/adguard/work:/opt/adguardhome/work
       - ${DOCKER_DATA}/adguard/conf:/opt/adguardhome/conf

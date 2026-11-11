@@ -128,7 +128,7 @@ If you set `/config/logs`, Tautulli will only read its own logs and Plex logs wi
 
 ### API key
 
-Tautulli lets environment variables override `config.ini`, and the container receives the shared `.env`. So the effective API key is `TAUTULLI_API_KEY` from `.env` (also used by the Homepage widget). The `api_key` line in `${DOCKER_DATA}/tautulli/config.ini` is stale and ignored. To rotate the key, change it in `.env.enc` and recreate `tautulli` and `homepage`.
+Tautulli lets environment variables (`TAUTULLI_<SETTING>`) override `config.ini`, and `compose.yml` passes `TAUTULLI_API_KEY` to the container. So the effective API key is `TAUTULLI_API_KEY` from `.env` (also used by the Homepage widget). The `api_key` line in `${DOCKER_DATA}/tautulli/config.ini` is stale and ignored. To rotate the key, change it in `.env.enc` and recreate `tautulli` and `homepage`.
 
 ## Plex Log Archive (and Dozzle)
 

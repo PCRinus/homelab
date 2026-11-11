@@ -17,7 +17,6 @@ minecraft-servers/
 │   ├── content.txt              # Shared content/gameplay mods
 │   └── world-generation-extra.txt # World-gen-only extra mods
 ├── resolve-modrinth-mods.sh     # Validates and resolves compatible mod versions
-├── .env                         # Environment variables (CF_API_KEY, TZ)
 └── README.md                    # This file
 ```
 
@@ -31,12 +30,7 @@ Shared mods are now managed from files in `mods/` and resolved automatically bef
 
 ## Environment Variables
 
-The `.env` file in this directory is automatically loaded by Docker Compose and contains:
-
-- `CF_API_KEY`: CurseForge API key for mod downloads
-- `TZ`: Timezone (Europe/Bucharest)
-
-These variables are available to all compose files in this directory.
+`start.sh` runs Compose through `homelab_compose`, which passes the decrypted root `.env` with `--env-file`. The servers receive only `TZ` from it. They get no API keys: mods come from Modrinth (`MODRINTH_PROJECTS`), so the CurseForge key (`CF_API_KEY`) is not needed. The plain `docker compose` commands below run without that file, so the container falls back to UTC.
 
 ## Starting a Server
 

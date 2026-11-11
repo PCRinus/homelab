@@ -22,23 +22,23 @@ Self-hosted homelab running Docker in **rootful mode** on Linux Server. Services
 
 ## Docker Compose Patterns
 
-**Environment variables:** Use root-level `.env` file via `env_file: - ../.env`. Contains `PUID`, `PGID`, `TZ`, API keys. Never hardcode secrets.
-
-**Important:** When using `env_file`, do NOT re-declare those variables in the `environment` section with `${VAR}` interpolation. Docker Compose looks for interpolation variables in the **same directory** as the compose file, not in `env_file`. The `env_file` directive passes variables directly to the container.
+**Environment variables:** Secrets live in the root `.env.enc` (SOPS). The start scripts and `scripts/reconcile.sh` run Compose through `homelab_compose` (`scripts/lib/compose-env.sh`), which decrypts it and passes it with `--env-file`. Give each service **only the variables it reads**, by bare name. Do not use `env_file:`, which hands every secret to every container. Never hardcode secrets.
 
 ```yaml
-# ✅ Correct - env_file passes PUID, PGID, TZ directly to container
-env_file:
-  - ../.env
+# ✅ Correct - Compose fills bare names from the --env-file; unset names are left out
 environment:
-  - CUSTOM_VAR=value  # Only add vars NOT in .env
+  - PUID
+  - PGID
+  - TZ
+  - CUSTOM_VAR=value
 
-# ❌ Wrong - ${PUID} won't resolve, container gets empty value
+# ❌ Wrong - every container gets every secret
 env_file:
   - ../.env
+
+# ⚠️ Avoid - an unset variable becomes an empty string and overrides the image default
 environment:
   - PUID=${PUID}
-  - PGID=${PGID}
 ```
 
 **Volume pattern:**
@@ -116,7 +116,7 @@ When adding a new service or migrating an existing one (e.g., switching torrent 
 
 ### 1. Docker Compose
 - Add/update service in `<stack>/compose.yml`
-- Use `env_file: - ../.env` for secrets
+- List only the variables the service reads under `environment:` by bare name (no `env_file`)
 - Pin image version for Renovate tracking
 - Join `media-net` network if inter-container communication needed
 

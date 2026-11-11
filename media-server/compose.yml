@@ -1,3 +1,6 @@
+# Each service gets only the variables it reads. Bare names are filled in by
+# Compose from the decrypted .env that homelab_compose passes with --env-file
+# (scripts/lib/compose-env.sh); a name missing there is left out, not set empty.
 services:
   qbittorrent:
     image: ghcr.io/hotio/qbittorrent:release-5.3.0
@@ -10,9 +13,10 @@ services:
       - net.ipv6.conf.all.disable_ipv6=1
     devices:
       - /dev/net/tun:/dev/net/tun
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     environment:
+      - PUID
+      - PGID
+      - TZ
       - WEBUI_PORTS=8080/tcp,8080/udp
       - VPN_ENABLED=true
       - VPN_CONF=wg0
@@ -43,8 +47,10 @@ services:
   sonarr:
     image: ghcr.io/hotio/sonarr:release-4.0.20.3014
     container_name: sonarr
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
+    environment:
+      - PUID
+      - PGID
+      - TZ
     volumes:
       - ${DOCKER_DATA}/sonarr:/config
       - ${MEDIA_PATH}:/data
@@ -69,8 +75,10 @@ services:
   sonarr-anime:
     image: ghcr.io/hotio/sonarr:release-4.0.20.3014
     container_name: sonarr-anime
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
+    environment:
+      - PUID
+      - PGID
+      - TZ
     volumes:
       - ${DOCKER_DATA}/sonarr-anime:/config
       - ${MEDIA_PATH}:/data
@@ -95,8 +103,10 @@ services:
   radarr:
     image: ghcr.io/hotio/radarr:release-6.4.4.10685
     container_name: radarr
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
+    environment:
+      - PUID
+      - PGID
+      - TZ
     volumes:
       - ${DOCKER_DATA}/radarr:/config
       - ${MEDIA_PATH}:/data
@@ -121,9 +131,10 @@ services:
   prowlarr:
     image: ghcr.io/hotio/prowlarr:release-2.7.0.5723
     container_name: prowlarr
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     environment:
+      - PUID
+      - PGID
+      - TZ
       - UMASK=002
     volumes:
       - ${DOCKER_DATA}/prowlarr:/config
@@ -146,9 +157,8 @@ services:
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:v3.5.2
     container_name: flaresolverr
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     environment:
+      - TZ
       - LOG_LEVEL=info
       - LOG_HTML=false
       - CAPTCHA_SOLVER=none
@@ -167,9 +177,10 @@ services:
   pulsarr:
     image: lakker/pulsarr:0.19.8
     container_name: pulsarr
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     environment:
+      - PUID
+      - PGID
+      - TZ
       - baseUrl=http://pulsarr
       - port=3003
       - listenPort=3003
@@ -198,9 +209,11 @@ services:
   plex:
     image: lscr.io/linuxserver/plex:1.43.5
     container_name: plex
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     environment:
+      - PUID
+      - PGID
+      - TZ
+      - PLEX_CLAIM
       - VERSION=docker
     devices:
       - /dev/dri:/dev/dri # GPU for VA-API hardware acceleration
@@ -232,8 +245,10 @@ services:
   bazarr:
     image: ghcr.io/hotio/bazarr:release-1.6.2
     container_name: bazarr
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
+    environment:
+      - PUID
+      - PGID
+      - TZ
     volumes:
       - ${DOCKER_DATA}/bazarr:/config
       - ${MEDIA_PATH}:/data
@@ -258,8 +273,11 @@ services:
   tautulli:
     image: lscr.io/linuxserver/tautulli:2.18.2
     container_name: tautulli
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
+    environment:
+      - PUID
+      - PGID
+      - TZ
+      - TAUTULLI_API_KEY # Tautulli reads TAUTULLI_<SETTING> over config.ini (see README)
     volumes:
       - ${DOCKER_DATA}/tautulli:/config
       - type: bind
@@ -376,8 +394,8 @@ services:
   configarr:
     image: ghcr.io/raydak-labs/configarr:1.38.0
     container_name: configarr
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
+    # No environment: API keys come from configarr/secrets.yml, and the weekly
+    # sync (sync-configarr.yml) runs plain `docker compose run` without the env file.
     volumes:
       - ./configarr:/app/config:ro # Config files (config.yml, secrets.yml)
       - ${DOCKER_DATA}/configarr/repos:/app/repos # Cache for TRaSH-Guides/Recyclarr repos
@@ -392,8 +410,11 @@ services:
   newt:
     image: fosrl/newt:1.19.1
     container_name: newt
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
+    environment:
+      - TZ
+      - PANGOLIN_ENDPOINT
+      - NEWT_ID
+      - NEWT_SECRET
     networks:
       - media-net
     extra_hosts:
