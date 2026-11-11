@@ -48,7 +48,8 @@ jobs:
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/vps_deploy_key "${VPS_SSH_USER}@${VPS_SSH_HOST}" \
-            "sed 's|@VPS_DIR@|${VPS_REPO_DIR}/vps|g' '${VPS_REPO_DIR}/vps/homelab-vps.service' > /etc/systemd/system/homelab-vps.service \
+            "sed 's|@VPS_DIR@|${VPS_REPO_DIR}/vps|g' '${VPS_REPO_DIR}/vps/homelab-vps.service' > /etc/systemd/system/homelab-vps.service.tmp \
+              && mv /etc/systemd/system/homelab-vps.service.tmp /etc/systemd/system/homelab-vps.service \
               && systemctl daemon-reload \
               && systemctl enable homelab-vps.service"
 
@@ -70,3 +71,12 @@ jobs:
           fi
           ssh -i ~/.ssh/vps_deploy_key "${VPS_SSH_USER}@${VPS_SSH_HOST}" \
             "chmod +x '${VPS_REPO_DIR}/vps/start.sh' && cd '${VPS_REPO_DIR}/vps' && ${AUTH_PREFIX} ./start.sh"
+
+      # Enabling only takes effect at the next boot. Start the unit now so it is
+      # active and a Docker restart (PartOf=docker.service) re-runs it before
+      # the VPS has ever rebooted. A no-op once the unit is already active.
+      - name: Activate boot unit
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/vps_deploy_key "${VPS_SSH_USER}@${VPS_SSH_HOST}" \
+            "systemctl start homelab-vps.service && systemctl is-active homelab-vps.service"

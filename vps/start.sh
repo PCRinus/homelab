@@ -51,16 +51,6 @@ if [ "${DOZZLE_AGENT_BIND:-}" = "" ] || [ "${DOZZLE_AGENT_BIND:-}" = "127.0.0.1"
         sleep 1
     done
 
-    # The address must also be on the host interface before Docker can bind to it.
-    if [ -n "${TAILSCALE_IP}" ]; then
-        for _ in {1..30}; do
-            if ip -4 -o addr show | grep -q " ${TAILSCALE_IP}/"; then
-                break
-            fi
-            sleep 1
-        done
-    fi
-
     if [ -n "${TAILSCALE_IP}" ]; then
         export DOZZLE_AGENT_BIND="${TAILSCALE_IP}"
         echo "Binding Dozzle agent to Tailscale IP ${DOZZLE_AGENT_BIND}"
@@ -71,6 +61,19 @@ if [ "${DOZZLE_AGENT_BIND:-}" = "" ] || [ "${DOZZLE_AGENT_BIND:-}" = "127.0.0.1"
         export DOZZLE_AGENT_BIND="127.0.0.1"
         echo "Tailscale IP not available yet; binding Dozzle agent to 127.0.0.1"
     fi
+fi
+
+# Note: .env is only passed to compose, never sourced here, so DOZZLE_AGENT_BIND
+# above comes from the shell environment and the detected IP overrides .env.
+# Whatever address we bind to must be on a host interface before Docker can
+# publish ports on it, so wait for it regardless of where it came from.
+if [ "${DOZZLE_AGENT_BIND}" != "127.0.0.1" ]; then
+    for _ in {1..30}; do
+        if ip -4 -o addr show | grep -F " ${DOZZLE_AGENT_BIND}/" > /dev/null; then
+            break
+        fi
+        sleep 1
+    done
 fi
 
 echo "Starting containers..."
