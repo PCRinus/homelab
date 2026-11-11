@@ -236,7 +236,8 @@ domain     = "home-server.me"
 - **Identity Provider**: Google OAuth
 - **Access Group**: Homelab Authorized Users
 - **Protected Services**: `*.home-server.me` (wildcard)
-- **Bypassed Services**: Plex, Homepage, Home Assistant
+- **Homepage** (`home-server.me`): Google login, same group as the protected services
+- **Bypassed Services**: Plex, Home Assistant
 - **Service Tokens Only**: `legislation-relay.home-server.me`
 
 ## 🛡️ Zero Trust Access (SSO Authentication)
@@ -264,7 +265,7 @@ User → Cloudflare Edge → Access Check → Tunnel → Service
 |--------|--------|-------------|
 | `*.home-server.me` | **Protected** | Requires Google login (7-day session) |
 | `plex.home-server.me` | **Bypass** | Uses Plex's own authentication |
-| `home-server.me` | **Bypass** | Homepage dashboard (public) |
+| `home-server.me` | **Protected** | Homepage dashboard; the apex is outside the wildcard, so it has its own application (7-day session) |
 | `ha.home-server.me` | **Bypass** | Home Assistant (uses own auth + mobile app) |
 | `legislation-relay.home-server.me` | **Service Auth** | `ssm-usor-legislation` and `ssm-usor-legislation-non-prod` service tokens only |
 
