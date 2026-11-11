@@ -61,6 +61,9 @@ services:
   # Read-only Docker API for Homepage's container status and stats, so Homepage
   # itself has no Docker socket. GET only (POST=0 is the image default);
   # CONTAINERS covers list/inspect/stats, and EVENTS is not needed.
+  # It is not harmless: any GET under /containers is allowed, so whatever
+  # reaches this proxy can read every container's environment (inspect) and
+  # files (archive/export). It only removes the ability to change anything.
   homepage-docker-proxy:
     image: tecnativa/docker-socket-proxy:v0.5.0
     container_name: homepage-docker-proxy
