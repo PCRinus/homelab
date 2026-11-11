@@ -6,8 +6,8 @@ services:
     networks:
       - media-net
       - monitoring_default
-    ports:
-      - "20241:20241"
+    # Metrics on 20241 are not published: the watchdog (media-net) and Gatus
+    # (monitoring_default) read http://cloudflared:20241/metrics directly.
     dns:
       - 1.1.1.1
       - 1.0.0.1
