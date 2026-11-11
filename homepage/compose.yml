@@ -24,7 +24,7 @@ services:
       - HOMEPAGE_VAR_ADGUARD_USER
       - HOMEPAGE_VAR_ADGUARD_PASS
       - HOMEPAGE_VAR_PANGOLIN_API_KEY
-      - PGID=${DOCKER_GID} # Docker socket GID — overrides .env so Homepage can access the socket as non-root
+      - PGID
     ports:
       - 3000:3000
     volumes:
@@ -40,8 +40,7 @@ services:
       - ./proxmox.yaml:/app/config/proxmox.yaml:ro
       # Container-writable data - not versioned
       - ${DOCKER_DATA}/homepage/logs:/app/config/logs
-      # Other mounts
-      - ${DOCKER_SOCK}:/var/run/docker.sock:ro
+      # Other mounts (Docker is reached through homepage-docker-proxy, see docker.yaml)
       - ${MEDIA_PATH}:/mnt/unas/media:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -51,6 +50,7 @@ services:
       - 8.8.8.8
     networks:
       - media-net
+      - docker-proxy
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
       interval: 30s
@@ -58,6 +58,26 @@ services:
       retries: 3
       start_period: 30s
 
+  # Read-only Docker API for Homepage's container status and stats, so Homepage
+  # itself has no Docker socket. GET only (POST=0 is the image default);
+  # CONTAINERS covers list/inspect/stats, and EVENTS is not needed.
+  # It is not harmless: any GET under /containers is allowed, so whatever
+  # reaches this proxy can read every container's environment (inspect) and
+  # files (archive/export). It only removes the ability to change anything.
+  homepage-docker-proxy:
+    image: tecnativa/docker-socket-proxy:v0.5.0
+    container_name: homepage-docker-proxy
+    restart: unless-stopped
+    environment:
+      - CONTAINERS=1
+      - EVENTS=0
+    volumes:
+      - ${DOCKER_SOCK}:/var/run/docker.sock:ro
+    networks:
+      - docker-proxy
+
 networks:
   media-net:
     external: true # Defined in media-server/compose.yml
+  docker-proxy:
+    internal: true # Only Homepage reaches the proxy; anything that can reads every container's config

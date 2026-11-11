@@ -26,11 +26,11 @@ Plex runs with `network_mode: host` (`media-server/compose.yml`), so it sees the
 
 With the Plex container on a Docker bridge network, Plex advertised only its unreachable container IP (`172.18.0.17`) as local, so every home device went through the VPS. A custom `plex.direct` LAN URL did not fix that: plex.tv lists custom URLs as `remote`, and the Android app went back to `stream.` for playback.
 
-Other containers still reach Plex as `http://plex:32400`: each consumer (newt, cloudflared, Sonarr, Sonarr Anime, Radarr, Bazarr, Gatus, the stream watchdog, Homepage) has `extra_hosts: plex:host-gateway`, which resolves `plex` to the host. Their requests keep arriving from their `media-net` addresses, which Plex treats as a local subnet, so it still honours `X-Forwarded-For` from newt and remote users stay remote.
+Other containers still reach Plex as `http://plex:32400`: each consumer (newt, Sonarr, Sonarr Anime, Radarr, Bazarr, Gatus, the stream watchdog, Homepage) has `extra_hosts: plex:host-gateway`, which resolves `plex` to the host. Their requests keep arriving from their `media-net` addresses, which Plex treats as a local subnet, so it still honours `X-Forwarded-For` from newt and remote users stay remote.
 
 `192-168-1-166.<hash>.plex.direct` resolves to `192.168.1.166` through public DNS. A DNS server with rebind protection (router or AdGuard) would block it; neither does today. The router should keep `192.168.1.166` reserved for the server.
 
-`plex.home-server.me` (Cloudflare Tunnel) still exists for browser access, but it is not advertised to Plex clients. Cloudflare's terms don't allow streaming video through the tunnel, so it shouldn't carry playback.
+There is no Cloudflare Tunnel hostname for Plex (`plex.home-server.me` was removed): Cloudflare's terms don't allow streaming video through the tunnel. For the web app away from home, use `https://stream.home-server.me/web`; the Homepage Plex tile links there when the dashboard is opened as `home-server.me`.
 
 ### Connection types and their limits
 

@@ -140,7 +140,6 @@
 
     - FlareSolverr:
         icon: flaresolverr.png
-        href: http://{{HOMEPAGE_VAR_SERVER_HOSTNAME}}:8191
         description: Cloudflare Solver
         server: my-docker
         container: flaresolverr

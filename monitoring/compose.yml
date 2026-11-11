@@ -7,6 +7,11 @@ services:
     image: ghcr.io/amir20/dozzle:v11.4.0
     environment:
       DOZZLE_REMOTE_AGENT: ${DOZZLE_REMOTE_AGENT:-}
+    # Dozzle keeps the raw socket. tecnativa/docker-socket-proxy cuts any
+    # response after 10 minutes without data, which ends the log stream of a
+    # quiet container, and Dozzle does not reopen it: the page looks live but
+    # shows nothing new. Dozzle is only reachable from the LAN and behind
+    # Cloudflare Access.
     volumes:
       - ${DOCKER_SOCK}:/var/run/docker.sock
     ports:

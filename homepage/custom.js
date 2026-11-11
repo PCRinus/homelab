@@ -5,7 +5,7 @@
     // Port-to-subdomain mapping (hostname-agnostic)
     const portMappings = {
       // Media Management
-      '32400': 'plex.home-server.me',
+      '32400': 'stream.home-server.me', // Plex via the Pangolin VPS (no tunnel hostname)
       '3003': 'pulsarr.home-server.me',
       '8989': 'sonarr.home-server.me',
       '8990': 'sonarr-anime.home-server.me',
@@ -15,7 +15,6 @@
       '8585': 'checkrr.home-server.me',
       '6767': 'bazarr.home-server.me',
       '8181': 'tautulli.home-server.me',
-      '8191': 'flaresolverr.home-server.me',
       // Infrastructure
       '8081': 'dozzle.home-server.me',
       '8082': 'gatus.home-server.me',

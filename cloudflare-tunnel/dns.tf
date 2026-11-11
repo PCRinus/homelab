@@ -1,13 +1,12 @@
-resource "cloudflare_dns_record" "terraform_managed_resource_27b84829b17fbafb6c98ad518331a208_0" {
-  comment  = "Domain verification record"
-  content  = "203.0.113.10"
-  name     = "www.home-server.me"
-  proxied  = true
-  tags     = []
-  ttl      = 1
-  type     = "A"
-  zone_id  = "97c1a5749e2e19a69ae4132f95f633cd"
-  settings = {}
+# www was declared twice: here (imported by cf-terraforming) and as
+# cloudflare_dns_record.www in main.tf, which is kept. Forget this copy without
+# deleting anything in Cloudflare, whichever record its state entry points at.
+removed {
+  from = cloudflare_dns_record.terraform_managed_resource_27b84829b17fbafb6c98ad518331a208_0
+
+  lifecycle {
+    destroy = false
+  }
 }
 
 resource "cloudflare_dns_record" "terraform_managed_resource_8f22cd35e6f3cc9e39ccd94b2a949363_1" {
@@ -31,19 +30,6 @@ resource "cloudflare_dns_record" "homepage" {
   type    = "CNAME"
   zone_id = var.zone_id
   comment = "Homepage dashboard on root domain"
-}
-
-resource "cloudflare_dns_record" "terraform_managed_resource_2ed691eb805ce7bcc49600fd0424f935_3" {
-  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
-  name    = "plex.home-server.me"
-  proxied = true
-  tags    = []
-  ttl     = 1
-  type    = "CNAME"
-  zone_id = "97c1a5749e2e19a69ae4132f95f633cd"
-  settings = {
-    flatten_cname = false
-  }
 }
 
 resource "cloudflare_dns_record" "dozzle" {
@@ -144,16 +130,6 @@ resource "cloudflare_dns_record" "bazarr" {
   type    = "CNAME"
   zone_id = var.zone_id
   comment = "Bazarr subtitle management"
-}
-
-resource "cloudflare_dns_record" "flaresolverr" {
-  content = "0ba69785-f553-4e75-ae68-1f3f990e573d.cfargotunnel.com"
-  name    = "flaresolverr"
-  proxied = true
-  ttl     = 1
-  type    = "CNAME"
-  zone_id = var.zone_id
-  comment = "FlareSolverr Cloudflare bypass"
 }
 
 

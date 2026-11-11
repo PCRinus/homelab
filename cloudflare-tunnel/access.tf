@@ -5,7 +5,8 @@
 # Access with Google as the identity provider.
 #
 # Protected services require Google login (SSO across all *.home-server.me)
-# Bypassed services: Plex, Homepage, Home Assistant (use their own auth)
+# Homepage (apex home-server.me) requires the same Google login
+# Bypassed services: Home Assistant (uses its own auth)
 # Service tokens only: legislation-relay (ssm-usor Workers, both environments)
 # =============================================================================
 
@@ -70,46 +71,36 @@ resource "cloudflare_zero_trust_access_application" "protected_services" {
 # Bypass Applications - No Authentication Required
 # -----------------------------------------------------------------------------
 
-# Plex - Uses its own authentication
-resource "cloudflare_zero_trust_access_application" "plex_bypass" {
+# Homepage - Dashboard on the apex, which the wildcard above does not cover.
+# Not a bypass: Homepage has no login of its own, and its widget proxy
+# (/api/services/proxy) returns Tautulli activity, AdGuard stats and the Sonarr
+# queue, so it needs the same Google login as the protected services.
+resource "cloudflare_zero_trust_access_application" "homepage" {
   account_id       = var.account_id
-  name             = "Plex (Bypass)"
-  domain           = "plex.home-server.me"
+  name             = "Homepage"
+  domain           = "home-server.me"
   type             = "self_hosted"
-  session_duration = "24h"
+  session_duration = "168h" # 7 days, same as the protected services
 
   allow_authenticate_via_warp = false
   app_launcher_visible        = false
 
   policies = [{
-    name       = "Bypass - Allow Everyone"
-    decision   = "bypass"
+    name       = "Allow Authorized Users"
+    decision   = "allow"
     precedence = 1
     include = [{
-      everyone = {}
+      group = {
+        id = cloudflare_zero_trust_access_group.authorized_users.id
+      }
     }]
   }]
 }
 
-# Homepage - Dashboard (bypass for easy access)
-resource "cloudflare_zero_trust_access_application" "homepage_bypass" {
-  account_id       = var.account_id
-  name             = "Homepage (Bypass)"
-  domain           = "home-server.me"
-  type             = "self_hosted"
-  session_duration = "24h"
-
-  allow_authenticate_via_warp = false
-  app_launcher_visible        = false
-
-  policies = [{
-    name       = "Bypass - Allow Everyone"
-    decision   = "bypass"
-    precedence = 1
-    include = [{
-      everyone = {}
-    }]
-  }]
+# Was a bypass-everyone application; update it in place rather than recreate.
+moved {
+  from = cloudflare_zero_trust_access_application.homepage_bypass
+  to   = cloudflare_zero_trust_access_application.homepage
 }
 
 # Home Assistant - Uses its own authentication (needed for mobile app)

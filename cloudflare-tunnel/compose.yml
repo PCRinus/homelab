@@ -1,3 +1,8 @@
+x-public-dns: &public-dns
+  - 1.1.1.1
+  - 1.0.0.1
+  - 8.8.8.8
+
 services:
   cloudflared:
     image: cloudflare/cloudflared:2026.10.7
@@ -6,15 +11,11 @@ services:
     networks:
       - media-net
       - monitoring_default
-    ports:
-      - "20241:20241"
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-      - 8.8.8.8
+    # Metrics on 20241 are not published: the watchdog (media-net) and Gatus
+    # (monitoring_default) read http://cloudflared:20241/metrics directly.
+    dns: *public-dns
     extra_hosts:
       - "homeassistant:host-gateway"
-      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
     environment:
       - TUNNEL_METRICS=0.0.0.0:20241
     volumes:
@@ -33,11 +34,11 @@ services:
     restart: unless-stopped
     depends_on:
       - cloudflared
-    volumes:
-      - ${DOCKER_SOCK}:/var/run/docker.sock:ro
+      - cloudflared-watchdog-docker-proxy
     environment:
       - CHECK_INTERVAL=30
       - UNHEALTHY_THRESHOLD=3
+      - DOCKER_HOST=tcp://cloudflared-watchdog-docker-proxy:2375 # `docker restart` goes through the proxy
     command:
       - sh
       - -c
@@ -67,6 +68,23 @@ services:
         done
     networks:
       - media-net
+      - watchdog-docker-proxy
+
+  # Docker API for the watchdog, limited to restarting containers: POST is on,
+  # but the only POST paths allowed are /containers/{name}/restart|stop|kill
+  # (ALLOW_RESTARTS). Listing, inspecting, creating and exec are all denied.
+  cloudflared-watchdog-docker-proxy:
+    image: tecnativa/docker-socket-proxy:v0.5.0
+    container_name: cloudflared-watchdog-docker-proxy
+    restart: unless-stopped
+    environment:
+      - POST=1
+      - ALLOW_RESTARTS=1
+      - EVENTS=0
+    volumes:
+      - ${DOCKER_SOCK}:/var/run/docker.sock:ro
+    networks:
+      - watchdog-docker-proxy
 
   # Lets a Worker in another Cloudflare account reach legislatie.just.ro from
   # this residential address; the portal refuses datacenter networks.
@@ -76,10 +94,7 @@ services:
     restart: unless-stopped
     networks:
       - media-net
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-      - 8.8.8.8
+    dns: *public-dns
     volumes:
       - ./legislation-relay.conf:/etc/nginx/conf.d/default.conf:ro
     healthcheck:
@@ -94,3 +109,5 @@ networks:
     external: true
   monitoring_default:
     external: true
+  watchdog-docker-proxy:
+    internal: true # Only the watchdog reaches its proxy
