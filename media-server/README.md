@@ -442,7 +442,7 @@ grep "server_url" /home/mircea/docker/bazarr/config/config.yaml
 docker compose start bazarr
 ```
 
-This changes the connection from `https://*.plex.direct:32400` (external, can timeout) to `http://plex:32400` (internal Docker network, fast and reliable).
+This changes the connection from `https://*.plex.direct:32400` (external, can timeout) to `http://plex:32400` (stays on the server, fast and reliable; Plex uses host networking and the Bazarr container resolves `plex` to the host through `extra_hosts: plex:host-gateway`).
 
 ## Configarr (Quality Profiles & Custom Formats)
 

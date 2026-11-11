@@ -14,6 +14,7 @@ services:
       - 8.8.8.8
     extra_hosts:
       - "homeassistant:host-gateway"
+      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
     environment:
       - TUNNEL_METRICS=0.0.0.0:20241
     volumes:

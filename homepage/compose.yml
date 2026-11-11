@@ -27,6 +27,7 @@ services:
       - ${MEDIA_PATH}:/mnt/unas/media:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
     dns:
       - 1.1.1.1
       - 8.8.8.8

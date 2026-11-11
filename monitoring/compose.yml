@@ -29,6 +29,7 @@ services:
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
     networks:
       - default
       - media-net
@@ -106,6 +107,8 @@ services:
       - /sys/class/net/enp46s0:/host-nic:ro
     networks:
       - media-net
+    extra_hosts:
+      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
     restart: unless-stopped
     logging:
       driver: local

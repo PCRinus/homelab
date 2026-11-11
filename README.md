@@ -227,7 +227,7 @@ Configure in **each** of Sonarr (`localhost:8989`), Sonarr Anime (`localhost:899
 
 1. Go to **Settings → Connect → +** → select **Plex Media Server**
 2. Fill in:
-   - **Host:** `plex` (Docker container name — works because all services share `media-net`)
+   - **Host:** `plex` (Plex uses host networking; the *arr containers resolve `plex` to the host through `extra_hosts: plex:host-gateway`)
    - **Port:** `32400`
    - **Auth Token:** your Plex token (see below)
    - **Update Library:** enabled

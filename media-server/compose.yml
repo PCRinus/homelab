@@ -56,6 +56,8 @@ services:
       - 8.8.8.8
     networks:
       - media-net
+    extra_hosts:
+      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8989/ping"]
@@ -80,6 +82,8 @@ services:
       - 8.8.8.8
     networks:
       - media-net
+    extra_hosts:
+      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8989/ping"]
@@ -104,6 +108,8 @@ services:
       - 8.8.8.8
     networks:
       - media-net
+    extra_hosts:
+      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:7878/ping"]
@@ -205,18 +211,16 @@ services:
     volumes:
       - ${DOCKER_DATA}/plex/config:/config
       - ${MEDIA_PATH}:/data
-    ports:
-      - "32400:32400" # Plex Web UI (required)
-      - "32410:32410/udp" # GDM network discovery
-      - "32412:32412/udp" # GDM network discovery
-      - "32413:32413/udp" # GDM network discovery
-      - "32414:32414/udp" # GDM network discovery
+    # Host networking lets Plex see the LAN: it advertises 192.168.1.166 as a local
+    # connection (home devices stream directly instead of through the VPS), treats LAN
+    # clients as local, and answers GDM discovery (32410-32414/udp) on the LAN.
+    # Containers reach it as `plex` through an `extra_hosts: plex:host-gateway` alias.
+    # See PLEX-REMOTE-ACCESS.md.
+    network_mode: host
     dns:
       - 1.1.1.1
       - 1.0.0.1
       - 8.8.8.8
-    networks:
-      - media-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:32400/identity"]
@@ -241,6 +245,8 @@ services:
       - 8.8.8.8
     networks:
       - media-net
+    extra_hosts:
+      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:6767/ping"]
@@ -390,6 +396,8 @@ services:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     networks:
       - media-net
+    extra_hosts:
+      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
     restart: unless-stopped
 
   checkrr:
