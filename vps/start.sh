@@ -11,10 +11,21 @@ if [ -f ".env" ]; then
     COMPOSE_ENV_ARGS=(--env-file .env)
 fi
 
+# VPS_BOOT=1 is set by homelab-vps.service. At boot (or after a Docker restart)
+# Docker races every container up at once, and the ones publishing ports on the
+# Tailscale IP fail with "cannot assign requested address" and are never retried.
+# Boot mode re-runs compose once Tailscale is up, skips the registry pull, and
+# fails instead of falling back to 127.0.0.1 so systemd retries.
+VPS_BOOT="${VPS_BOOT:-0}"
+
 echo "Starting VPS stack..."
 
-echo "Pulling latest images..."
-docker compose "${COMPOSE_ENV_ARGS[@]}" -f compose.yml pull
+if [ "${VPS_BOOT}" = "1" ]; then
+    echo "Boot mode: skipping image pull"
+else
+    echo "Pulling latest images..."
+    docker compose "${COMPOSE_ENV_ARGS[@]}" -f compose.yml pull
+fi
 
 echo "Starting Tailscale..."
 mkdir -p "${TAILSCALE_STATE_DIR:-./tailscale-state}"
@@ -40,9 +51,22 @@ if [ "${DOZZLE_AGENT_BIND:-}" = "" ] || [ "${DOZZLE_AGENT_BIND:-}" = "127.0.0.1"
         sleep 1
     done
 
+    # The address must also be on the host interface before Docker can bind to it.
+    if [ -n "${TAILSCALE_IP}" ]; then
+        for _ in {1..30}; do
+            if ip -4 -o addr show | grep -q " ${TAILSCALE_IP}/"; then
+                break
+            fi
+            sleep 1
+        done
+    fi
+
     if [ -n "${TAILSCALE_IP}" ]; then
         export DOZZLE_AGENT_BIND="${TAILSCALE_IP}"
         echo "Binding Dozzle agent to Tailscale IP ${DOZZLE_AGENT_BIND}"
+    elif [ "${VPS_BOOT}" = "1" ]; then
+        echo "Tailscale IP not available yet; failing so systemd retries"
+        exit 1
     else
         export DOZZLE_AGENT_BIND="127.0.0.1"
         echo "Tailscale IP not available yet; binding Dozzle agent to 127.0.0.1"
