@@ -71,8 +71,9 @@ networks:
 # Media stack
 cd /home/mircea/homeserver/media-server && ./start.sh
 
-# Most services
-cd /home/mircea/homeserver/<service> && docker compose up -d
+# Most services (start.sh passes the decrypted env; a plain `docker compose up`
+# would start containers without PUID/PGID/TZ and their secrets)
+cd /home/mircea/homeserver/<service> && ./start.sh
 
 # All services at once
 cd /home/mircea/homeserver && ./scripts/start.sh

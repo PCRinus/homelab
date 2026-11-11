@@ -24,8 +24,10 @@ This directory contains version-controlled Home Assistant configuration files.
 ### Running
 
 ```bash
-docker compose up -d
+./start.sh
 ```
+
+`start.sh` passes the decrypted environment to Compose. A plain `docker compose up -d` would start the container without `TZ`.
 
 ## Volume Strategy
 
