@@ -102,8 +102,10 @@ Apply changes:
 
 ```bash
 cd /home/mircea/homeserver/media-server
-docker compose up -d tautulli
+bash -c 'source ../scripts/lib/compose-env.sh && homelab_compose up -d tautulli'
 ```
+
+Use `homelab_compose`, not plain `docker compose`: containers take their variables (`PUID`, `PGID`, `TZ`, API keys) from the decrypted env it passes, and a plain run would start them without any.
 
 ### 2) Configure Tautulli log folder
 
