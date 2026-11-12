@@ -1,3 +1,6 @@
+# Each service gets only the variables it reads. Bare names are filled in by
+# Compose from the decrypted .env that homelab_compose passes with --env-file
+# (scripts/lib/compose-env.sh); a name missing there is left out, not set empty.
 services:
   dozzle:
     container_name: dozzle
@@ -24,8 +27,16 @@ services:
     volumes:
       - ./config.yaml:/config/config.yaml:ro
       - ${DOCKER_DATA}/gatus/data:/data
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
+    environment:
+      - TZ
+      # Variables referenced in config.yaml
+      - GATUS_DISCORD_WEBHOOK_URL
+      - GATUS_DISCORD_LINK_SPEED_MENTION
+      - SONARR_API_KEY
+      - SONARR_ANIME_API_KEY
+      - RADARR_API_KEY
+      - PROWLARR_API_KEY
+      - BAZARR_API_KEY
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -93,9 +104,16 @@ services:
     container_name: stream-watchdog
     init: true
     entrypoint: ["python3", "-u", "/app/watchdog.py"]
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     environment:
+      - TZ
+      # Variables watchdog.py reads (unset ones are left out)
+      - PLEX_TOKEN
+      - QBITTORRENT_USER
+      - QBITTORRENT_PASS
+      - STREAM_WATCHDOG_DISCORD_WEBHOOK_URL
+      - STREAM_WATCHDOG_DISCORD_MENTION
+      - GATUS_DISCORD_WEBHOOK_URL
+      - DISCORD_WEBHOOK_URL
       - NIC_NAME=enp46s0
     volumes:
       - ./stream-watchdog/watchdog.py:/app/watchdog.py:ro

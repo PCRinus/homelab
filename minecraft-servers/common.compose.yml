@@ -8,9 +8,8 @@ services:
     stdin_open: true
     labels:
       - "dozzle.enable=true"
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     environment:
+      TZ: # only TZ from the root .env (passed by homelab_compose); no API keys
       EULA: "TRUE"
       TYPE: "FABRIC"
       VERSION: "${MC_VERSION:-1.21.8}"

@@ -1,11 +1,29 @@
+# Each service gets only the variables it reads. Bare names are filled in by
+# Compose from the decrypted .env that homelab_compose passes with --env-file
+# (scripts/lib/compose-env.sh); a name missing there is left out, not set empty.
 services:
   homepage:
     image: ghcr.io/gethomepage/homepage:v2.7
     container_name: homepage
     restart: unless-stopped
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
     environment:
+      - PUID
+      - TZ
+      - HOMEPAGE_ALLOWED_HOSTS
+      # {{HOMEPAGE_VAR_*}} placeholders used in services.yaml / widgets.yaml
+      - HOMEPAGE_VAR_SERVER_HOSTNAME
+      - HOMEPAGE_VAR_SONARR_API_KEY
+      - HOMEPAGE_VAR_SONARR_ANIME_API_KEY
+      - HOMEPAGE_VAR_RADARR_API_KEY
+      - HOMEPAGE_VAR_PROWLARR_API_KEY
+      - HOMEPAGE_VAR_BAZARR_API_KEY
+      - HOMEPAGE_VAR_TAUTULLI_API_KEY
+      - HOMEPAGE_VAR_QBITTORRENT_USER
+      - HOMEPAGE_VAR_QBITTORRENT_PASS
+      - HOMEPAGE_VAR_PLEX_TOKEN
+      - HOMEPAGE_VAR_ADGUARD_USER
+      - HOMEPAGE_VAR_ADGUARD_PASS
+      - HOMEPAGE_VAR_PANGOLIN_API_KEY
       - PGID=${DOCKER_GID} # Docker socket GID — overrides .env so Homepage can access the socket as non-root
     ports:
       - 3000:3000

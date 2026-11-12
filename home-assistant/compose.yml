@@ -1,3 +1,6 @@
+# Each service gets only the variables it reads. Bare names are filled in by
+# Compose from the decrypted .env that homelab_compose passes with --env-file
+# (scripts/lib/compose-env.sh); a name missing there is left out, not set empty.
 services:
   homeassistant:
     image: ghcr.io/home-assistant/home-assistant:2026.10.4
@@ -6,8 +9,8 @@ services:
     dns:
       - 1.1.1.1
       - 8.8.8.8
-    env_file:
-      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
+    environment:
+      - TZ
     volumes:
       # Persistent data (databases, cache, storage) stays in ~/docker
       - ${DOCKER_DATA}/home-assistant:/config
