@@ -116,26 +116,62 @@ radarr:
       - template: radarr-quality-profile-uhd-bluray-web
       - template: radarr-custom-formats-uhd-bluray-web
 
-    # Pulsarr's default profile: prefer 4K, but grab 1080p when no acceptable 4K
-    # release exists and upgrade to 4K later.
+    # Blu-ray and WEB are merged into one quality per resolution (TRaSH ranks
+    # Blu-ray above WEB). Radarr compares quality before custom format score, so
+    # without the merge the DTS penalty below could never trade a DTS Blu-ray for
+    # a DD+ WEB-DL. Without DTS, Blu-ray still wins on tier score (+100).
+    # min_format_score -1000 (TRaSH: 0) lets a DTS-only movie still be grabbed.
+    # Every other negative score in these profiles is -10000.
     quality_profiles:
-      - name: UHD Bluray + WEB
+      - name: HD Bluray + WEB
+        min_format_score: -1000
+        upgrade:
+          allowed: true
+          until_quality: Bluray + WEB 1080p
+          until_score: 10000
         qualities:
-          - name: Bluray-2160p
-          - name: WEB 2160p
+          - name: Bluray + WEB 1080p
             qualities:
+              - Bluray-1080p
+              - WEBDL-1080p
+              - WEBRip-1080p
+          - name: Bluray-720p
+
+      # Pulsarr's default profile: prefer 4K, but grab 1080p when no acceptable
+      # 4K release exists and upgrade to 4K later.
+      - name: UHD Bluray + WEB
+        min_format_score: -1000
+        upgrade:
+          allowed: true
+          until_quality: Bluray + WEB 2160p
+          until_score: 10000
+        qualities:
+          - name: Bluray + WEB 2160p
+            qualities:
+              - Bluray-2160p
               - WEBDL-2160p
               - WEBRip-2160p
-          - name: Bluray-1080p
-          - name: WEB 1080p
+          - name: Bluray + WEB 1080p
             qualities:
+              - Bluray-1080p
               - WEBDL-1080p
               - WEBRip-1080p
 
-    # Custom format overrides (optional - uncomment to customize)
-    # custom_formats:
-    #   - trash_ids:
-    #       - b6832f586342ef70d9c128d40c07b872  # Bad Dual Groups
-    #     quality_profiles:
-    #       - name: UHD Bluray + WEB
-    #         score: -10000
+    # Prefer non-DTS audio. Plex for LG has no DTS support on the household's
+    # newer LG TVs: every DTS play on the C4 and CX was transcoded, and a 4K HDR
+    # transcode of a DTS file broke the Intel GPU decoder (2026-11-02). -1000
+    # outweighs the tier spread (1600-1800), so any tiered non-DTS release beats
+    # a tiered DTS one, while a DTS-only movie still passes min_format_score.
+    # The five TRaSH DTS formats are mutually exclusive: a release scores -1000 once.
+    custom_formats:
+      - trash_ids:
+          - 1c1a4c5e823891c75bc50380a6866f73 # DTS
+          - f9f847ac70a0af62ea4a08280b859636 # DTS-ES
+          - 8e109e50e0a0b83a5098b056e13bf6db # DTS-HD HRA
+          - dcf3ec6938fa32445f590a4da84256cd # DTS-HD MA
+          - 2f22d89048b01681dde8afe203bf2e95 # DTS X
+        assign_scores_to:
+          - name: HD Bluray + WEB
+            score: -1000
+          - name: UHD Bluray + WEB
+            score: -1000

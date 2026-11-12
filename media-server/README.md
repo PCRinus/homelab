@@ -459,6 +459,17 @@ Configarr syncs quality profiles and custom formats from [TRaSH-Guides](https://
 - Config: `configarr/config.yml` - Defines which profiles/formats to sync
 - Secrets: `configarr/secrets.yml` - API keys (gitignored, see `.example`)
 
+### Movies: avoid DTS audio (LG TVs)
+
+Plex for LG does not play DTS on the household's newer LG OLEDs (C4, G4, CX), so every DTS movie gets transcoded on those TVs. Two local changes to the TRaSH movie profiles, both in `config.yml`:
+
+- **DTS penalty**: the five TRaSH DTS formats (DTS, DTS-ES, DTS-HD HRA, DTS-HD MA, DTS X) score `-1000` in `HD Bluray + WEB` and `UHD Bluray + WEB`. `min_format_score` is `-1000`, so a movie that only exists with DTS can still be grabbed
+- **Blu-ray and WEB merged** into one quality per resolution (`Bluray + WEB 2160p`, `Bluray + WEB 1080p`). Radarr compares quality before format score, so otherwise a DTS Blu-ray always beats a DD+ WEB-DL. Without DTS involved, Blu-ray still wins on tier score
+
+One Radarr setting outside Configarr is needed too: **Settings → Media Management → Propers and Repacks = Do Not Prefer** (TRaSH's recommendation). With *Prefer and Upgrade*, a REPACK file outranks every non-repack release regardless of score. The `Repack/Proper` custom format still gives repacks a small boost.
+
+Existing DTS files are replaced only when a better-scored release appears in RSS. No bulk search was run (69 DTS movies, 1.8 TB, as of 2026-11-03).
+
 ### Usage
 
 Configarr is a **one-shot job**, not a daemon. Run it manually or via cron:
