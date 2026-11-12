@@ -260,6 +260,17 @@ services:
     container_name: tautulli
     env_file:
       - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
+    # Talk to Plex directly instead of through the public stream URL and the VPS.
+    # TAUTULLI_* env vars override config.ini. With PMS_SSL=0, Tautulli uses
+    # http://PMS_IP:PMS_PORT as-is and skips the plex.tv lookup that used to pick
+    # https://stream.home-server.me. It logs a "set by environment variable"
+    # warning for these keys on each 12-hourly URL refresh; that's expected.
+    environment:
+      - TAUTULLI_PMS_IP=plex
+      - TAUTULLI_PMS_PORT=32400
+      - TAUTULLI_PMS_SSL=0
+    extra_hosts:
+      - "plex:host-gateway" # Plex runs with host networking, so the Docker DNS name `plex` doesn't exist
     volumes:
       - ${DOCKER_DATA}/tautulli:/config
       - type: bind

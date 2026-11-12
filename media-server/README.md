@@ -130,6 +130,10 @@ If you set `/config/logs`, Tautulli will only read its own logs and Plex logs wi
 
 Tautulli lets environment variables override `config.ini`, and the container receives the shared `.env`. So the effective API key is `TAUTULLI_API_KEY` from `.env` (also used by the Homepage widget). The `api_key` line in `${DOCKER_DATA}/tautulli/config.ini` is stale and ignored. To rotate the key, change it in `.env.enc` and recreate `tautulli` and `homepage`.
 
+### Plex connection
+
+`compose.yml` pins Tautulli's Plex connection to `http://plex:32400` with `TAUTULLI_PMS_IP`, `TAUTULLI_PMS_PORT` and `TAUTULLI_PMS_SSL=0`, plus the `plex:host-gateway` alias. Otherwise Tautulli picks a URL from plex.tv and chose the public `https://stream.home-server.me`, which routed it through the VPS. That made it fail whenever the tunnel or VPS was down. The Plex connection fields in the Tautulli UI can't be changed while these variables are set.
+
 ## Plex Log Archive (and Dozzle)
 
 Plex keeps a fixed rotation of `Plex Media Server.log` plus five numbered backups (about 10 MB each). With verbose logging that covers less than a day. The `plex-log-media-server` sidecar keeps 30 days in two places:
