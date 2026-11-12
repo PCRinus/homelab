@@ -6,7 +6,7 @@ checkrr:
     - "/data/media/movies/"
   database: /checkrr.db
   debug: false
-  cron: "@daily"
+  cron: "@weekly"            # Sundays 00:00 UTC; only new/changed files are decoded
   ignorehidden: true
   requireaudio: true
   ffprobe: true
@@ -39,7 +39,7 @@ logs:
     formatter: default
 arr:
   sonarr-tv:
-    process: false   # set true once detection is verified working
+    process: false   # report-only: true deletes flagged files via the arr and re-downloads them (see README)
     service: sonarr
     address: sonarr
     apikey: "YOUR_SONARR_API_KEY"
