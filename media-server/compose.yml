@@ -430,6 +430,30 @@ services:
       retries: 3
       start_period: 30s
 
+  # Posts a Discord summary after each checkrr run. checkrr runs report-only
+  # (process: false) and sends no notification about bad files in that mode,
+  # so this reads its API instead. See checkrr/README.md.
+  checkrr-report:
+    image: python:3.14.10-alpine3.24
+    container_name: checkrr-report
+    init: true
+    entrypoint: ["python3", "-u", "/app/report.py"]
+    env_file:
+      - ${HOMELAB_RUNTIME_ENV_FILE:-../.env}
+    environment:
+      - CHECKRR_URL=http://checkrr:8585
+      - CHECKRR_UI_URL=http://homelab:8585
+    volumes:
+      - ./checkrr/report.py:/app/report.py:ro
+      - ${DOCKER_DATA}/checkrr-report:/state
+    networks:
+      - media-net
+    depends_on:
+      - checkrr
+    restart: unless-stopped
+    labels:
+      - "dozzle.enable=true"
+
 networks:
   media-net:
     name: media-net # Named network allows other compose stacks (e.g., homepage) to join for inter-container communication

@@ -13,7 +13,7 @@ NAS_CONTAINERS=(qbittorrent sonarr sonarr-anime radarr plex bazarr checkrr homep
 MEDIA_SERVICES=(
     qbittorrent sonarr sonarr-anime radarr prowlarr flaresolverr pulsarr
     plex bazarr tautulli plex-log-media-server plex-log-transcoder-statistics
-    plex-log-scanner-matcher newt checkrr
+    plex-log-scanner-matcher newt checkrr checkrr-report
 )
 NAS_MEDIA_SERVICES=(qbittorrent sonarr sonarr-anime radarr plex bazarr checkrr)
 
