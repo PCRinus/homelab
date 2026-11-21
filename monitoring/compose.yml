@@ -1,7 +1,7 @@
 services:
   dozzle:
     container_name: dozzle
-    image: ghcr.io/amir20/dozzle:v11.4.0
+    image: ghcr.io/amir20/dozzle:v11.5.0
     environment:
       DOZZLE_REMOTE_AGENT: ${DOZZLE_REMOTE_AGENT:-}
     volumes:
@@ -89,7 +89,7 @@ services:
   # Check detection against an archived day:
   #   docker compose run --rm stream-watchdog --replay /archive/plex-media-server-YYYY-MM-DD.log.gz
   stream-watchdog:
-    image: python:3.14.10-alpine3.24
+    image: python:3.15.2-alpine3.24
     container_name: stream-watchdog
     init: true
     entrypoint: ["python3", "-u", "/app/watchdog.py"]
